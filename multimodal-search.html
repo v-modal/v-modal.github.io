@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multimodal Search – VModal Blog</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html">VModal Blog</a>
+  </header>
+
+  <main>
+    <a class="back-link" href="index.html">&larr; Back to all articles</a>
+
+    <div class="article-body">
+      <h1>Multimodal Search: Bridging Vision and Language</h1>
+      <p style="color:#888; font-size:0.9rem; margin-bottom:1.5rem;">August 2026 &middot; AI &middot; Search</p>
+
+      <h2>What Is Multimodal Search?</h2>
+      <p>
+        Traditional search engines operate on a single modality — typically text.
+        You type a query, and the system retrieves documents that match your words.
+        <strong>Multimodal search</strong> breaks this limitation by allowing queries
+        and documents to span multiple modalities: text, images, audio, and video.
+        You can search for "a red bicycle parked near a café" using either a text
+        phrase or an example image, and receive relevant results regardless of
+        the input form.
+      </p>
+
+      <h2>Why Does It Matter?</h2>
+      <p>
+        The web and enterprise data are overwhelmingly multimodal. Product
+        catalogues contain images alongside descriptions; medical records pair
+        radiology scans with clinical notes; social media posts mix photos,
+        captions, and hashtags. A search system that ignores visual or audio
+        content leaves a large fraction of available signal on the table.
+      </p>
+      <p>
+        Multimodal search unlocks richer user experiences:
+      </p>
+      <ul>
+        <li><strong>Visual search</strong> — upload a photo to find similar products or scenes.</li>
+        <li><strong>Cross-modal retrieval</strong> — describe a concept in text and retrieve matching images, or vice versa.</li>
+        <li><strong>Unified ranking</strong> — blend textual and visual relevance signals into a single ranked list.</li>
+      </ul>
+
+      <h2>Key Technical Building Blocks</h2>
+
+      <h3>1. Shared Embedding Spaces</h3>
+      <p>
+        The core idea is to project all modalities into a <em>shared vector space</em>
+        where semantically similar items are close to one another regardless of their
+        original form. Models such as OpenAI's CLIP and Google's ALIGN learn these
+        joint embeddings by training on hundreds of millions of image–caption pairs
+        using a contrastive loss. Once trained, a text query and an image of the same
+        concept will have similar embedding vectors, making retrieval straightforward
+        via approximate nearest-neighbour (ANN) search.
+      </p>
+
+      <h3>2. Contrastive Pre-training</h3>
+      <p>
+        Contrastive learning trains the model to pull matched (image, text) pairs
+        together in embedding space while pushing mismatched pairs apart. This
+        self-supervised approach scales well because supervision comes from
+        naturally occurring image–text pairs on the web rather than costly manual
+        annotations.
+      </p>
+
+      <h3>3. Approximate Nearest-Neighbour Indexing</h3>
+      <p>
+        Once embeddings are computed, the retrieval step must be fast even over
+        billions of items. Libraries such as <strong>FAISS</strong> (Facebook AI
+        Similarity Search), <strong>ScaNN</strong> (Google), and
+        <strong>Annoy</strong> provide efficient ANN indexes that trade a small
+        amount of recall for dramatic speed-ups over exact exhaustive search.
+      </p>
+
+      <h3>4. Re-ranking and Fusion</h3>
+      <p>
+        A first-stage retriever returns hundreds of candidates quickly. A heavier
+        <em>cross-encoder</em> or multi-modal transformer re-ranks those candidates
+        by jointly attending over the query and each retrieved item, significantly
+        improving precision at the top of the ranked list.
+      </p>
+
+      <h2>State-of-the-Art Models</h2>
+      <ul>
+        <li>
+          <strong>CLIP (Contrastive Language–Image Pre-training)</strong> — OpenAI's
+          model trained on 400 M image–text pairs; the de-facto baseline for
+          zero-shot visual recognition and cross-modal search.
+        </li>
+        <li>
+          <strong>BLIP / BLIP-2</strong> — Salesforce models that add generative
+          captioning to the contrastive objective, enabling both retrieval and
+          question-answering.
+        </li>
+        <li>
+          <strong>ImageBind</strong> — Meta's model that extends the joint embedding
+          to six modalities: image, text, audio, depth, thermal, and IMU data.
+        </li>
+        <li>
+          <strong>Gemini / GPT-4V</strong> — Large multimodal models that understand
+          interleaved images and text, enabling conversational multimodal search
+          experiences.
+        </li>
+      </ul>
+
+      <h2>Building a Simple Multimodal Search Pipeline</h2>
+      <p>
+        A minimal pipeline involves three steps:
+      </p>
+      <ul>
+        <li>
+          <strong>Encode</strong> — pass each document (image, text, or both) through
+          a pre-trained multimodal encoder to obtain a fixed-size embedding vector.
+        </li>
+        <li>
+          <strong>Index</strong> — store all embeddings in an ANN index (e.g., FAISS
+          <code>IndexFlatIP</code> for inner-product search).
+        </li>
+        <li>
+          <strong>Query</strong> — encode the user's query with the same encoder,
+          then perform a nearest-neighbour lookup against the index and return the
+          top-k results.
+        </li>
+      </ul>
+      <p>
+        Open-source frameworks such as <strong>Haystack</strong>,
+        <strong>LlamaIndex</strong>, and <strong>Weaviate</strong> provide
+        ready-made components for each stage, so you can assemble a working
+        multimodal search system in a matter of hours.
+      </p>
+
+      <h2>Challenges and Open Problems</h2>
+      <ul>
+        <li><strong>Modality gap</strong> — even after joint training, text and image embeddings often occupy different regions of the shared space, hurting retrieval quality.</li>
+        <li><strong>Fine-grained understanding</strong> — models struggle with precise spatial reasoning ("object on the left of the table") or counting.</li>
+        <li><strong>Scalability</strong> — indexing and serving billions of high-dimensional vectors requires significant infrastructure.</li>
+        <li><strong>Bias and safety</strong> — models trained on web data inherit societal biases that can surface in retrieval results.</li>
+      </ul>
+
+      <h2>Conclusion</h2>
+      <p>
+        Multimodal search represents a fundamental shift in how we interact with
+        information. By unifying text, images, and other modalities in a shared
+        semantic space, it enables more natural and expressive queries while
+        surfacing relevant content that purely text-based systems would miss.
+        With powerful pre-trained models now freely available and efficient
+        indexing libraries maturing rapidly, there has never been a better time
+        to build multimodal search into your applications.
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 VModal Blog
+  </footer>
+</body>
+</html>
