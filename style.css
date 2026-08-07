@@ -137,3 +137,58 @@ footer {
   margin-top: 3rem;
   border-top: 1px solid #e0e0e0;
 }
+
+/* Custom styling for converted articles and summaries */
+.article-list .summary {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 0.3rem;
+  line-height: 1.5;
+}
+
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.article-body th, .article-body td {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.article-body th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.article-body tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.article-body code {
+  background-color: #f1f1f1;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.article-body blockquote {
+  border-left: 4px solid #1a1a2e;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: #555;
+  font-style: italic;
+}
+
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+
