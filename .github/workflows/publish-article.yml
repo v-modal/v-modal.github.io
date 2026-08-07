@@ -1,0 +1,62 @@
+name: publish-article
+
+on:
+  schedule:
+    - cron: "23 7 * * *"   # daily at 07:23 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Render the article and log it without opening a pull request"
+        required: false
+        type: boolean
+        default: false
+      topic_slug:
+        description: "Force a specific topic slug (optional)"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: vmx_blog_publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Generate the article
+        id: gen
+        env:
+          BRIGHT_DATA_API_KEY: ${{ secrets.BRIGHT_DATA_API_KEY }}
+          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+          TOPIC_SLUG: ${{ inputs.topic_slug }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python run_publish.py
+      - name: Open a pull request
+        if: ${{ steps.gen.outputs.created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.gen.outputs.branch }}
+          TITLE: ${{ steps.gen.outputs.title }}
+        run: |
+          set -euo pipefail
+          git config user.name "vmodal-blog-bot"
+          git config user.email "vmodal-blog-bot@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add articles index.html
+          git commit -m "Add article: $TITLE"
+          git push --force-with-lease origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "New blog article: $TITLE" \
+            --body "Automated draft of a new blog article for review. Merge to publish it to the site, or close to skip it."
