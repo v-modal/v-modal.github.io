@@ -206,9 +206,9 @@ footer {
 
 .landing-page {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-family: var(--font-sans) !important;
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
 .landing-page h1,
