@@ -1,153 +1,255 @@
-## The Physical AI Software Stack
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Physical AI Software Stack – VModal Blog</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <a href="index.html">VModal Blog</a>
+  </header>
 
+  <main>
+    <a class="back-link" href="index.html">&larr; Back to all articles</a>
 
-Physical AI represents the convergence of advanced computational intelligence with the physical world. Unlike purely digital AI (such as large language models running in cloud data centers), Physical AI systems must perceive, reason, and act within real-world constraints in real time.
-Building a Physical AI system—whether it is a humanoid robot, an autonomous vehicle, or an industrial manipulator—requires a highly specialized, multi-layered software stack. This article provides a comprehensive blueprint of the modern Physical AI software infrastructure, moving from low-level hardware abstraction to high-level cognitive orchestration.
-------------------------------
-## 1. Hardware Abstraction and Real-Time Operating Systems (RTOS)
-At the absolute base of the stack sits the interface between software and physical silicon, sensors, and actuators. Physical AI requires deterministic execution; a delay of a few milliseconds in a control loop can cause physical instability or catastrophic failure.
-## Real-Time Operating Systems (RTOS)
-Standard operating systems like stock Linux are optimized for throughput, not latency. Physical AI relies on specialized operating systems or kernels:
+    <div class="article-body">
+      <h1>The Physical AI Software Stack</h1>
+      <p style="color:#888; font-size:0.9rem; margin-bottom:1.5rem;">January 2026 &middot; AI &middot; Search</p>
 
-* Linux with PREEMPT_RT Patches: Transforms standard Linux into a real-time OS by making almost all kernel code preemptible. This is the most popular choice for modern research and industrial robotics due to its vast ecosystem.
-* QNX / VxWorks: Proprietary, microkernel-based RTOS solutions used heavily in safety-critical deployments like autonomous driving (ADAS) and aerospace due to their strict deterministic guarantees and safety certifications (e.g., ISO 26262).
+      <p>
+        Physical AI represents the convergence of advanced computational intelligence with the physical world. Unlike purely digital AI (such as large language models running in cloud data centers), Physical AI systems must perceive, reason, and act within real-world constraints in real time.
+      </p>
+      <p>
+        Building a Physical AI system—whether it is a humanoid robot, an autonomous vehicle, or an industrial manipulator—requires a highly specialized, multi-layered software stack. This article provides a comprehensive blueprint of the modern Physical AI software infrastructure, moving from low-level hardware abstraction to high-level cognitive orchestration.
+      </p>
 
-## Compute Abstraction Layers
-Physical AI workloads are highly heterogeneous, requiring simultaneous execution of neural networks, geometry pipelines, and physics equations.
+      <h2>1. Hardware Abstraction and Real-Time Operating Systems (RTOS)</h2>
+      <p>
+        At the absolute base of the stack sits the interface between software and physical silicon, sensors, and actuators. Physical AI requires deterministic execution; a delay of a few milliseconds in a control loop can cause physical instability or catastrophic failure.
+      </p>
 
-* Hardware Acceleration APIs: NVIDIA CUDA and TensorRT dominate the space for accelerating deep learning models. OpenCL, Apple Metal, and ROCm serve as alternatives across different hardware platforms.
-* Driver & Middleware Interfaces: Libraries that translate high-level commands into low-level electrical signals (e.g., EtherCAT drivers for industrial motor synchronization, CAN bus interfaces for automotive components).
+      <h3>Real-Time Operating Systems (RTOS)</h3>
+      <p>
+        Standard operating systems like stock Linux are optimized for throughput, not latency. Physical AI relies on specialized operating systems or kernels:
+      </p>
+      <ul>
+        <li><strong>Linux with PREEMPT_RT Patches:</strong> Transforms standard Linux into a real-time OS by making almost all kernel code preemptible. This is the most popular choice for modern research and industrial robotics due to its vast ecosystem.</li>
+        <li><strong>QNX / VxWorks:</strong> Proprietary, microkernel-based RTOS solutions used heavily in safety-critical deployments like autonomous driving (ADAS) and aerospace due to their strict deterministic guarantees and safety certifications (e.g., ISO 26262).</li>
+      </ul>
 
-------------------------------
-## 2. Robotics Middleware and Communication Frameworks
-Above the OS layer sits the middleware, which manages how different software components (nodes) communicate with one another across a distributed network of microcontrollers and onboard computers.
+      <h3>Compute Abstraction Layers</h3>
+      <p>
+        Physical AI workloads are highly heterogeneous, requiring simultaneous execution of neural networks, geometry pipelines, and physics equations.
+      </p>
+      <ul>
+        <li><strong>Hardware Acceleration APIs:</strong> NVIDIA CUDA and TensorRT dominate the space for accelerating deep learning models. OpenCL, Apple Metal, and ROCm serve as alternatives across different hardware platforms.</li>
+        <li><strong>Driver &amp; Middleware Interfaces:</strong> Libraries that translate high-level commands into low-level electrical signals (e.g., EtherCAT drivers for industrial motor synchronization, CAN bus interfaces for automotive components).</li>
+      </ul>
 
+      <h2>2. Robotics Middleware and Communication Frameworks</h2>
+      <p>
+        Above the OS layer sits the middleware, which manages how different software components (nodes) communicate with one another across a distributed network of microcontrollers and onboard computers.
+      </p>
+
+      <pre style="font-family: monospace; background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid #e0e0e0; font-size: 0.9rem; line-height: 1.4;">+-------------------------------------------------------+
+|          High-Level Applications &amp; Cognition         |
 +-------------------------------------------------------+
-
-|          High-Level Applications & Cognition         |
-+-------------------------------------------------------+
-
 |    ROS 2 Graph (Data Spaces, Nodes, Services, Pub/Sub)|
 +-------------------------------------------------------+
-
 |           DDS Middleware (Data Distribution Service)  |
 +-------------------------------------------------------+
-
 |  Real-Time OS (PREEMPT_RT) / Hardware Abstraction     |
-+-------------------------------------------------------+
++-------------------------------------------------------+</pre>
 
-## ROS 2 (Robot Operating System)
-ROS 2 is the industry standard middleware for Physical AI. Unlike its predecessor (ROS 1), ROS 2 is built from the ground up for production environments, real-time performance, and unreliable networks.
+      <h3>ROS 2 (Robot Operating System)</h3>
+      <p>
+        ROS 2 is the industry standard middleware for Physical AI. Unlike its predecessor (ROS 1), ROS 2 is built from the ground up for production environments, real-time performance, and unreliable networks.
+      </p>
+      <ul>
+        <li><strong>Publish-Subscribe Architecture:</strong> Allows sensors (publishers) to broadcast data streams (e.g., camera frames, LiDAR point clouds) that multiple processing nodes (subscribers) can consume simultaneously.</li>
+        <li><strong>Lifecycle Nodes:</strong> Provides deterministic state management (Unconfigured, Inactive, Active, Finalized) to ensure components initialize and fail predictably.</li>
+      </ul>
 
-* Publish-Subscribe Architecture: Allows sensors (publishers) to broadcast data streams (e.g., camera frames, LiDAR point clouds) that multiple processing nodes (subscribers) can consume simultaneously.
-* Lifecycle Nodes: Provides deterministic state management (Unconfigured, Inactive, Active, Finalized) to ensure components initialize and fail predictably.
+      <h3>Data Distribution Service (DDS)</h3>
+      <p>
+        ROS 2 abstracts its communication through DDS, an industrial end-to-end networking standard. DDS handles serialization, discovery, and Quality of Service (QoS) profiles. QoS allows developers to configure communication behavior explicitly:
+      </p>
+      <ul>
+        <li><strong>Best Effort:</strong> Prioritizes speed over reliability (ideal for high-frequency camera data where losing a single frame is acceptable).</li>
+        <li><strong>Reliable:</strong> Guarantees data delivery (essential for critical control commands or system state changes).</li>
+      </ul>
 
-## Data Distribution Service (DDS)
-ROS 2 abstracts its communication through DDS, an industrial end-to-end networking standard. DDS handles serialization, discovery, and Quality of Service (QoS) profiles. QoS allows developers to configure communication behavior explicitly:
+      <h2>3. Spatial Perception and World Modeling</h2>
+      <p>
+        Before a machine can act, it must construct a digital representation of its physical surroundings. This layer ingests raw sensor data and outputs a structured "world model."
+      </p>
 
-* Best Effort: Prioritizes speed over reliability (ideal for high-frequency camera data where losing a single frame is acceptable).
-* Reliable: Guarantees data delivery (essential for critical control commands or system state changes).
+      <h3>Sensor Fusion Pipelines</h3>
+      <p>
+        Physical AI systems use multiple modalities to overcome individual sensor limitations (e.g., cameras failing in low light, LiDAR failing in heavy fog).
+      </p>
+      <ul>
+        <li><strong>Low-Level Fusion:</strong> Combining raw sensor data (e.g., projecting pixels onto a LiDAR point cloud) before feature extraction.</li>
+        <li><strong>High-Level Fusion:</strong> Extracting independent tracks or objects from each sensor and fusing them using techniques like Extended Kalman Filters (EKF) or Factor Graphs.</li>
+      </ul>
 
-------------------------------
-## 3. Spatial Perception and World Modeling
-Before a machine can act, it must construct a digital representation of its physical surroundings. This layer ingests raw sensor data and outputs a structured "world model."
-## Sensor Fusion Pipelines
-Physical AI systems use multiple modalities to overcome individual sensor limitations (e.g., cameras failing in low light, LiDAR failing in heavy fog).
+      <h3>State Estimation and SLAM</h3>
+      <p>
+        Simultaneous Localization and Mapping (SLAM) is critical for robots operating in unknown or dynamic environments.
+      </p>
+      <ul>
+        <li><strong>Visual-Inertial Odometry (VIO):</strong> Tracking the position of the robot by combining high-frequency Inertial Measurement Unit (IMU) data with tracking features from video streams.</li>
+        <li><strong>3D Reconstruction:</strong> Utilizing algorithms like TSDF (Truncated Signed Distance Function) or Neural Radiance Fields (NeRFs) / 3D Gaussian Splatting to build high-fidelity semantic maps of the environment in real time.</li>
+      </ul>
 
-* Low-Level Fusion: Combining raw sensor data (e.g., projecting pixels onto a LiDAR point cloud) before feature extraction.
-* High-Level Fusion: Extracting independent tracks or objects from each sensor and fusing them using techniques like Extended Kalman Filters (EKF) or Factor Graphs.
+      <h3>Semantic Perception</h3>
+      <ul>
+        <li><strong>3D Object Detection:</strong> Identifying and bounding physical objects in three dimensions rather than flat 2D image planes.</li>
+        <li><strong>Open-Vocabulary Perception:</strong> Utilizing models like CLIP adapted for 3D space, allowing a robot to locate arbitrary physical objects (e.g., "find the red coffee mug") without explicit retraining.</li>
+      </ul>
 
-## State Estimation and SLAM
-Simultaneous Localization and Mapping (SLAM) is critical for robots operating in unknown or dynamic environments.
+      <h2>4. Cognition, Planning, and Decision-Making</h2>
+      <p>
+        Once the world model is constructed, the AI must decide what to do next. This layer spans long-term mission planning down to short-term collision avoidance.
+      </p>
 
-* Visual-Inertial Odometry (VIO): Tracking the position of the robot by combining high-frequency Inertial Measurement Unit (IMU) data with tracking features from video streams.
-* 3D Reconstruction: Utilizing algorithms like TSDF (Truncated Signed Distance Function) or Neural Radiance Fields (NeRFs) / 3D Gaussian Splatting to build high-fidelity semantic maps of the environment in real time.
+      <h3>Hierarchical Motion Planning</h3>
+      <p>
+        Planning is typically split into two distinct time horizons:
+      </p>
+      <ol style="margin: 0 0 1rem 1.5rem;">
+        <li style="margin-bottom: 0.4rem;"><strong>Global Planners:</strong> Compute a coarse, collision-free path from point A to point B across a known map. Algorithms include traditional graph searches (A*, Dijkstra) and sampling-based approaches (RRT* - Rapidly-exploring Random Trees).</li>
+        <li style="margin-bottom: 0.4rem;"><strong>Local Planners (Trajectory Generation):</strong> Run at much higher frequencies (100 Hz+). They account for sudden obstacles, vehicle dynamics, and comfort. Common methods include Model Predictive Control (MPC), which solves an optimization problem over a short future window to output smooth velocity commands.</li>
+      </ol>
 
-## Semantic Perception
+      <h3>Physical Foundation Models and VLA</h3>
+      <p>
+        The cutting edge of Physical AI replaces hand-coded state machines with end-to-end neural network architectures.
+      </p>
+      <ul>
+        <li><strong>Vision-Language-Action (VLA) Models:</strong> Models like RT-2 (Robotic Transformer) ingest visual tokens and text prompts, processing them through a massive multi-modal transformer to directly output action tokens (e.g., end-effector trajectories for a robotic arm).</li>
+        <li><strong>Affordance Mapping:</strong> AI models that identify how an object can be interacted with (e.g., locating the handle of a drawer and predicting the physical vector required to pull it open).</li>
+      </ul>
 
-* 3D Object Detection: Identifying and bounding physical objects in three dimensions rather than flat 2D image planes.
-* Open-Vocabulary Perception: Utilizing models like CLIP adapted for 3D space, allowing a robot to locate arbitrary physical objects (e.g., "find the red coffee mug") without explicit retraining.
+      <h2>5. Low-Level Control and Actuation</h2>
+      <p>
+        The control layer translates high-level trajectories or action tokens into raw physics: torque, voltage, and fluid pressure.
+      </p>
 
-------------------------------
-## 4. Cognition, Planning, and Decision-Making
-Once the world model is constructed, the AI must decide what to do next. This layer spans long-term mission planning down to short-term collision avoidance.
-## Hierarchical Motion Planning
-Planning is typically split into two distinct time horizons:
-
-   1. Global Planners: Compute a coarse, collision-free path from point A to point B across a known map. Algorithms include traditional graph searches ($A^*$, Dijkstra) and sampling-based approaches (RRT* - Rapidly-exploring Random Trees).
-   2. Local Planners (Trajectory Generation): Run at much higher frequencies (100 Hz+). They account for sudden obstacles, vehicle dynamics, and comfort. Common methods include Model Predictive Control (MPC), which solves an optimization problem over a short future window to output smooth velocity commands.
-
-## Physical Foundation Models and VLA
-The cutting edge of Physical AI replaces hand-coded state machines with end-to-end neural network architectures.
-
-* Vision-Language-Action (VLA) Models: Models like RT-2 (Robotic Transformer) ingest visual tokens and text prompts, processing them through a massive multi-modal transformer to directly output action tokens (e.g., end-effector trajectories for a robotic arm).
-* Affordance Mapping: AI models that identify how an object can be interacted with (e.g., locating the handle of a drawer and predicting the physical vector required to pull it open).
-
-------------------------------
-## 5. Low-Level Control and Actuation
-The control layer translates high-level trajectories or action tokens into raw physics: torque, voltage, and fluid pressure.
-
-+-------------------------------------------------------+
-
+      <pre style="font-family: monospace; background: #f4f4f4; padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid #e0e0e0; font-size: 0.9rem; line-height: 1.4;">+-------------------------------------------------------+
 |  High-Level Planner (Outputs Target Position/Velocity)|
 +-------------------------------------------------------+
                            |
                            v
 +-------------------------------------------------------+
-
 |       ros2_control / Dynamic Optimization Controller |
 +-------------------------------------------------------+
                            |
                            v
 +-------------------------------------------------------+
-
 |     Actuator Level (PID / Field Oriented Control)    |
 +-------------------------------------------------------+
                            |
                            v
 +-------------------------------------------------------+
+|             Physical Motors &amp; Joints                  |
++-------------------------------------------------------+</pre>
 
-|             Physical Motors & Joints                  |
-+-------------------------------------------------------+
+      <h3>Control Frameworks</h3>
+      <ul>
+        <li><strong><code>ros2_control</code>:</strong> A highly modular framework that interfaces high-level robot logic with physical hardware interfaces. It manages resource allocation, controller switching, and real-time read/write loops.</li>
+        <li><strong>Whole-Body Control (WBC):</strong> Essential for legged and humanoid robots. WBC coordinates every joint simultaneously to maintain balance (e.g., adjusting the arms and torso to counteract a slip of the foot).</li>
+      </ul>
 
-## Control Frameworks
+      <h3>Reinforcement Learning (RL) for Actuation</h3>
+      <p>
+        While traditional control relies on rigorous mathematical models of physics, modern locomotion (e.g., quadruped running) heavily utilizes RL.
+      </p>
+      <ul>
+        <li><strong>Locomotion Policies:</strong> Neural networks trained to map joint positions and IMU data directly to motor torques. These policies are highly resilient to uneven terrain, debris, and physical disturbances.</li>
+      </ul>
 
-* ros2_control: A highly modular framework that interfaces high-level robot logic with physical hardware interfaces. It manages resource allocation, controller switching, and real-time read/write loops.
-* Whole-Body Control (WBC): Essential for legged and humanoid robots. WBC coordinates every joint simultaneously to maintain balance (e.g., adjusting the arms and torso to counteract a slip of the foot).
+      <h2>6. Simulation, Synthetics, and the Data Loop</h2>
+      <p>
+        Physical AI cannot be trained entirely in the real world due to hardware wear-and-tear, safety risks, and the sheer time required to gather data. The software stack therefore extends deeply into virtual environments.
+      </p>
 
-## Reinforcement Learning (RL) for Actuation
-While traditional control relies on rigorous mathematical models of physics, modern locomotion (e.g., quadruped running) heavily utilizes RL.
+      <h3>Simulation Engines (Sim-to-Real)</h3>
+      <p>
+        Modern simulation tools must bridge the "sim-to-real gap"—the discrepancy between simulated physics and real-world conditions.
+      </p>
+      <ul>
+        <li><strong>NVIDIA Isaac Sim / Omniverse:</strong> Built on the PhysX engine, leveraging hardware-accelerated ray tracing and parallelized physics to simulate thousands of robots simultaneously.</li>
+        <li><strong>MuJoCo (Multi-Joint dynamics with Contact):</strong> An open-source, highly accurate physics engine optimized for model-based control and contact dynamics.</li>
+        <li><strong>Domain Randomization:</strong> Software tools that randomly alter virtual physical properties (friction coefficients, mass, lighting conditions, actuator delays) during simulation. This forces the AI to learn generalized behaviors that easily transfer to physical hardware.</li>
+      </ul>
 
-* Locomotion Policies: Neural networks trained to map joint positions and IMU data directly to motor torques. These policies are highly resilient to uneven terrain, debris, and physical disturbances.
+      <h3>Teleoperation and Data Capture</h3>
+      <p>
+        To train imitation learning models, engineers must record human demonstrations.
+      </p>
+      <ul>
+        <li><strong>Imitation Learning Pipelines:</strong> Software that captures spatial data from VR controllers, exokeletons, or teleoperation rigs, pairing the human movements with the robot's sensor logs to build training datasets (e.g., ALOHA system pipelines).</li>
+      </ul>
 
-------------------------------
-## 6. Simulation, Synthetics, and the Data Loop
-Physical AI cannot be trained entirely in the real world due to hardware wear-and-tear, safety risks, and the sheer time required to gather data. The software stack therefore extends deeply into virtual environments.
-## Simulation Engines (Sim-to-Real)
-Modern simulation tools must bridge the "sim-to-real gap"—the discrepancy between simulated physics and real-world conditions.
+      <h2>Summary of the Full Stack</h2>
+      <table style="border-collapse: collapse; width: 100%; margin: 1.5rem 0; font-size: 0.95rem;">
+        <thead>
+          <tr style="background-color: #1a1a2e; color: #fff;">
+            <th style="padding: 10px 12px; border: 1px solid #ddd; text-align: left;">Layer</th>
+            <th style="padding: 10px 12px; border: 1px solid #ddd; text-align: left;">Primary Function</th>
+            <th style="padding: 10px 12px; border: 1px solid #ddd; text-align: left;">Core Technologies / Tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Cognition &amp; Strategy</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">High-level reasoning, VLA modeling, task orchestration</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">VLA Transformers (RT-2), Large Language Models</td>
+          </tr>
+          <tr style="background-color: #f9f9f9;">
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Planning &amp; Navigation</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Pathfinding, obstacle avoidance, trajectory generation</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">A*, RRT*, Model Predictive Control (MPC)</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Spatial Perception</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">SLAM, object detection, 3D world building</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">ORB-SLAM, 3D Gaussian Splatting, Kalman Filters</td>
+          </tr>
+          <tr style="background-color: #f9f9f9;">
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Middleware</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Inter-process communication, networking, QoS</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">ROS 2, CycloneDDS, eProsima Fast DDS</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Control &amp; Actuation</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Motor torque management, balance, hardware loops</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;"><code>ros2_control</code>, Whole-Body Control, RL Policies</td>
+          </tr>
+          <tr style="background-color: #f9f9f9;">
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">OS &amp; Silicon</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Deterministic compute, real-time scheduling</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Linux + PREEMPT_RT, NVIDIA CUDA, QNX</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; font-weight: bold; background-color: #fcfcfc;">Infra &amp; Validation</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">Simulation, testing, sim-to-real training</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">NVIDIA Isaac Sim, MuJoCo, Docker</td>
+          </tr>
+        </tbody>
+      </table>
 
-* NVIDIA Isaac Sim / Omniverse: Built on the PhysX engine, leveraging hardware-accelerated ray tracing and parallelized physics to simulate thousands of robots simultaneously.
-* MuJoCo (Multi-Joint dynamics with Contact): An open-source, highly accurate physics engine optimized for model-based control and contact dynamics.
-* Domain Randomization: Software tools that randomly alter virtual physical properties (friction coefficients, mass, lighting conditions, actuator delays) during simulation. This forces the AI to learn generalized behaviors that easily transfer to physical hardware.
+      <p>
+        As Physical AI advances, the boundaries between these layers are blurring. High-level transformers are beginning to bypass traditional planning and map directly to control loops. However, the foundational requirements of real-time determinism, robust communication, and safety-critical fallback mechanisms ensure that a well-structured, modular software stack remains essential for bringing intelligence into the physical world.
+      </p>
+    </div>
+  </main>
 
-## Teleoperation and Data Capture
-To train imitation learning models, engineers must record human demonstrations.
-
-* Imitation Learning Pipelines: Software that captures spatial data from VR controllers, exokeletons, or teleoperation rigs, pairing the human movements with the robot's sensor logs to build training datasets (e.g., ALOHA system pipelines).
-
-------------------------------
-## Summary of the Full Stack
-
-| Layer | Primary Function | Core Technologies / Tools |
-|---|---|---|
-| Cognition & Strategy | High-level reasoning, VLA modeling, task orchestration | VLA Transformers (RT-2), Large Language Models |
-| Planning & Navigation | Pathfinding, obstacle avoidance, trajectory generation | $A^*$, RRT*, Model Predictive Control (MPC) |
-| Spatial Perception | SLAM, object detection, 3D world building | ORB-SLAM, 3D Gaussian Splatting, Kalman Filters |
-| Middleware | Inter-process communication, networking, QoS | ROS 2, CycloneDDS, eProsima Fast DDS |
-| Control & Actuation | Motor torque management, balance, hardware loops | ros2_control, Whole-Body Control, RL Policies |
-| OS & Silcon | Deterministic compute, real-time scheduling | Linux + PREEMPT_RT, NVIDIA CUDA, QNX |
-| Infra & Validation | Simulation, testing, sim-to-real training | NVIDIA Isaac Sim, MuJoCo, Docker |
-
-As Physical AI advances, the boundaries between these layers are blurring. High-level transformers are beginning to bypass traditional planning and map directly to control loops. However, the foundational requirements of real-time determinism, robust communication, and safety-critical fallback mechanisms ensure that a well-structured, modular software stack remains essential for bringing intelligence into the physical world.
-------------------------------
-
+  <footer>
+    &copy; 2026 VModal Blog
+  </footer>
+</body>
+</html>
