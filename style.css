@@ -410,6 +410,16 @@ footer {
   color: #2563eb;
 }
 
+.landing-page .pillar-icon-box.pink {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+.landing-page .pillar-icon-box.purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
 .landing-page .pillar-card h3 {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 1.3rem !important;
