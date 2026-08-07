@@ -198,67 +198,80 @@ footer {
   margin-bottom: 1.5rem;
 }
 
+
 /* ==========================================
    HOMEPAGE / LANDING PAGE MODERN STYLES
    (Namespaced under .landing-page to protect article styles)
    ========================================== */
 
 .landing-page {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans) !important;
   background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page p,
+.landing-page a,
+.landing-page li,
+.landing-page div,
+.landing-page footer {
+  font-family: var(--font-sans);
+}
+
 .landing-page header {
   background: #0f172a !important;
-  padding: 1.25rem 2.5rem !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  border-bottom: 1px solid #1e293b !important;
-  margin-bottom: 0 !important;
+  padding: 1.25rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 0;
 }
 
 .landing-page header .logo-container {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.75rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .landing-page header .logo-symbol {
-  width: 28px !important;
-  height: 28px !important;
-  color: #38bdf8 !important;
+  width: 28px;
+  height: 28px;
+  color: #38bdf8;
 }
 
 .landing-page header a {
-  font-size: 1.25rem !important;
+  font-size: 1.25rem;
   color: #f1f5f9 !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.01em !important;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .landing-page header nav {
-  display: flex !important;
-  gap: 1.75rem !important;
+  display: flex;
+  gap: 1.75rem;
 }
 
 .landing-page header nav a {
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  color: #94a3b8 !important;
-  text-decoration: none !important;
-  transition: color 0.2s !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
 .landing-page header nav a:hover {
-  color: #38bdf8 !important;
+  color: #38bdf8;
 }
 
 .landing-page main {
   max-width: 1200px !important;
-  margin: 0 auto !important;
-  padding: 0 2rem 4rem 2rem !important;
+  margin: 0 auto;
+  padding: 0 2rem 4rem 2rem;
 }
 
 /* Hero Section */
@@ -281,20 +294,19 @@ footer {
 }
 
 .landing-page .hero-section h1 {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 2.85rem !important;
-  line-height: 1.15 !important;
+  line-height: 1.15;
   color: #0f172a !important;
-  font-weight: 800 !important;
+  font-weight: 800;
   margin-bottom: 1.25rem !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.02em;
 }
 
 .landing-page .hero-section p {
-  font-size: 1.125rem !important;
-  color: #475569 !important;
-  line-height: 1.625 !important;
-  margin-bottom: 2.25rem !important;
+  font-size: 1.125rem;
+  color: #475569;
+  line-height: 1.625;
+  margin-bottom: 2.25rem;
 }
 
 .landing-page .hero-cta {
@@ -352,27 +364,26 @@ footer {
 
 /* Sections Layout */
 .landing-page .section-title {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 2.25rem !important;
   color: #0f172a !important;
-  font-weight: 800 !important;
-  text-align: center !important;
+  font-weight: 800;
+  text-align: center;
   margin-top: 5rem !important;
   margin-bottom: 0.5rem !important;
-  letter-spacing: -0.015em !important;
+  letter-spacing: -0.015em;
   border: none !important;
   padding: 0 !important;
 }
 
 .landing-page .section-subtitle {
-  font-size: 1.1rem !important;
-  color: #64748b !important;
-  text-align: center !important;
-  margin-bottom: 3.5rem !important;
-  max-width: 650px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  line-height: 1.5 !important;
+  font-size: 1.1rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 3.5rem;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
 }
 
 /* Core Pillars Grid */
@@ -417,23 +428,22 @@ footer {
 
 .landing-page .pillar-icon-box.purple {
   background: #faf5ff;
-  color: #7c3aed;
+  color: #6d28d9;
 }
 
 .landing-page .pillar-card h3 {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 1.3rem !important;
-  font-weight: 700 !important;
+  font-weight: 700;
   color: #0f172a !important;
   margin-bottom: 0.75rem !important;
   margin-top: 0 !important;
 }
 
 .landing-page .pillar-card p {
-  font-size: 0.975rem !important;
-  color: #475569 !important;
-  line-height: 1.55 !important;
-  margin-bottom: 0 !important;
+  font-size: 0.975rem;
+  color: #475569;
+  line-height: 1.55;
+  margin-bottom: 0;
 }
 
 /* Architecture pipeline section */
@@ -461,34 +471,33 @@ footer {
 }
 
 .landing-page .architecture-text h3 {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 1.5rem !important;
-  font-weight: 700 !important;
+  font-weight: 700;
   color: #0f172a !important;
   margin-bottom: 1rem !important;
   margin-top: 0 !important;
 }
 
 .landing-page .architecture-text p {
-  font-size: 1.025rem !important;
-  color: #475569 !important;
-  line-height: 1.6 !important;
-  margin-bottom: 1.5rem !important;
+  font-size: 1.025rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 .landing-page .architecture-list {
   list-style: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  margin: 0;
+  padding: 0;
 }
 
 .landing-page .architecture-list li {
   position: relative;
   padding-left: 1.75rem !important;
-  font-size: 0.975rem !important;
-  color: #334155 !important;
+  font-size: 0.975rem;
+  color: #334155;
   margin-bottom: 0.85rem !important;
-  line-height: 1.45 !important;
+  line-height: 1.45;
 }
 
 .landing-page .architecture-list li::before {
@@ -565,20 +574,19 @@ footer {
 }
 
 .landing-page .article-card-title {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 1.35rem !important;
-  font-weight: 800 !important;
+  font-weight: 800;
   color: #0f172a !important;
-  line-height: 1.3 !important;
+  line-height: 1.3;
   margin-bottom: 0.75rem !important;
   margin-top: 0 !important;
 }
 
 .landing-page .article-card-summary {
-  font-size: 0.95rem !important;
-  color: #475569 !important;
-  line-height: 1.55 !important;
-  margin-bottom: 1.5rem !important;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
 }
 
 .landing-page .article-card-footer {
@@ -622,21 +630,20 @@ footer {
 }
 
 .landing-page .executive-title {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 1.85rem !important;
-  font-weight: 800 !important;
+  font-weight: 800;
   color: #ffffff !important;
   margin-bottom: 1rem !important;
   margin-top: 0 !important;
-  letter-spacing: -0.015em !important;
+  letter-spacing: -0.015em;
 }
 
 .landing-page .executive-description {
-  font-size: 1.075rem !important;
-  color: #94a3b8 !important;
-  line-height: 1.65 !important;
-  margin-bottom: 2.5rem !important;
-  max-width: 850px !important;
+  font-size: 1.075rem;
+  color: #94a3b8;
+  line-height: 1.65;
+  margin-bottom: 2.5rem;
+  max-width: 850px;
 }
 
 .landing-page .executive-grid {
@@ -735,5 +742,3 @@ footer {
     padding: 2rem;
   }
 }
-
-
