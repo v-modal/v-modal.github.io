@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joint Embedding Spaces for Multimodal Search &ndash; VModal Blog</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <header>
+    <a href="../index.html">V-Modal AI Blog</a>
+  </header>
+
+  <main>
+    <a class="back-link" href="../index.html">&larr; Back to all articles</a>
+
+    <div class="article-body">
+      <h1>Joint Embedding Spaces for Multimodal Search</h1>
+      <p style="color:#888; font-size:0.9rem; margin-bottom:1.5rem;">August 2026 &middot; AI &middot; Search</p>
+
+      <p>Multimodal search rests on a simple idea: project every modality into one shared vector space where similar things land close together, regardless of whether they started as text, an image, or a sound. Once everything is a vector, retrieval becomes a nearest-neighbour lookup.</p>
+
+      <h2>Why a shared space</h2>
+
+      <p>A shared space lets a text query match an image, or an image match a sound, without any hand-built mapping between them. The model learns the alignment from data, so a photo of a red bicycle and the phrase "red bicycle" end up as neighbours.</p>
+
+      <h2>How the alignment is learned</h2>
+
+      <p>Contrastive training does the work. The model is shown matched and mismatched pairs and learns to pull matches together while pushing mismatches apart:</p>
+
+      <ul>
+        <li>Supervision comes from naturally occurring pairs, such as images and their captions.</li>
+        <li>No manual labelling is needed, so the approach scales to hundreds of millions of pairs.</li>
+        <li>The same recipe extends to audio, depth, and other modalities.</li>
+      </ul>
+
+      <h2>Turning embeddings into search</h2>
+
+      <p>At query time the system encodes the query with the same model and looks up the closest vectors in an index. The quality of the embedding decides the ceiling on relevance; the index decides how fast you reach it.</p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 VModal Blog
+  </footer>
+</body>
+</html>
