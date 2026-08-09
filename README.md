@@ -1,4 +1,4 @@
-# 🌐 [V-Modal AI Blog ](v-modal.github.io)
+# 🌐 [V-Modal AI Blog ](https://v-modal.github.io)
 
 > **[V-Modal AI](https://www.v-modal.com)** — Some Insight into world of MultiModal AI Search (Video, Audio) and Physical AI software application and stack.
 
