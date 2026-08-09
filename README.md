@@ -1,10 +1,10 @@
-# 🌐 [v-modal.github.io](https://v-modal.github.io)
+# 🌐 [V-Modal AI Blog ](v-modal.github.io)
 
-> **V-Modal AI** — Some Insight into world of MultiModal AI Search (Video, Audio) and Physical AI software application and stack.
+> **[V-Modal AI](https://www.v-modal.com)** — Some Insight into world of MultiModal AI Search (Video, Audio) and Physical AI software application and stack.
 
 ---
 
-A space dedicated to exploring modern AI techniques for Search in **MultiModal** and **Physical AI**: the intersection of vision, audio, language, and search. Here you will find in-depth articles on cutting-edge research, practical tutorials, and insights into building intelligent systems that understand the world beyond a single modality.
+A space dedicated to exploring modern technology statck in **AI** and **Physical AI**: the intersection of Vision, Audio, Search  and Physical Sensory interaction. Here you will find in-depth articles on cutting-edge research, practical tutorials, and insights into building intelligent systems that understand the world beyond a single modality.
 
 As artificial intelligence matures, the boundaries between digital reasoning and physical reality are dissolving. Yesterday's search engines matched keywords on text pages. Today's systems must understand and navigate the continuous flow of the physical world. This blog serves as your guide to the core principles and strategies driving this transformation. We focus specifically on four pillars:
 
