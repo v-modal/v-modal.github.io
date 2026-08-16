@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install fire requests
+        run: pip install fire requests markdown
 
       - name: Verify API key
         env:

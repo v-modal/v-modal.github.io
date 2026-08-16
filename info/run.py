@@ -11,6 +11,7 @@ from typing import Optional
 import os, sys, json, re, datetime
 import fire
 import requests
+import markdown as md_lib
 
 BASE_URL     = "https://www.outrank.so/api/agent/v1"
 ARTICLES_DIR = "articles"
@@ -49,16 +50,26 @@ def _req(path: str, api_key: str) -> dict:
     return resp.json()
 
 
-def _req_html(path: str, api_key: str) -> str:
+def _req_html(path: str, api_key: str, title: str = "") -> str:
     url = BASE_URL + path
-    resp = _session(api_key).get(url, headers={"Accept": "text/html,application/json"}, timeout=30)
+    resp = _session(api_key).get(url, headers={"Accept": "application/json"}, timeout=30)
     if not resp.ok:
         raise SystemExit(f"API {resp.status_code} on {url}\n{resp.text}")
-    ct = resp.headers.get("Content-Type", "")
-    if "json" in ct:
-        obj = resp.json()
-        return obj.get("html") or obj.get("content") or json.dumps(obj, indent=2)
-    return resp.text
+    obj  = resp.json()
+    data = obj.get("data") or obj
+    # prefer explicit html field, else convert markdown content
+    html_body = data.get("html") or ""
+    if not html_body:
+        raw = data.get("content") or ""
+        html_body = md_lib.markdown(raw, extensions=["tables", "fenced_code"])
+    page_title = data.get("title") or title
+    return (
+        f"<!DOCTYPE html>\n<html lang='en'>\n<head>\n"
+        f"  <meta charset='UTF-8'/>\n"
+        f"  <title>{page_title}</title>\n"
+        f"  <link rel='stylesheet' href='../style.css'/>\n"
+        f"</head>\n<body>\n{html_body}\n</body>\n</html>"
+    )
 
 
 # ── Slug / dedup ─────────────────────────────────────────────────────────────
@@ -177,11 +188,9 @@ def fetch():
     # 4. fetch HTML content
     print(f"Fetching content for article {article_id}…")
     try:
-        html_content = _req_html(f"/articles/{article_id}/content", key)
-    except urllib.error.HTTPError as e:
-        print(f"Content endpoint failed ({e.code}), falling back to metadata page.")
-        meta = _req(f"/articles/{article_id}", key)
-        html_content = f"<html><body><h1>{title}</h1><pre>{json.dumps(meta, indent=2)}</pre></body></html>"
+        html_content = _req_html(f"/articles/{article_id}/content", key, title)
+    except Exception as e:
+        raise SystemExit(f"Content fetch failed: {e}")
 
     # 5. save
     try:
