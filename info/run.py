@@ -40,8 +40,11 @@ def _session(api_key: str) -> requests.Session:
 def _req(path: str, api_key: str) -> dict:
     url = BASE_URL + path
     resp = _session(api_key).get(url, headers={"Accept": "application/json"}, timeout=30)
+    print(f"  {resp.status_code} {url}  (body: {len(resp.content)} bytes)")
     if not resp.ok:
         raise SystemExit(f"API {resp.status_code} on {url}\n{resp.text}")
+    if not resp.content:
+        return {}
     return resp.json()
 
 
@@ -116,7 +119,11 @@ def _add_to_index(href: str, title: str, summary: str, tags, published_at: str):
 def whoami():
     """Verify API key and show org info."""
     key = os.environ.get(API_KEY_ENV) or sys.exit(f"Set {API_KEY_ENV}")
-    print(json.dumps(_req("/auth/whoami", key), indent=2))
+    url = BASE_URL + "/auth/whoami"
+    resp = _session(key).get(url, headers={"Accept": "application/json"}, timeout=30)
+    print(f"status: {resp.status_code}")
+    print(f"headers: {dict(resp.headers)}")
+    print(f"body: {resp.text[:2000]}")
 
 
 def fetch():
