@@ -1,0 +1,57 @@
+name: Get Article
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Article URL to fetch"
+        required: false
+        default: "https://www.outrank.so/docs/api"
+      title:
+        description: "Article title"
+        required: false
+        default: "Outrank.so API Documentation"
+      summary:
+        description: "Article summary"
+        required: false
+        default: "Full API reference for the Outrank.so content generation platform."
+      tags:
+        description: "Comma-separated tags"
+        required: false
+        default: "AI, API, SEO"
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
+
+jobs:
+  fetch-article:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install fire
+
+      - name: Fetch article
+        env:
+          OUT_API_KEY: ${{ secrets.OUT_API_KEY }}
+        run: |
+          python info/run.py fetch \
+            --url="${{ github.event.inputs.url || 'https://www.outrank.so/docs/api' }}" \
+            --title="${{ github.event.inputs.title || 'Outrank.so API Documentation' }}" \
+            --summary="${{ github.event.inputs.summary || 'Full API reference for the Outrank.so content generation platform.' }}" \
+            --tags="${{ github.event.inputs.tags || 'AI, API, SEO' }}"
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add articles/ index.html
+          git diff --cached --quiet || git commit -m "chore: fetch article $(date +%Y%m%d)"
+          git push
