@@ -16,6 +16,7 @@ BASE_URL     = "https://www.outrank.so/api/agent/v1"
 ARTICLES_DIR = "articles"
 INDEX_HTML   = "index.html"
 API_KEY_ENV  = "OUT_API_KEY"
+FETCHED_IDS  = "info/fetched_ids.json"
 
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────
@@ -69,13 +70,22 @@ def _slugify(text: str) -> str:
     return text[:50]
 
 
+def _load_ids() -> dict:
+    if os.path.exists(FETCHED_IDS):
+        with open(FETCHED_IDS) as f:
+            return json.load(f)
+    return {}
+
+
+def _save_id(article_id: str, filename: str):
+    ids = _load_ids()
+    ids[article_id] = filename
+    with open(FETCHED_IDS, "w") as f:
+        json.dump(ids, f, indent=2)
+
+
 def _already_saved(article_id: str) -> Optional[str]:
-    """Return existing filename if article_id is already in articles/."""
-    os.makedirs(ARTICLES_DIR, exist_ok=True)
-    for fn in os.listdir(ARTICLES_DIR):
-        if article_id in fn:
-            return fn
-    return None
+    return _load_ids().get(article_id)
 
 
 # ── index.html update ────────────────────────────────────────────────────────
@@ -181,12 +191,14 @@ def fetch():
         ymd = datetime.date.today().strftime("%Y%m%d")
 
     slug     = _slugify(title)
-    filename = f"{ymd}_{article_id}_{slug}.html"
+    filename = f"{ymd}_{slug}.html"
     dest     = os.path.join(ARTICLES_DIR, filename)
     os.makedirs(ARTICLES_DIR, exist_ok=True)
     with open(dest, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"Saved: {dest}")
+
+    _save_id(article_id, filename)
 
     # 6. update index.html
     if isinstance(tags, list):
