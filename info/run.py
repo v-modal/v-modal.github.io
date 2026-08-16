@@ -26,8 +26,12 @@ def _req(path: str, api_key: str) -> dict:
         "Authorization": f"Bearer {api_key}",
         "Accept":        "application/json",
     })
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        raise SystemExit(f"API {e.code} {e.reason} on {url}\n{body}")
 
 
 def _req_html(path: str, api_key: str) -> str:

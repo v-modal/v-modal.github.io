@@ -2,23 +2,6 @@ name: Get Article
 
 on:
   workflow_dispatch:
-    inputs:
-      url:
-        description: "Article URL to fetch"
-        required: false
-        default: "https://www.outrank.so/docs/api"
-      title:
-        description: "Article title"
-        required: false
-        default: "Outrank.so API Documentation"
-      summary:
-        description: "Article summary"
-        required: false
-        default: "Full API reference for the Outrank.so content generation platform."
-      tags:
-        description: "Comma-separated tags"
-        required: false
-        default: "AI, API, SEO"
   schedule:
     - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
 
@@ -38,15 +21,15 @@ jobs:
       - name: Install dependencies
         run: pip install fire
 
+      - name: Verify API key
+        env:
+          OUT_API_KEY: ${{ secrets.OUT_API_KEY }}
+        run: python info/run.py whoami
+
       - name: Fetch article
         env:
           OUT_API_KEY: ${{ secrets.OUT_API_KEY }}
-        run: |
-          python info/run.py fetch \
-            --url="${{ github.event.inputs.url || 'https://www.outrank.so/docs/api' }}" \
-            --title="${{ github.event.inputs.title || 'Outrank.so API Documentation' }}" \
-            --summary="${{ github.event.inputs.summary || 'Full API reference for the Outrank.so content generation platform.' }}" \
-            --tags="${{ github.event.inputs.tags || 'AI, API, SEO' }}"
+        run: python info/run.py fetch
 
       - name: Commit and push
         run: |
