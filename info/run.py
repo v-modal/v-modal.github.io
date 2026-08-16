@@ -9,8 +9,8 @@ Usage:
 """
 from typing import Optional
 import os, sys, json, re, datetime
-import urllib.request, urllib.error
 import fire
+import requests
 
 BASE_URL     = "https://www.outrank.so/api/agent/v1"
 ARTICLES_DIR = "articles"
@@ -20,35 +20,41 @@ API_KEY_ENV  = "OUT_API_KEY"
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────
 
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+}
+
+
+def _session(api_key: str) -> requests.Session:
+    s = requests.Session()
+    s.headers.update(_HEADERS)
+    s.headers["Authorization"] = f"Bearer {api_key}"
+    return s
+
+
 def _req(path: str, api_key: str) -> dict:
     url = BASE_URL + path
-    req = urllib.request.Request(url, headers={
-        "Authorization": f"Bearer {api_key}",
-        "Accept":        "application/json",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        raise SystemExit(f"API {e.code} {e.reason} on {url}\n{body}")
+    resp = _session(api_key).get(url, headers={"Accept": "application/json"}, timeout=30)
+    if not resp.ok:
+        raise SystemExit(f"API {resp.status_code} on {url}\n{resp.text}")
+    return resp.json()
 
 
 def _req_html(path: str, api_key: str) -> str:
     url = BASE_URL + path
-    req = urllib.request.Request(url, headers={
-        "Authorization": f"Bearer {api_key}",
-        "Accept":        "text/html,application/json",
-    })
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        raw  = resp.read()
-        enc  = resp.headers.get_content_charset() or "utf-8"
-        data = raw.decode(enc, errors="replace")
-        # if JSON returned, pull out html/content field
-        if resp.headers.get_content_type() in ("application/json", "application/json; charset=utf-8"):
-            obj = json.loads(data)
-            return obj.get("html") or obj.get("content") or json.dumps(obj, indent=2)
-        return data
+    resp = _session(api_key).get(url, headers={"Accept": "text/html,application/json"}, timeout=30)
+    if not resp.ok:
+        raise SystemExit(f"API {resp.status_code} on {url}\n{resp.text}")
+    ct = resp.headers.get("Content-Type", "")
+    if "json" in ct:
+        obj = resp.json()
+        return obj.get("html") or obj.get("content") or json.dumps(obj, indent=2)
+    return resp.text
 
 
 # ── Slug / dedup ─────────────────────────────────────────────────────────────
