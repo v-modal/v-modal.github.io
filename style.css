@@ -138,6 +138,193 @@ footer {
   border-top: 1px solid #e0e0e0;
 }
 
+/* ── Article page — plain HTML elements inside <main> ── */
+
+main h1 {
+  font-size: 2.2rem;
+  line-height: 1.25;
+  color: #1a1a2e;
+  margin-bottom: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+main h2 {
+  font-size: 1.45rem;
+  margin: 2.5rem 0 0.85rem;
+  color: #1a1a2e;
+  border-bottom: 2px solid #e8e8f0;
+  padding-bottom: 0.35rem;
+}
+
+main h3 {
+  font-size: 1.15rem;
+  margin: 2rem 0 0.6rem;
+  color: #2a2a4e;
+}
+
+main h4 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.4rem;
+  color: #333;
+  font-style: italic;
+}
+
+main p {
+  margin-bottom: 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+main a {
+  color: #1a1a2e;
+  text-decoration: underline;
+  text-decoration-color: #c0c0d8;
+  text-underline-offset: 3px;
+}
+
+main a:hover {
+  color: #4f46e5;
+  text-decoration-color: #4f46e5;
+}
+
+main ul, main ol {
+  margin: 0.5rem 0 1.4rem 1.6rem;
+}
+
+main li {
+  margin-bottom: 0.55rem;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+main strong {
+  color: #111;
+  font-weight: 700;
+}
+
+/* Table of Contents — first <ul> after a "Table of Contents" h2 */
+main h2 + ul {
+  list-style: none;
+  margin-left: 0;
+  padding: 1rem 1.25rem;
+  background: #f5f5fb;
+  border-left: 4px solid #1a1a2e;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 2rem;
+  columns: 2;
+  column-gap: 2rem;
+}
+
+main h2 + ul li {
+  margin-bottom: 0.3rem;
+  font-size: 0.93rem;
+  break-inside: avoid;
+}
+
+main h2 + ul li a {
+  color: #555;
+  text-decoration: none;
+}
+
+main h2 + ul li a:hover {
+  color: #1a1a2e;
+  text-decoration: underline;
+}
+
+/* Code */
+main code {
+  background: #f0f0f8;
+  color: #2d2d6e;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.88em;
+}
+
+main pre {
+  background: #1a1a2e;
+  color: #e8e8f8;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+main pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Blockquote */
+main blockquote {
+  border-left: 4px solid #4f46e5;
+  margin: 1.75rem 0;
+  padding: 0.75rem 1.25rem;
+  background: #f7f7ff;
+  border-radius: 0 6px 6px 0;
+  color: #444;
+  font-style: italic;
+}
+
+main blockquote p {
+  margin-bottom: 0;
+}
+
+/* Tables */
+main table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.75rem 0;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+main th {
+  background: #1a1a2e;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+main td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid #e8e8f0;
+  color: #333;
+  vertical-align: top;
+}
+
+main tr:nth-child(even) td {
+  background: #f9f9fc;
+}
+
+main tr:last-child td {
+  border-bottom: none;
+}
+
+main img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+main hr {
+  border: none;
+  border-top: 2px solid #e8e8f0;
+  margin: 2.5rem 0;
+}
+
 /* Custom styling for converted articles and summaries */
 .article-list .summary {
   font-size: 0.95rem;

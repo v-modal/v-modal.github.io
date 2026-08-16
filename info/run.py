@@ -66,9 +66,20 @@ def _req_html(path: str, api_key: str, title: str = "") -> str:
     return (
         f"<!DOCTYPE html>\n<html lang='en'>\n<head>\n"
         f"  <meta charset='UTF-8'/>\n"
+        f"  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>\n"
         f"  <title>{page_title}</title>\n"
         f"  <link rel='stylesheet' href='../style.css'/>\n"
-        f"</head>\n<body>\n{html_body}\n</body>\n</html>"
+        f"</head>\n<body>\n"
+        f"  <header>\n"
+        f"    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>\n"
+        f"  </header>\n"
+        f"  <main>\n"
+        f"    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>\n"
+        f"    <h1>{page_title}</h1>\n"
+        f"    {html_body}\n"
+        f"  </main>\n"
+        f"  <footer>&copy; 2026 V-Modal AI Blog</footer>\n"
+        f"</body>\n</html>"
     )
 
 
