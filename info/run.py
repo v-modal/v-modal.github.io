@@ -26,7 +26,7 @@ _HEADERS = {
         "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Encoding": "gzip, deflate",  # exclude br — requests can't decode Brotli
 }
 
 
@@ -136,7 +136,8 @@ def fetch():
     print("Fetching article list…")
     data = _req("/articles", key)
 
-    articles = data if isinstance(data, list) else data.get("articles") or data.get("data") or []
+    raw = data.get("data") or data
+    articles = raw.get("items") or raw if isinstance(raw, dict) else raw
     if not articles:
         print("No articles returned from API.")
         return
