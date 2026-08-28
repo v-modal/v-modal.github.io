@@ -10,6 +10,7 @@ Usage:
 from typing import Optional
 import os, sys, json, re, datetime
 import fire
+import pandas as pd
 import requests
 import markdown as md_lib
 
@@ -158,6 +159,80 @@ def whoami():
     print(f"body: {resp.text[:2000]}")
 
 
+def _generated_articles(key: str) -> list:
+    data = _req("/articles", key)
+    raw = data.get("data") or data
+    articles = raw.get("items") or raw if isinstance(raw, dict) else raw
+    articles = articles or []
+    generated = [article for article in articles if article.get("status") == "generated"]
+    return sorted(
+        generated,
+        key=lambda article: article.get("created_at") or article.get("date_created") or "",
+        reverse=True,
+    )
+
+
+def fetch_all_article_title() -> pd.DataFrame:
+    """Return generated article IDs, titles, and creation dates."""
+    key = os.environ.get(API_KEY_ENV)
+    if not key:
+        sys.exit(f"ERROR: {API_KEY_ENV} environment variable is not set")
+
+    rows = []
+    for article in _generated_articles(key):
+        rows.append({
+            "article_id": str(article.get("id") or article.get("_id") or "unknown"),
+            "title": article.get("title") or "Untitled",
+            "date_created": article.get("date_created") or article.get("created_at") or "",
+        })
+    return pd.DataFrame(rows, columns=["article_id", "title", "date_created"])
+
+
+def fetch_generated(n: int = 1):
+    """Fetch and save the newest n generated articles."""
+    key = os.environ.get(API_KEY_ENV)
+    if not key:
+        sys.exit(f"ERROR: {API_KEY_ENV} environment variable is not set")
+    if n < 1:
+        raise ValueError("n must be at least 1")
+
+    generated = _generated_articles(key)[:n]
+    if not generated:
+        print("No generated articles returned from API.")
+        return
+
+    for article in generated:
+        article_id = str(article.get("id") or article.get("_id") or "unknown")
+        title = article.get("title") or "Untitled"
+        summary = article.get("summary") or article.get("excerpt") or ""
+        created_at = article.get("date_created") or article.get("created_at") or datetime.date.today().isoformat()
+        tags = article.get("tags") or article.get("keywords") or ["AI"]
+
+        existing = _already_saved(article_id)
+        if existing:
+            print(f"Already saved: {existing} — skipping.")
+            continue
+
+        print(f"Fetching generated article: [{article_id}] {title}")
+        html_content = _req_html(f"/articles/{article_id}/content", key, title)
+        try:
+            dt = datetime.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+            ymd = dt.strftime("%Y%m%d")
+        except Exception:
+            ymd = datetime.date.today().strftime("%Y%m%d")
+
+        filename = f"{ymd}_{_slugify(title)}.html"
+        dest = os.path.join(ARTICLES_DIR, filename)
+        os.makedirs(ARTICLES_DIR, exist_ok=True)
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        _save_id(article_id, filename)
+
+        tag_str = ", ".join(str(tag) for tag in tags) if isinstance(tags, list) else str(tags)
+        _add_to_index(f"articles/{filename}", title, summary, tag_str, created_at)
+        print(f"Saved: {dest}")
+
+
 def fetch():
     """Fetch the most recent published article; skip if already saved."""
     key = os.environ.get(API_KEY_ENV)
@@ -229,4 +304,9 @@ def fetch():
 
 
 if __name__ == "__main__":
-    fire.Fire({"fetch": fetch, "whoami": whoami})
+    fire.Fire({
+        "fetch": fetch,
+        "fetch_all_article_title": fetch_all_article_title,
+        "fetch_generated": fetch_generated,
+        "whoami": whoami,
+    })
