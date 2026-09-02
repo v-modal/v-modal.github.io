@@ -3,7 +3,7 @@ name: Get Article
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
+    - cron: "0 23 * * *"  # every Monday at 06:00 UTC
 
 jobs:
   fetch-article:
@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install fire requests markdown
+        run: pip install fire requests markdown pandas 
 
       - name: Verify API key
         env:
