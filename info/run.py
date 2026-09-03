@@ -234,73 +234,56 @@ def fetch_generated(n: int = 1):
 
 
 def fetch():
-    """Fetch the most recent published article; skip if already saved."""
+    """Fetch unfetched articles among the five most recent generated articles."""
     key = os.environ.get(API_KEY_ENV)
     if not key:
         sys.exit(f"ERROR: {API_KEY_ENV} environment variable is not set")
 
-    # 1. list articles
-    print("Fetching article list…")
-    data = _req("/articles", key)
-
-    raw = data.get("data") or data
-    articles = raw.get("items") or raw if isinstance(raw, dict) else raw
-    if not articles:
-        print("No articles returned from API.")
+    print("Fetching generated article list…")
+    recent = _generated_articles(key)[:5]
+    if not recent:
+        print("No generated articles returned from API.")
         return
+    fetched = 0
 
-    # 2. filter published, sort by published_at desc
-    published = [a for a in articles if a.get("status") == "published"]
-    if not published:
-        # fallback: take all and sort
-        published = articles
-    published.sort(key=lambda a: a.get("published_at") or a.get("created_at") or "", reverse=True)
-    latest = published[0]
+    for article in recent:
+        article_id = str(article.get("id") or article.get("_id") or "unknown")
+        existing = _already_saved(article_id)
+        if existing:
+            print(f"Already saved: {existing} — skipping.")
+            continue
 
-    article_id   = str(latest.get("id") or latest.get("_id") or "unknown")
-    title        = latest.get("title") or "Untitled"
-    summary      = latest.get("summary") or latest.get("excerpt") or ""
-    published_at = latest.get("published_at") or latest.get("created_at") or datetime.date.today().isoformat()
-    tags         = latest.get("tags") or latest.get("keywords") or ["AI"]
+        title = article.get("title") or "Untitled"
+        summary = article.get("summary") or article.get("excerpt") or ""
+        published_at = article.get("date_created") or article.get("created_at") or datetime.date.today().isoformat()
+        tags = article.get("tags") or article.get("keywords") or ["AI"]
 
-    print(f"Latest article: [{article_id}] {title}")
+        print(f"Fetching article: [{article_id}] {title}")
+        try:
+            html_content = _req_html(f"/articles/{article_id}/content", key, title)
+        except Exception as e:
+            raise SystemExit(f"Content fetch failed: {e}")
 
-    # 3. dedup check
-    existing = _already_saved(article_id)
-    if existing:
-        print(f"Already saved: {existing} — nothing to do.")
-        return
+        try:
+            dt = datetime.datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+            ymd = dt.strftime("%Y%m%d")
+        except Exception:
+            ymd = datetime.date.today().strftime("%Y%m%d")
 
-    # 4. fetch HTML content
-    print(f"Fetching content for article {article_id}…")
-    try:
-        html_content = _req_html(f"/articles/{article_id}/content", key, title)
-    except Exception as e:
-        raise SystemExit(f"Content fetch failed: {e}")
+        filename = f"{ymd}_{_slugify(title)}.html"
+        dest = os.path.join(ARTICLES_DIR, filename)
+        os.makedirs(ARTICLES_DIR, exist_ok=True)
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        _save_id(article_id, filename)
 
-    # 5. save
-    try:
-        dt = datetime.datetime.fromisoformat(published_at.replace("Z", "+00:00"))
-        ymd = dt.strftime("%Y%m%d")
-    except Exception:
-        ymd = datetime.date.today().strftime("%Y%m%d")
+        tag_str = ", ".join(str(t) for t in tags) if isinstance(tags, list) else str(tags)
+        _add_to_index(f"articles/{filename}", title, summary, tag_str, published_at)
+        print(f"Saved: {dest}")
+        fetched += 1
 
-    slug     = _slugify(title)
-    filename = f"{ymd}_{slug}.html"
-    dest     = os.path.join(ARTICLES_DIR, filename)
-    os.makedirs(ARTICLES_DIR, exist_ok=True)
-    with open(dest, "w", encoding="utf-8") as f:
-        f.write(html_content)
-    print(f"Saved: {dest}")
-
-    _save_id(article_id, filename)
-
-    # 6. update index.html
-    if isinstance(tags, list):
-        tag_str = ", ".join(str(t) for t in tags)
-    else:
-        tag_str = str(tags)
-    _add_to_index(f"articles/{filename}", title, summary, tag_str, published_at)
+    if not fetched:
+        print("All five most recent generated articles are already saved.")
 
 
 if __name__ == "__main__":
