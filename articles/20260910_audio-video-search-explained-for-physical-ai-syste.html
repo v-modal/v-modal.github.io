@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Audio Video Search Explained for Physical AI Systems</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Audio Video Search Explained for Physical AI Systems</h1>
+    <p>You're reviewing footage from a warehouse robot, a smart-glasses camera, or a mobile app, and you remember the moment clearly: a tool hit the floor, someone turned away, and an alarm sounded. Yet searching for “alarm” finds speech transcripts, searching for “tool” returns unrelated frames, and searching the entire recording manually wastes time. The missing capability isn't another keyword box. It's a memory layer that connects <strong>what was seen, what was heard, and when both happened</strong>.</p>
+<p>That's the practical meaning of <strong>audio video search</strong> for Physical AI. A robot, camera, or wearable device needs to recall events from continuous sensory input, often while operating with limited bandwidth, battery, and storage. This guide builds the idea progressively, compares fragmented tools with unified multimodal retrieval, and shows where the approach fits mobile development, advertisement video edition, <strong>vision for robotics</strong>, and <strong>audio for robotics</strong>.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#introduction-to-audio-video-search-in-the-physical-ai-era">Introduction to Audio Video Search in the Physical AI Era</a></li>
+<li><a href="#what-audio-video-search-really-means">What Audio Video Search Really Means</a></li>
+<li><a href="#transcription-is-only-one-signal">Transcription is only one signal</a></li>
+<li><a href="#retrieval-should-preserve-time">Retrieval should preserve time</a></li>
+<li><a href="#how-multimodal-audio-and-video-search-differs-from-traditional-tools">How Multimodal Audio and Video Search Differs From Traditional Tools</a></li>
+<li><a href="#inside-a-typical-audio-video-search-pipeline-without-the-secret-sauce">Inside a Typical Audio Video Search Pipeline Without the Secret Sauce</a></li>
+<li><a href="#capture-and-indexing-set-the-boundaries">Capture and indexing set the boundaries</a></li>
+<li><a href="#representation-should-preserve-different-meanings">Representation should preserve different meanings</a></li>
+<li><a href="#time-turns-matches-into-memories">Time turns matches into memories</a></li>
+<li><a href="#real-world-use-cases-that-show-the-value">Real World Use Cases That Show the Value</a></li>
+<li><a href="#advertisement-video-edition">Advertisement video edition</a></li>
+<li><a href="#vision-for-robotics">Vision for robotics</a></li>
+<li><a href="#audio-for-robotics">Audio for robotics</a></li>
+<li><a href="#pain-points-challenges-and-privacy-edge-tradeoffs">Pain Points Challenges and Privacy Edge Tradeoffs</a></li>
+<li><a href="#practical-integration-notes-for-mobile-and-edge-with-v-modal-ai">Practical Integration Notes for Mobile and Edge With V-Modal AI</a></li>
+<li><a href="#choose-the-integration-pattern">Choose the integration pattern</a></li>
+<li><a href="#conclusion-and-next-steps-for-building-with-audio-video-search">Conclusion and Next Steps for Building With Audio Video Search</a></li>
+</ul>
+<p><a id="introduction-to-audio-video-search-in-the-physical-ai-era"></a></p>
+<h2>Introduction to Audio Video Search in the Physical AI Era</h2>
+<p>A maintenance robot moves through a factory while its camera records shelves, tools, warning lights, and workers. Its microphone captures motors, footsteps, speech, impacts, and alarms. Later, an operator asks, “Find the moment the metal tool fell near the red cabinet, followed by the warning sound.” A transcript-only system may find nothing. A visual-only system may locate the tool but miss the alarm. A useful system has to connect both cues across time.</p>
+<p><img alt="A friendly humanoid robot wearing glasses analyzes digital audio and video search footage on a holographic screen." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/50d61551-843e-42b0-a3f1-27fac8e66ab6/audio-video-search-robot-analyst.jpg" /></p>
+<p>Traditional media search assumes that files have titles, tags, captions, or searchable speech. Physical environments don't behave that way. Ambient recordings contain incomplete views, background sounds, changing lighting, overlapping activity, and events that nobody labeled in advance. A smart-glasses user might remember hearing a bicycle bell before seeing the cyclist. A security operator might remember a crash sound even though the camera faced away.</p>
+<p>The opportunity is broader than media content management. Research on multimedia web search found measurable audio and video behavior long before today's multimodal models. Across a longitudinal study covering <strong>1997 to 2006</strong>, audio represented <strong>113,769 sessions, or 31.4% of multimedia sessions</strong>, while video represented <strong>50,795 sessions, or 14.06%</strong>. The study also reported average session durations of <strong>410.4 seconds for audio</strong> and <strong>414.5 seconds for video</strong>, with short query lengths of about <strong>4.1 terms for audio</strong> and <strong>3.5 to 4.1 terms for video</strong>. These figures come from the <a href="https://faculty.ist.psu.edu/jjansen/academic/pubs/mm00.pdf">longitudinal multimedia web searching study</a>.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Treat audio and video as complementary sensors, not as separate media files.</p>
+</blockquote>
+<p>This perspective matters for mobile developers because the search experience depends on the device's role. An Android phone may capture and query recent surroundings. Smart glasses may provide a first-person visual stream with blind spots. An IoT camera may see an entrance while a nearby microphone detects activity outside the frame. Physical AI systems need a way to retrieve moments from that combined history without forcing every query through transcription or cloud-only processing.</p>
+<p><a id="what-audio-video-search-really-means"></a></p>
+<h2>What Audio Video Search Really Means</h2>
+<p>Start with familiar text search. You type a word, and the system looks for that word in a title, tag, caption, or transcript. That works when the information was expressed in text. It breaks when the useful clue is a visual action, a non-speech sound, or the relationship between events.</p>
+<p>Human memory offers a better analogy. If you remember a friend dropping a cup, you may recall the image of the cup, the sound of impact, the location, and what happened immediately afterward. You don't search your memory through one transcript. You combine several weak signals until one moment feels right.</p>
+<p><strong>Audio video search</strong> applies the same principle to recorded media. A natural-language query such as “a person in a yellow jacket opening a gate while a motor is running” contains visual, auditory, and contextual intent. The result should point to a relevant time segment, not merely return the entire file.</p>
+<p><img alt="An infographic illustrating the evolution of audio video search from simple text keywords to human-like multimodal understanding." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/d7c4de75-3c29-45a7-8281-0aeddfcbbc3a/audio-video-search-evolution.jpg" /></p>
+<p><a id="transcription-is-only-one-signal"></a></p>
+<h3>Transcription is only one signal</h3>
+<p>Transcription turns spoken language into text. It's useful for queries such as “the operator says the shipment is delayed,” but it can't reliably represent a door slam, a siren, a buzzing motor, or a person who appears on screen. Visual analysis adds objects, scenes, actions, and spatial relationships. Audio analysis adds music, impact sounds, alarms, and environmental texture.</p>
+<p>Early multimedia query research illustrates why text alone is a weak foundation for this problem. In one search-log dataset, <strong>3,810 audio queries represented 0.37% of all queries</strong>, while <strong>7,630 video queries represented 0.74%</strong>. Audio sessions had a mean length of <strong>2.44 queries</strong>, and video sessions had a mean length of <strong>2.91 queries</strong>. The most common audio term was <strong>music, with 1,365 occurrences</strong>, and the most common video term was <strong>movies, with 1,707 occurrences</strong>, as documented in the <a href="https://faculty.ist.psu.edu/jjansen/academic/pubs/jansen_www.pdf">empirical analysis of multimedia web queries</a>.</p>
+<p>The lesson isn't that users always write short queries. It's that sparse language leaves room for ambiguity. A query like “alarm near the loading bay” doesn't say whether the alarm was spoken about, visible, or audible. A fused system can use the wording as a starting point and let the media supply the missing context.</p>
+<p><a id="retrieval-should-preserve-time"></a></p>
+<h3>Retrieval should preserve time</h3>
+<p>A whole-file result isn't enough for editing, investigation, or robot memory. The useful result is a precise moment with surrounding context, such as the few seconds before a sound and the visual event that follows it. That temporal connection separates a media catalog from a continuous memory layer.</p>
+<blockquote>
+<p><strong>The key idea:</strong> Search should recover an event in context, not just match a word inside a file.</p>
+</blockquote>
+<p><a id="how-multimodal-audio-and-video-search-differs-from-traditional-tools"></a></p>
+<h2>How Multimodal Audio and Video Search Differs From Traditional Tools</h2>
+<p>Teams often assemble search from separate components. One model handles automatic speech recognition, another analyzes video frames, a database stores tags, and a media player asks the user to scrub through the results. Each component may work well alone. The problem appears at the boundaries.</p>
+<p>A transcript can identify what someone said but not what happened outside the camera's view. A frame index can locate a red vehicle but not the horn that distinguishes the relevant event. Manual scrubbing preserves human judgment, but it makes long recordings expensive to review and doesn't scale well for continuous streams.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Traditional Separate Models</th>
+<th>Unified Multimodal Search Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spoken words</td>
+<td>Searches speech converted into text</td>
+<td>Uses speech as one signal alongside sight and sound</td>
+</tr>
+<tr>
+<td>Non-speech audio</td>
+<td>Often handled by a separate detector or ignored</td>
+<td>Can contribute to queries involving alarms, impacts, music, or machinery</td>
+</tr>
+<tr>
+<td>Visual context</td>
+<td>Matches frames, tags, or captions</td>
+<td>Connects objects and actions with audio and time</td>
+</tr>
+<tr>
+<td>Blind spots</td>
+<td>Depends heavily on camera coverage</td>
+<td>Uses audio as a second sensing layer when the camera can't see</td>
+</tr>
+<tr>
+<td>Result format</td>
+<td>File, transcript hit, or loosely related frame</td>
+<td>Time-aware moment with surrounding context</td>
+</tr>
+<tr>
+<td>Mobile and edge use</td>
+<td>Often assumes cloud processing or disconnected services</td>
+<td>Can be designed as a localized memory layer with offline considerations</td>
+</tr>
+<tr>
+<td>Query style</td>
+<td>Keyword, transcript, or modality-specific input</td>
+<td>Text, voice, image, and environmental-state intent</td>
+</tr>
+</tbody>
+</table>
+<p>A unified layer doesn't mean every traditional tool becomes unnecessary. A transcript index remains practical for exact spoken phrases. Metadata filters remain useful for device, location, or access rules. Manual review remains essential when the consequences of a decision are high.</p>
+<p>The decision changes when the query crosses modalities. “Find the person who shouted before the gate closed” needs speech or sound, visual identity, an action, and temporal order. “Find every advertisement shot where the product is visible while the presenter mentions the feature” needs frame understanding and dialogue alignment. “Find the moment the robot heard a collision while its camera was pointed away” needs an auditory memory of an event that vision alone cannot confirm.</p>
+<p>Recent research makes this distinction explicit. The <strong>FLARE</strong> dataset contains <strong>87,697 clips</strong>, <strong>225.4 hours</strong> of source video, and <strong>274,933 user-style queries</strong>. Its hard bimodal constraint deliberately creates queries where vision-only or audio-only retrieval fails, while fused retrieval succeeds, as described in the <a href="https://arxiv.org/html/2605.10228v1">FLARE audiovisual retrieval benchmark</a>. The benchmark supports a practical conclusion: multimodal fusion is not decoration for difficult searches. It's central to them.</p>
+<p><a id="inside-a-typical-audio-video-search-pipeline-without-the-secret-sauce"></a></p>
+<h2>Inside a Typical Audio Video Search Pipeline Without the Secret Sauce</h2>
+<p>A developer can understand the system's behavior without knowing proprietary data handling or model internals. Think of the pipeline as a set of responsibilities rather than a recipe.</p>
+<ol>
+<li><strong>Capture</strong> records the camera and microphone streams from a phone, wearable, robot, or edge hub.</li>
+<li><strong>Indexing</strong> organizes continuous media into searchable time units.</li>
+<li><strong>Multimodal representation</strong> associates visual, audio, and contextual meaning with those units.</li>
+<li><strong>Query fusion</strong> interprets whether a request depends mostly on sight, sound, speech, language, or a combination.</li>
+<li><strong>Timestamp-aware retrieval</strong> returns the relevant moment and preserves nearby context.</li>
+</ol>
+<p><img alt="A five-step infographic explaining the technical process of a typical audio video search pipeline for data analysis." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/96b284c3-069e-4e7f-a84a-ec9bdd3c5015/audio-video-search-pipeline-process.jpg" /></p>
+<p><a id="capture-and-indexing-set-the-boundaries"></a></p>
+<h3>Capture and indexing set the boundaries</h3>
+<p>Capture quality affects every later step. A blocked microphone, dropped frames, poor lighting, or clock drift can reduce the usefulness of search. Mobile and embedded systems also need sensible retention policies, because continuous sensing creates a history that may grow faster than expected.</p>
+<p>Indexing doesn't need to expose implementation details to the application developer. At the product level, it should make recordings addressable by <strong>time, device, stream, and access policy</strong>. A search result that points to a moment without a playable range, stream identity, or permission context isn't operationally useful.</p>
+<p><a id="representation-should-preserve-different-meanings"></a></p>
+<h3>Representation should preserve different meanings</h3>
+<p>A frame tells you what the camera sees. An audio segment tells you what the microphone hears. Speech carries language, but speech isn't the same as all audio. A strong system keeps these distinctions available while still allowing a query to combine them.</p>
+<p>The query can arrive in several forms:</p>
+<ul>
+<li><strong>Text to video</strong>, such as “a forklift passing the blue storage rack.”</li>
+<li><strong>Image to video</strong>, such as finding scenes visually similar to a reference product shot.</li>
+<li><strong>Voice to audio</strong>, such as asking for “the last time the alarm beeped.”</li>
+<li><strong>Environmental state to video</strong>, such as retrieving moments when a workspace appeared occupied and noisy.</li>
+</ul>
+<p>The application doesn't need to know how these representations are created. It needs predictable inputs, clear result timestamps, and behavior that remains understandable when one modality is missing.</p>
+<p><a id="time-turns-matches-into-memories"></a></p>
+<h3>Time turns matches into memories</h3>
+<p>A timestamp is more than a playback coordinate. It helps establish sequence. The sound may happen before the object appears. The relevant person may enter from outside the frame. The user may need the seconds leading up to an event to understand what caused it.</p>
+<p>RVMS-Bench evaluates this memory-oriented problem with <strong>1,440 samples across 20 categories and four duration groups</strong>. It models <strong>Global Impression, Key Moment, Temporal Context, and Auditory Memory</strong>, which reflects the demands of surveillance, dashcam, robotics, and smart-glasses workflows described in the <a href="https://arxiv.org/abs/2602.10159">RVMS-Bench research</a>. For edge developers, the takeaway is simple: a result should be useful as a memory, not just impressive as a similarity score.</p>
+<p><a id="real-world-use-cases-that-show-the-value"></a></p>
+<h2>Real World Use Cases That Show the Value</h2>
+<p>A media editor, a warehouse robot, and a smart-glasses user may ask very different questions, but each depends on the same capability: retrieve a meaningful moment from more than one signal.</p>
+<p><img alt="An illustration showing advanced multimodal AI technology applied to video editing, warehouse logistics, and acoustic environment sensing." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/b1fae0da-092c-4c9d-93d9-adacb44166dc/audio-video-search-ai-multimodal.jpg" /></p>
+<p><a id="advertisement-video-edition"></a></p>
+<h3>Advertisement video edition</h3>
+<p>An editor receives a large campaign archive and needs shots where a product appears on a kitchen counter while the presenter describes a particular benefit. Searching the transcript may find the benefit but return shots where the product isn't visible. Searching visually may find the product but miss the spoken context.</p>
+<p>A multimodal query can narrow the archive to moments where <strong>the product, the presenter, the setting, and the dialogue align</strong>. The editor can then review precise segments instead of scrubbing through every source file. The same pattern helps locate alternate takes, brand mentions, reaction shots, and sound cues for a final cut.</p>
+<p>Video search has clear value for news, studios, and broadcasters too. A query can combine an event, a person, a mood, or a setting, while timestamp-aware results help teams move from discovery to editing quickly. The search layer doesn't replace editorial judgment. It reduces the mechanical work required to reach the right material.</p>
+<p><a id="vision-for-robotics"></a></p>
+<h3>Vision for robotics</h3>
+<p>A warehouse robot may need to recall where it last saw a package, a worker, or an obstruction. Visual search can locate the object, but the surrounding audio may identify whether the moment involved a warning, a collision, or a human instruction.</p>
+<p>A query such as “find the pallet that was moved after the forklift alarm” links an object, an action, a sound, and an order of events. That context can support investigation, task recovery, or operator review. It also helps when the robot's camera has a limited field of view and the important event occurs just outside it.</p>
+<p>Robotics research is moving toward unified representations of environmental information. <strong>AVLMaps</strong> describes an open-vocabulary three-dimensional map that combines audio, visual, and language cues, allowing multimodal prompts to support zero-shot spatial goal navigation, as reported in <a href="https://news.mit.edu/2025/ai-learns-how-vision-and-sound-are-connected-without-human-intervention-0522">MIT's coverage of the AVLMaps research</a>. That direction resembles a searchable memory layer for embodied systems.</p>
+<p><a id="audio-for-robotics"></a></p>
+<h3>Audio for robotics</h3>
+<p>Sound can provide an early warning when vision is obstructed, poorly lit, or pointed elsewhere. A robot might hear glass breaking, a motor changing pitch, a person calling for help, or an alarm beginning before the camera captures the relevant scene.</p>
+<p>The query “find the moment the tool dropped, then the operator turned away, then the alarm sounded” illustrates why audio for robotics isn't just speech recognition. The system needs to connect a non-speech impact, a visual action, and a later acoustic event. Research from MIT describes improved alignment between audio and visual data without human labels, with applications including video retrieval from audio queries, audiovisual scene classification, journalism, film production, and longer-term robotics use, as documented in this <a href="https://wla-summit.oss-cn-hongkong.aliyuncs.com/static_files/wls/files/2026-07-07/2c10a2da2b5c464e8d323babcda41047.pdf">MIT audiovisual alignment paper</a>.</p>
+<p><a id="pain-points-challenges-and-privacy-edge-tradeoffs"></a></p>
+<h2>Pain Points Challenges and Privacy Edge Tradeoffs</h2>
+<p>Continuous memory sounds straightforward until a team deploys it on real hardware. Physical data is messy. A camera may miss the action, a microphone may capture reflections or machinery, and different devices may record with inconsistent timing. Search quality depends on what the system experienced, not what the operator assumes it saw.</p>
+<p>The main operational pain points usually appear in five places:</p>
+<ul>
+<li><strong>Opaque physical data:</strong> Teams can't rely on labels for every object, sound, or event in an environment that keeps changing.</li>
+<li><strong>Disconnected device history:</strong> A phone, smart-glasses camera, and robot may each hold partial context without a shared retrieval experience.</li>
+<li><strong>Bandwidth and latency:</strong> Cloud processing can be powerful, but weak connectivity can delay indexing or make live recall unavailable.</li>
+<li><strong>Storage growth:</strong> Continuous streams create a retention problem, especially when users need recent history rather than a permanent archive.</li>
+<li><strong>Privacy exposure:</strong> Audio and video can capture bystanders, private conversations, screens, locations, and sensitive routines.</li>
+</ul>
+<p>The edge-versus-cloud decision isn't binary. Cloud infrastructure can support larger archives and heavier processing. On-device or edge processing can reduce dependence on connectivity and keep sensitive content closer to its source. The right choice depends on the required response time, retention policy, device capability, and acceptable privacy boundary.</p>
+<p>Recent industry discussion identifies a shift toward <strong>on-device semantic search and cross-modal retrieval</strong> for audio and video libraries, while also highlighting unanswered questions around weak connectivity, live streams, continuous sensor logging, storage, recall, and device constraints in <a href="https://picovoice.ai/use-cases/audio-search-engine/">coverage of audio search engines</a>. The important point is not that edge search eliminates tradeoffs. It makes those tradeoffs explicit.</p>
+<blockquote>
+<p><strong>Before integration, decide what the device should remember, how long it should retain that memory, and who can query it.</strong></p>
+</blockquote>
+<p>A practical review should ask whether queries must work offline, whether raw media can leave the device, how users revoke access, and how the system handles deletion. Teams should also test degraded conditions, including missing audio, partial video, interrupted uploads, and clock differences between sensors.</p>
+<p><a id="practical-integration-notes-for-mobile-and-edge-with-v-modal-ai"></a></p>
+<h2>Practical Integration Notes for Mobile and Edge With V-Modal AI</h2>
+<p>Start with the user journey, not the SDK. Define the query types your application must support, the result your interface will display, and whether the device needs recent recall during connectivity loss. A media application may prioritize text-to-video and image-to-video. A smart-glasses app may need voice-to-audio and environmental-state-to-video. A robotics edge hub may need continuous local capture with later synchronization.</p>
+<p>For Android, a native Kotlin integration is useful when the application controls capture, playback, permissions, and background work directly. Flutter is a better fit when the same search experience must span Android and iOS through a shared application layer. Embedded Linux teams should focus on process boundaries, hardware acceleration, storage lifecycle, and recovery after power or network interruptions.</p>
+<p>V-Modal AI provides a <strong>Multimodal search API</strong>, a <strong>robotics edge-optimized memory layer</strong>, natural-language video search, and query modes including text-to-video, image-to-video, voice-to-audio, and environmental-state-to-video. Its public developer options include a native Android SDK written in Kotlin, a Flutter SDK, signed streaming URLs, and chunked multipart uploads, with integration targets spanning mobile devices, smart glasses, robotics edge hubs, and IoT cameras. Developers can review the <a href="https://github.com/v-modal">V-Modal AI public repositories</a> when evaluating a prototype.</p>
+<p><a id="choose-the-integration-pattern"></a></p>
+<h3>Choose the integration pattern</h3>
+<p>Use a small prototype to test the boundary between capture and recall:</p>
+<ol>
+<li><strong>Define representative queries.</strong> Include visual-only, speech-heavy, non-speech audio, and cross-modal requests.</li>
+<li><strong>Test timestamp behavior.</strong> Verify that results open at useful moments and include enough surrounding context.</li>
+<li><strong>Exercise mobile failure modes.</strong> Interrupt uploads, rotate the device, background the app, and test weak connectivity.</li>
+<li><strong>Compare local and remote behavior.</strong> Measure perceived responsiveness qualitatively and document which functions require network access.</li>
+<li><strong>Set privacy defaults early.</strong> Establish retention, deletion, permission, and sharing rules before collecting continuous recordings.</li>
+</ol>
+<p>Mobile-first memory strategies matter because large uploads and live playback can trigger crashes or slowdowns when an app holds too much media in memory. Chunked uploads, signed playback access, and controlled buffering help the application remain responsive without exposing proprietary data-side implementation.</p>
+<p><a id="conclusion-and-next-steps-for-building-with-audio-video-search"></a></p>
+<h2>Conclusion and Next Steps for Building With Audio Video Search</h2>
+<p>Audio video search becomes more useful when you stop treating it as a transcript lookup and start treating it as <strong>continuous memory for Physical AI</strong>. Vision finds what appeared, audio recalls what happened outside the frame, language expresses the user's intent, and timestamps preserve the sequence.</p>
+<p>Traditional tools still work for narrow needs, especially exact speech or structured metadata. Unified multimodal retrieval becomes valuable when a query crosses sight, sound, action, and time, particularly on robots, smart glasses, IoT cameras, and edge hubs.</p>
+<p>Begin with a small set of real queries, test them across mobile and offline conditions, and evaluate whether your results point to moments rather than whole files. Then prototype with an edge-ready SDK and expand retention only after privacy, storage, and recovery behavior are clear.</p>
+<hr />
+<p>V-Modal AI offers multimodal search, an edge-optimized memory layer for robotics and Physical AI, and mobile integration options for Android and Flutter applications. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to review the public SDK and repository options, then test a concrete audio video search workflow with your own device recordings.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
