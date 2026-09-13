@@ -213,8 +213,6 @@ def fetch_generated(n: int = 1):
             print(f"Already saved: {existing} — skipping.")
             continue
 
-        print(f"Fetching generated article: [{article_id}] {title}")
-        html_content = _req_html(f"/articles/{article_id}/content", key, title)
         try:
             dt = datetime.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
             ymd = dt.strftime("%Y%m%d")
@@ -224,6 +222,13 @@ def fetch_generated(n: int = 1):
         filename = f"{ymd}_{_slugify(title)}.html"
         dest = os.path.join(ARTICLES_DIR, filename)
         os.makedirs(ARTICLES_DIR, exist_ok=True)
+        if os.path.exists(dest):
+            print(f"Already exists on disk: {dest} — skipping.")
+            _save_id(article_id, filename)
+            continue
+
+        print(f"Fetching generated article: [{article_id}] {title}")
+        html_content = _req_html(f"/articles/{article_id}/content", key, title)
         with open(dest, "w", encoding="utf-8") as f:
             f.write(html_content)
         _save_id(article_id, filename)
@@ -258,12 +263,6 @@ def fetch():
         published_at = article.get("date_created") or article.get("created_at") or datetime.date.today().isoformat()
         tags = article.get("tags") or article.get("keywords") or ["AI"]
 
-        print(f"Fetching article: [{article_id}] {title}")
-        try:
-            html_content = _req_html(f"/articles/{article_id}/content", key, title)
-        except Exception as e:
-            raise SystemExit(f"Content fetch failed: {e}")
-
         try:
             dt = datetime.datetime.fromisoformat(published_at.replace("Z", "+00:00"))
             ymd = dt.strftime("%Y%m%d")
@@ -273,6 +272,17 @@ def fetch():
         filename = f"{ymd}_{_slugify(title)}.html"
         dest = os.path.join(ARTICLES_DIR, filename)
         os.makedirs(ARTICLES_DIR, exist_ok=True)
+        if os.path.exists(dest):
+            print(f"Already exists on disk: {dest} — skipping.")
+            _save_id(article_id, filename)
+            continue
+
+        print(f"Fetching article: [{article_id}] {title}")
+        try:
+            html_content = _req_html(f"/articles/{article_id}/content", key, title)
+        except Exception as e:
+            raise SystemExit(f"Content fetch failed: {e}")
+
         with open(dest, "w", encoding="utf-8") as f:
             f.write(html_content)
         _save_id(article_id, filename)
