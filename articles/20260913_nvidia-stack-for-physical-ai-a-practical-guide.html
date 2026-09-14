@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Nvidia Stack for Physical AI: A Practical Guide</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Nvidia Stack for Physical AI: A Practical Guide</h1>
+    <p>You're reviewing footage from a warehouse robot, a dashcam, or a factory camera, and the useful moment is buried inside hours of video and audio. A robot may have seen a box fall, heard an alarm, and changed its route, yet the system often stores those signals as disconnected files rather than as a searchable account of what happened.</p>
+<p>That's the problem the <strong>Nvidia Stack for Physical AI</strong> is designed to support. It combines simulation, world models, robotics software, vision analytics, edge computers, and safety tooling for machines that must perceive, reason, and act in the physical world. The next engineering question is just as important: once a device has captured continuous video, audio, and sensor context, how can it remember and retrieve the right moment?</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-the-nvidia-stack-for-physical-ai-actually-is">What the Nvidia Stack for Physical AI Actually Is</a></li>
+<li><a href="#why-the-stack-has-separate-layers">Why the stack has separate layers</a></li>
+<li><a href="#the-compute-shapes-behind-physical-ai-workloads">The Compute Shapes Behind Physical AI Workloads</a></li>
+<li><a href="#four-processor-roles">Four processor roles</a></li>
+<li><a href="#inside-the-nvidia-physical-ai-toolchain">Inside the Nvidia Physical AI Toolchain</a></li>
+<li><a href="#multimodal-video-and-audio-search-on-physical-ai-devices">Multimodal Video and Audio Search on Physical AI Devices</a></li>
+<li><a href="#why-local-memory-matters">Why local memory matters</a></li>
+<li><a href="#where-the-stack-shows-up-in-real-devices-and-industries">Where the Stack Shows Up in Real Devices and Industries</a></li>
+<li><a href="#robotics-and-vision">Robotics and vision</a></li>
+<li><a href="#smart-glasses-and-mobile-devices">Smart glasses and mobile devices</a></li>
+<li><a href="#dashcam-gopro-and-cctv">DashCam, GoPro, and CCTV</a></li>
+<li><a href="#pain-points-developers-still-face-with-the-nvidia-stack">Pain Points Developers Still Face With the Nvidia Stack</a></li>
+<li><a href="#the-open-engineering-problems">The open engineering problems</a></li>
+<li><a href="#why-a-visual-memory-layer-belongs-on-top-of-the-stack">Why a Visual Memory Layer Belongs on Top of the Stack</a></li>
+<li><a href="#retrieval-changes-the-role-of-captured-media">Retrieval changes the role of captured media</a></li>
+<li><a href="#frequently-asked-questions-about-the-nvidia-stack-for-physical-ai">Frequently Asked Questions About the Nvidia Stack for Physical AI</a></li>
+<li><a href="#what-does-the-nvidia-physical-ai-stack-include">What does the Nvidia Physical AI stack include?</a></li>
+<li><a href="#how-is-it-different-from-the-older-isaac-robotics-suite">How is it different from the older Isaac robotics suite?</a></li>
+<li><a href="#can-jetson-orin-nano-run-cosmos-or-isaac-sim-effectively">Can Jetson Orin Nano run Cosmos or Isaac Sim effectively?</a></li>
+<li><a href="#where-does-metropolis-fit">Where does Metropolis fit?</a></li>
+<li><a href="#should-an-edge-system-use-a-gpu-npu-asic-or-fpga">Should an edge system use a GPU, NPU, ASIC, or FPGA?</a></li>
+<li><a href="#can-a-visual-memory-platform-sit-on-top-of-nvidia-tools">Can a visual memory platform sit on top of Nvidia tools?</a></li>
+</ul>
+<p><a id="what-the-nvidia-stack-for-physical-ai-actually-is"></a></p>
+<h2>What the Nvidia Stack for Physical AI Actually Is</h2>
+<p>A warehouse robot may need to answer a spoken question while moving. It must identify a box, interpret the request, avoid people, plan a route, and control its motors at the same time. An employee using AR glasses faces a related task, recording a factory floor and asking when a conveyor stopped. Both examples rely on live <strong>multimodal video, audio, and sensor streams</strong>, not only on a text prompt sent to a cloud model.</p>
+<p>The <strong>Nvidia Stack for Physical AI</strong> works like a layered toolkit for these systems. It combines <strong>Jetson and other edge computers</strong>, GPU infrastructure, <strong>Omniverse</strong> simulation libraries, <strong>Cosmos</strong> world foundation models, <strong>Isaac</strong> robotics tools, <strong>Metropolis</strong> vision AI, and safety technologies such as <strong>Halos</strong>. Nvidia describes the broader ecosystem as computing, open models, and software frameworks for robots, autonomous vehicles, factories, and laboratories in its <a href="https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-and-Global-Robotics-Leaders-Take-Physical-AI-to-the-Real-World/">physical AI ecosystem announcement</a>.</p>
+<p><img alt="An infographic showing the Nvidia stack for Physical AI, illustrating perception to action for robotics and edge computing." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/4cef2336-7b61-4e6a-a0b5-37c6e6c431cf/nvidia-stack-for-physical-ai-ai-stack.jpg" /></p>
+<p><a id="why-the-stack-has-separate-layers"></a></p>
+<h3>Why the stack has separate layers</h3>
+<p>Physical AI development contains several distinct jobs:</p>
+<ul>
+<li><strong>World creation and data generation:</strong> Cosmos models physical-world behavior and produces training material.</li>
+<li><strong>Simulation and digital twins:</strong> Omniverse libraries support high-fidelity, OpenUSD-based environments.</li>
+<li><strong>Robot learning and control:</strong> Isaac covers simulation, policy development, navigation, and robot learning.</li>
+<li><strong>Perception and video intelligence:</strong> Metropolis processes camera feeds and operational video.</li>
+<li><strong>Edge execution:</strong> Jetson places inference and sensor processing near the robot, vehicle, or wearable.</li>
+<li><strong>Safety and runtime controls:</strong> Halos brings hardware, operating-system, and functional-safety requirements into deployment.</li>
+</ul>
+<p>These layers divide responsibilities that require different resources. Training a model, testing a policy, processing a camera stream, and enforcing a safety constraint are separate workloads. A system can connect them without asking one general-purpose model to handle every task.</p>
+<p>Cosmos provides broad physical-world coverage. Nvidia reported that its world foundation models were trained on <strong>9,000 trillion tokens from 20 million hours of data</strong> covering human interactions, environments, industry, robotics, and driving scenarios in its <a href="https://blogs.nvidia.com/blog/cosmos-world-foundation-models/">Cosmos overview</a>. That training does not give a deployed device a searchable record of its own operating history. Simulation and inference describe what the system can learn and do. A dedicated retrieval layer over the edge stack helps answer what it saw, heard, and sensed, even when those events are spread across continuous multimodal streams.</p>
+<p><a id="the-compute-shapes-behind-physical-ai-workloads"></a></p>
+<h2>The Compute Shapes Behind Physical AI Workloads</h2>
+<p>Physical AI doesn't run on one kind of processor. A robot may use GPU capacity during training, specialized inference hardware for perception, deterministic logic for sensor handling, and local memory for short response times. Calling all of that “edge AI” hides the engineering choices underneath.</p>
+<p><a id="four-processor-roles"></a></p>
+<h3>Four processor roles</h3>
+<p><strong>GPUs</strong> handle highly parallel workloads and remain central to cloud training, flexible inference, and the generation or adaptation of Cosmos world models. They're useful when developers need to change models frequently or run several modalities together.</p>
+<p><strong>NPUs</strong> are designed for efficient neural-network inference. They fit always-on workloads such as wake-word detection, object recognition, and lightweight visual understanding in mobile devices, wearables, and edge systems where power matters.</p>
+<p><strong>ASICs</strong> trade flexibility for efficiency on a defined workload. Automotive and industrial systems may use application-specific blocks for perception, video processing, or other repeated operations. They're valuable when the pipeline is stable and throughput per watt matters more than broad programmability.</p>
+<p><strong>FPGAs</strong> offer reprogrammable hardware logic. Industrial gateways often use them for unusual sensor protocols, low-latency signal paths, or workloads where deterministic timing matters more than model experimentation.</p>
+<table>
+<thead>
+<tr>
+<th>Compute Shape</th>
+<th>Strength in Physical AI</th>
+<th>Typical Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPU</td>
+<td>Flexible parallel training and inference</td>
+<td>Cloud systems, workstations, edge GPU modules</td>
+</tr>
+<tr>
+<td>NPU</td>
+<td>Low-power neural inference</td>
+<td>Mobile devices, smart glasses, embedded systems</td>
+</tr>
+<tr>
+<td>ASIC</td>
+<td>Efficient fixed-function processing</td>
+<td>Automotive platforms, video and sensor modules</td>
+</tr>
+<tr>
+<td>FPGA</td>
+<td>Deterministic, reprogrammable data paths</td>
+<td>Industrial gateways and sensor-fusion systems</td>
+</tr>
+</tbody>
+</table>
+<p>A Jetson module can combine several of these roles. One path may process camera frames, another may handle neural inference, and another may manage sensor input or video encoding. That's why an edge deployment decision shouldn't begin with “Which chip is fastest?” It should begin with “Which parts of the workload need flexibility, low power, deterministic timing, or local privacy?”</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Choose the accelerator for the task, then design the software pipeline around the complete device budget, including memory, heat, battery, and sensor bandwidth.</p>
+</blockquote>
+<p><a id="inside-the-nvidia-physical-ai-toolchain"></a></p>
+<h2>Inside the Nvidia Physical AI Toolchain</h2>
+<p>A warehouse robot may need to learn in a simulated factory, test its policy against unusual situations, and then run that policy beside real cameras and motors. Nvidia's toolchain follows this path from generated experience to local execution. It also creates the ingredients for a later memory system, where video, audio, and sensor events can be indexed and retrieved at the edge.</p>
+<p><strong>Cosmos</strong> supplies world foundation models for physical AI. Nvidia organizes its model families into <strong>Nano, Super, and Ultra</strong> tiers for edge inference, baseline performance, and higher-fidelity distillation, as described in its Cosmos platform materials. The platform supports synthetic data generation and physical-world reasoning, helping developers study situations that are rare, difficult, or costly to capture directly.</p>
+<p><strong>Omniverse</strong> provides the simulation and digital-twin environment. Its libraries supply ground-truth simulation, while <strong>OpenUSD</strong> serves as the shared 3D data framework. A factory, road, or workspace can therefore be represented in a reusable format across simulation, testing, and deployment.</p>
+<p><strong>Isaac</strong> connects those environments to robotics development. Isaac Sim provides simulated robot scenes, Isaac Lab supports policy training and evaluation, and related Isaac tools cover navigation and robot learning. Nvidia's wider ecosystem also includes GR00T for humanoid robotics and OSMO for coordinating training across compute environments, as outlined in its <a href="https://blogs.nvidia.com/blog/physical-ai-open-models-robot-autonomous-systems-omniverse/">open physical AI tools coverage</a>.</p>
+<p><strong>Metropolis</strong> handles vision and video intelligence. It suits fixed-camera systems, industrial inspection, smart-building operations, and other workflows that interpret streams instead of controlling a moving robot.</p>
+<p><strong>Jetson</strong> runs selected workloads locally on robots, vehicles, drones, smart glasses, and similar devices. Nvidia presents <strong>Jetson Thor</strong> as a platform for the physical AI software stack, including Isaac, Metropolis, and Holoscan for sensor processing, in its <a href="https://developer.nvidia.com/blog/introducing-nvidia-jetson-thor-the-ultimate-platform-for-physical-ai/">Jetson Thor developer announcement</a>.</p>
+<p><strong>Halos</strong> addresses functional safety. Nvidia describes Halos for Robotics as a full-stack safety system built around IGX Thor, Holoscan Sensor Bridge, and Halos OS. The design coordinates perception, control, sensor input, and safety checks at runtime.</p>
+<p>A common path is <strong>Cosmos, Omniverse, Isaac, Jetson</strong>. Metropolis joins camera-heavy deployments, while Halos matters when safety evidence and controlled runtime behavior are required. A retrieval layer can sit above these components, turning the device's accumulated multimodal experience into searchable edge memory.</p>
+<p><a id="multimodal-video-and-audio-search-on-physical-ai-devices"></a></p>
+<h2>Multimodal Video and Audio Search on Physical AI Devices</h2>
+<p>A robot or wearable can capture everything and still fail to answer a simple question. “When did the motor start making that sound?” requires the system to connect visual context, acoustic evidence, and time. The search experience should feel closer to asking a colleague than scrubbing a timeline.</p>
+<p>The exact implementation depends on the product and its privacy requirements, but the conceptual flow is straightforward:</p>
+<ol>
+<li><strong>Capture:</strong> Cameras, microphones, and sensors collect material from a robot, DashCam, CCTV stream, smart glasses, or GoPro.</li>
+<li><strong>Represent:</strong> The system creates compact representations of visual and audio content suitable for later retrieval.</li>
+<li><strong>Align:</strong> Video moments and audio events are associated with shared timestamps and operational context.</li>
+<li><strong>Retrieve:</strong> A natural-language, image, voice, or environmental query returns relevant time segments.</li>
+</ol>
+<p><a id="why-local-memory-matters"></a></p>
+<h3>Why local memory matters</h3>
+<p>On-device indexing can reduce dependence on continuous raw-video uploads. A wearable may need to preserve privacy, a robot may operate in a low-bandwidth environment, and a vehicle may need to answer a query before a cloud connection is available. Local processing also supports faster incident review, provided the device has enough memory and thermal capacity.</p>
+<p>Developers usually choose between continuous background processing and on-demand analysis. Continuous processing creates a richer history but consumes more power. On-demand processing saves resources but may miss the event that happened before a user asked about it.</p>
+<p>The difficult trade-off isn't only model quality. It includes how much temporal detail the system keeps, how long it retains local context, and how reliably it handles overlapping speech, machinery noise, motion blur, and changing viewpoints. A search layer can sit above the Nvidia runtime without turning Cosmos, Isaac, or Jetson into a single monolithic application.</p>
+<p><a id="where-the-stack-shows-up-in-real-devices-and-industries"></a></p>
+<h2>Where the Stack Shows Up in Real Devices and Industries</h2>
+<p>The same Nvidia components look different across deployment surfaces. A mobile robot needs control and navigation. A smart-glasses application prioritizes battery and audio interaction. A CCTV operator may care more about fleet-wide video review than local motor control.</p>
+<table>
+<thead>
+<tr>
+<th>Device Type</th>
+<th>Primary Stack Layer</th>
+<th>Compute Shape</th>
+<th>Typical Workload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autonomous mobile robot</td>
+<td>Isaac and Jetson</td>
+<td>GPU, NPU, and specialized edge hardware</td>
+<td>Perception, navigation, manipulation, and local action</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Jetson-class edge compute or mobile SoC</td>
+<td>NPU with mobile GPU support</td>
+<td>Wake words, short video capture, and contextual assistance</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Jetson or mobile companion stack</td>
+<td>NPU and edge GPU</td>
+<td>Continuous capture, event recognition, and fleet review</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>Metropolis at an edge node</td>
+<td>GPU or dedicated video hardware</td>
+<td>Multi-camera analytics, incident search, and surveillance</td>
+</tr>
+<tr>
+<td>Mobile companion app</td>
+<td>Android, Flutter, and phone hardware</td>
+<td>Mobile GPU and NPU</td>
+<td>Capture control, upload, playback, and query interaction</td>
+</tr>
+</tbody>
+</table>
+<p><a id="robotics-and-vision"></a></p>
+<h3>Robotics and vision</h3>
+<p>An autonomous mobile robot may use Omniverse and Isaac during development, then run perception and policy execution on Jetson hardware. Metropolis can help analyze fleet video, while the robot's own audio stream can add context to visual events. For example, a collision review might need both the frame showing an obstruction and the sound of an alarm.</p>
+<p><a id="smart-glasses-and-mobile-devices"></a></p>
+<h3>Smart glasses and mobile devices</h3>
+<p>Smart glasses typically depend on a phone or companion device for connectivity, camera control, audio capture, and application management. A published Flutter package for MoYoung smart glasses exposes <strong>more than 50 features</strong>, including Bluetooth communication, camera control, audio recording, file management, OTA upgrades, and AI integration, through a unified Android and iOS API in its package documentation. That illustrates why mobile developers need stable bridges between head-mounted hardware and software.</p>
+<p><a id="dashcam-gopro-and-cctv"></a></p>
+<h3>DashCam, GoPro, and CCTV</h3>
+<p>Dashcams and GoPros generate long streams from moving viewpoints. A retrieval system can help locate a near miss, a spoken instruction, a road sign, or a sudden sound without requiring manual review of the entire recording. CCTV systems differ because cameras are fixed and numerous, so Metropolis-style edge-node analytics may be more practical than placing high-end inference hardware at every camera.</p>
+<p>The developer doesn't ship “the stack” as a single binary. They ship a device-specific combination of capture, inference, storage, search, safety, and mobile integration.</p>
+<p><a id="pain-points-developers-still-face-with-the-nvidia-stack"></a></p>
+<h2>Pain Points Developers Still Face With the Nvidia Stack</h2>
+<p>A polished simulator doesn't remove the messiness of the physical world. Friction, material variation, sensor noise, lighting changes, actuator behavior, and human unpredictability can all separate a successful simulated policy from a dependable deployed one. Independent coverage of Nvidia's physical AI work identifies the sim-to-real gap as a central unresolved question, including whether industrial systems can reach the reliability manufacturers require, as discussed in <a href="https://www.techtimes.com/articles/318710/20260619/nvidia-doosan-expand-physical-ai-across-robots-reactors-circuit-board-materials.htm">this 2026 analysis of industrial physical AI</a>.</p>
+<p><a id="the-open-engineering-problems"></a></p>
+<h3>The open engineering problems</h3>
+<ul>
+<li><strong>Sim-to-real transfer:</strong> Synthetic worlds improve coverage, but real cameras, lidar, motors, and materials behave differently.</li>
+<li><strong>SDK coordination:</strong> Isaac, Metropolis, Holoscan, CUDA libraries, containers, and device runtimes can evolve on different schedules.</li>
+<li><strong>Bandwidth:</strong> Uploading raw video from robots, cameras, or vehicles can overwhelm networks and increase cloud dependence.</li>
+<li><strong>Battery and heat:</strong> Wearables and mobile robots can't run every multimodal workload continuously at maximum intensity.</li>
+<li><strong>Operational memory:</strong> Synthetic training data doesn't preserve what a particular device encountered during yesterday's shift.</li>
+<li><strong>Licensing and deployment policy:</strong> Teams must review the terms around Cosmos, Omniverse Enterprise, third-party models, and production distribution before committing to a rollout.</li>
+</ul>
+<p>A March 2026 industry discussion also highlights a data gap between synthetic data and expensive teleoperation records. It argues that <strong>egocentric data from the robot's own perspective</strong> forms an important additional layer, as described in <a href="https://objectways.com/blog/physical-ai-and-the-data-gap-we-saw-at-nvidia-gtc-2026/">this report from GTC 2026</a>. Capturing that data is only half the job. Teams still need to organize, search, audit, and learn from it.</p>
+<p><a id="why-a-visual-memory-layer-belongs-on-top-of-the-stack"></a></p>
+<h2>Why a Visual Memory Layer Belongs on Top of the Stack</h2>
+<p>Cosmos can help generate worlds and reason about physical behavior. Omniverse can represent environments, Isaac can train robot policies, and Jetson can execute workloads close to the device. None of those layers, by themselves, provides a complete answer to the question, “What did this machine see and hear during its last operating cycle?”</p>
+<p>A <strong>visual memory layer</strong> fills that gap. It treats continuous video, audio, and sensor streams as an operational history that people and machines can query later. A robot could recall where it encountered a fallen object. A technician could find the moment a conveyor stopped. A safety team could connect an alarm sound to the camera view that showed the event.</p>
+<p><a id="retrieval-changes-the-role-of-captured-media"></a></p>
+<h3>Retrieval changes the role of captured media</h3>
+<p>Without memory, a physical AI device acts as a powerful sensor and controller. With searchable memory, it can support:</p>
+<ul>
+<li><strong>Natural-language video search</strong>, such as finding a person, object, action, or scene.</li>
+<li><strong>Audio-aware investigation</strong>, such as locating alarms, impacts, speech, or unusual machinery sounds.</li>
+<li><strong>Cross-modal review</strong>, where a visual clue finds related audio and sensor context.</li>
+<li><strong>Auditable operations</strong>, where teams can review what the device observed before an action.</li>
+<li><strong>Privacy-conscious workflows</strong>, where local processing limits the need to move raw footage.</li>
+</ul>
+<p>The layer belongs above the device runtime because it serves applications and operators, but it should remain close enough to the edge to respect latency, bandwidth, and privacy constraints. It can use available GPU or NPU capacity without forcing every product into the same hardware profile.</p>
+<p>For <strong>advertisement video edition</strong>, the same idea helps editors find shots containing a product, a spoken phrase, a reaction, or a visual transition. For <strong>vision for robotics</strong> and <strong>audio for robotics</strong>, it connects policy behavior with the surrounding scene. For CCTV, video surveillance, DashCam, GoPro, and smart-glasses workflows, it turns long recordings into queryable experiences instead of passive archives.</p>
+<p><a id="frequently-asked-questions-about-the-nvidia-stack-for-physical-ai"></a></p>
+<h2>Frequently Asked Questions About the Nvidia Stack for Physical AI</h2>
+<p><a id="what-does-the-nvidia-physical-ai-stack-include"></a></p>
+<h3>What does the Nvidia Physical AI stack include?</h3>
+<p>It spans <strong>Cosmos, Omniverse, Isaac, Metropolis, Jetson, Holoscan, and Halos</strong>, alongside computing infrastructure and deployment frameworks. The layers cover world modeling, simulation, robotics, vision analytics, sensor processing, edge inference, and safety.</p>
+<p><a id="how-is-it-different-from-the-older-isaac-robotics-suite"></a></p>
+<h3>How is it different from the older Isaac robotics suite?</h3>
+<p>Isaac remains the robotics-centered part of the ecosystem. The broader stack adds world foundation models, synthetic data, digital-twin workflows, video intelligence, autonomous-driving tools, edge hardware, and safety architecture.</p>
+<p><a id="can-jetson-orin-nano-run-cosmos-or-isaac-sim-effectively"></a></p>
+<h3>Can Jetson Orin Nano run Cosmos or Isaac Sim effectively?</h3>
+<p>It can support suitable edge inference and robotics workloads, but full simulation and large model training generally belong on more capable GPU systems. The right choice depends on model size, sensor load, latency, memory, and power limits.</p>
+<p><a id="where-does-metropolis-fit"></a></p>
+<h3>Where does Metropolis fit?</h3>
+<p>Metropolis fits camera-heavy deployments such as CCTV, industrial inspection, smart buildings, and video surveillance. It complements Isaac when a robot fleet also produces video that operators need to review.</p>
+<p><a id="should-an-edge-system-use-a-gpu-npu-asic-or-fpga"></a></p>
+<h3>Should an edge system use a GPU, NPU, ASIC, or FPGA?</h3>
+<p>Use a GPU when flexibility matters, an NPU for efficient neural inference, an ASIC for stable high-throughput functions, and an FPGA for deterministic or unusual sensor paths. Hybrid designs are common.</p>
+<p><a id="can-a-visual-memory-platform-sit-on-top-of-nvidia-tools"></a></p>
+<h3>Can a visual memory platform sit on top of Nvidia tools?</h3>
+<p>Yes. A third-party retrieval layer can integrate with Cosmos, Isaac, and Jetson while preserving the existing simulation and inference pipeline. It can provide searchable multimodal history without requiring those components to become the search system.</p>
+<hr />
+<p>V-Modal AI provides a <strong>Visual Memory Layer for Physical AI</strong>, with multimodal video and audio search, edge-optimized memory, natural-language retrieval, and Android and Flutter SDKs for mobile, smart glasses, robotics, and IoT cameras. Explore the platform and examples at <a href="https://github.com/v-modal">V-Modal AI</a> to evaluate how searchable operational memory can complement the Nvidia stack.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
