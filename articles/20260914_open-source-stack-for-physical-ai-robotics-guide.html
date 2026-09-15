@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Open Source Stack for Physical AI / Robotics Guide</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Open Source Stack for Physical AI / Robotics Guide</h1>
+    <p>Your robotics team has a working prototype, but the system still feels like several unrelated products. The camera driver speaks one language, the control loop expects another, training data sits in a separate repository, and finding a useful moment in hours of dashcam or robot footage means manual scrubbing. A mobile developer joining the project quickly discovers that middleware, data, edge memory, and search are different engineering decisions.</p>
+<p>An <strong>Open Source Stack for Physical AI / Robotics</strong> connects those decisions without pretending they're one monolithic platform. ROS 2 can provide the communications layer, open cross-embodiment datasets can support training and evaluation, and a multimodal search layer can turn continuous video, audio, and sensor history into usable memory. The stack also applies beyond traditional robots, including smart glasses, dashcams, GoPro-style cameras, CCTV systems, and mobile companion apps.</p>
+<p>The difficult questions are practical: How much processing can run at the edge? How can data collected from different robots be reused? How can an operator ask for a moment in natural language without depending on proprietary tooling? The answers sit across several layers, and each layer has a different trade-off.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-an-open-physical-ai-stack-actually-looks-like">What an Open Physical AI Stack Actually Looks Like</a></li>
+<li><a href="#three-pressures-shape-the-design">Three pressures shape the design</a></li>
+<li><a href="#the-core-layers-of-a-physical-ai-system">The Core Layers of a Physical AI System</a></li>
+<li><a href="#perception-turns-signals-into-observations">Perception turns signals into observations</a></li>
+<li><a href="#state-estimation-maintains-continuity">State estimation maintains continuity</a></li>
+<li><a href="#world-models-organize-meaning">World models organize meaning</a></li>
+<li><a href="#planning-and-control-connect-decisions-to-movement">Planning and control connect decisions to movement</a></li>
+<li><a href="#memory-and-search-preserve-experience">Memory and search preserve experience</a></li>
+<li><a href="#open-middleware-and-benchmark-building-blocks">Open Middleware and Benchmark Building Blocks</a></li>
+<li><a href="#middleware-and-data-components-side-by-side">Middleware and data components side by side</a></li>
+<li><a href="#multimodal-search-as-the-memory-layer">Multimodal Search as the Memory Layer</a></li>
+<li><a href="#the-user-asks-for-an-event-not-a-file">The user asks for an event, not a file</a></li>
+<li><a href="#edge-and-cloud-have-different-jobs">Edge and cloud have different jobs</a></li>
+<li><a href="#real-devices-and-real-use-cases">Real Devices and Real Use Cases</a></li>
+<li><a href="#dashcams-and-vehicle-footage">Dashcams and vehicle footage</a></li>
+<li><a href="#cctv-and-video-surveillance">CCTV and video surveillance</a></li>
+<li><a href="#smart-glasses-and-mobile-companions">Smart glasses and mobile companions</a></li>
+<li><a href="#robots-and-field-systems">Robots and field systems</a></li>
+<li><a href="#pain-points-the-open-stack-still-has-not-solved">Pain Points the Open Stack Still Has Not Solved</a></li>
+<li><a href="#data-quality-still-limits-reuse">Data quality still limits reuse</a></li>
+<li><a href="#safety-verification-remains-underserved">Safety verification remains underserved</a></li>
+<li><a href="#interoperability-stops-at-the-embodiment-boundary">Interoperability stops at the embodiment boundary</a></li>
+<li><a href="#assembling-a-practical-open-stack-today">Assembling a Practical Open Stack Today</a></li>
+<li><a href="#a-four-piece-assembly-plan">A four-piece assembly plan</a></li>
+<li><a href="#frequently-asked-questions-for-builders">Frequently Asked Questions for Builders</a></li>
+<li><a href="#is-open-source-the-same-as-permissively-licensed">Is open source the same as permissively licensed?</a></li>
+<li><a href="#should-search-run-on-the-device-or-in-the-cloud">Should search run on the device or in the cloud?</a></li>
+<li><a href="#how-should-a-team-evaluate-a-stack">How should a team evaluate a stack?</a></li>
+<li><a href="#should-a-new-project-start-with-ros-2">Should a new project start with ROS 2?</a></li>
+</ul>
+<p><a id="what-an-open-physical-ai-stack-actually-looks-like"></a></p>
+<h2>What an Open Physical AI Stack Actually Looks Like</h2>
+<p>A mobile robotics team wiring a new drone prototype may begin with a simple assumption: choose a robotics framework, connect the sensors, and start training. In practice, the team soon faces three separate procurement problems. It needs middleware to move camera, IMU, and control messages; data to teach or evaluate behavior; and a way to search recorded footage when something goes wrong.</p>
+<p>That fragmentation is the reason the stack should be viewed as a system rather than a collection of packages. <strong>Openness</strong> can mean source-available runtimes, reusable datasets, transparent interfaces, and SDKs that a small team can deploy on its own hardware. It doesn't require every component to share one license, one vendor, or one programming language.</p>
+<p><img alt="A team of engineers building a drone while learning about the open physical AI technology stack components." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/eaefb77c-1ba8-41de-a1e9-6db6d1b7736a/open-source-stack-for-physical-ai-robotics-ai-stack.jpg" /></p>
+<p><a id="three-pressures-shape-the-design"></a></p>
+<h3>Three pressures shape the design</h3>
+<p><strong>Edge memory</strong> is the first pressure. A robot, dashcam, or pair of smart glasses may capture continuous media, but the device has limited compute, storage, battery, and thermal capacity. Sending everything to the cloud may simplify processing, yet it adds dependency on connectivity and increases the delay between an event and a useful answer.</p>
+<p><strong>Cross-embodiment generalization</strong> is the second. A dataset collected from one arm, camera arrangement, or mobile platform rarely maps perfectly to another. Open data commons help researchers compare and reuse experience, but interfaces, calibration, action spaces, and sensor layouts still need careful normalization.</p>
+<p><strong>Natural-language retrieval</strong> is the third. A robot operator doesn't want to inspect every frame after a failed grasp. They want to ask for the event, connect it with audio or telemetry, and review the relevant time range. This makes search a system capability, not merely a media application feature.</p>
+<p>A useful mental model is a continuous loop:</p>
+<ol>
+<li>Sensors capture the environment and the robot's own state.</li>
+<li>Middleware moves those observations between perception, planning, and control.</li>
+<li>Models transform observations into decisions or actions.</li>
+<li>Memory preserves the experience with its timing and context.</li>
+<li>Search makes that history accessible to operators and future learning systems.</li>
+</ol>
+<p>The same loop works for a drone, a warehouse robot, a smart-glasses app, or a CCTV installation. The sensors and constraints change, but the architectural question stays consistent: <strong>how does an open system turn physical experience into reliable action and recall?</strong></p>
+<p><a id="the-core-layers-of-a-physical-ai-system"></a></p>
+<h2>The Core Layers of a Physical AI System</h2>
+<p>A practical Physical AI architecture is easier to reason about when each responsibility has a clear boundary. The following five layers aren't rigid product categories. They're engineering roles, and one open-source project may cover more than one of them.</p>
+<p><img alt="A diagram illustrating the five core layers of a physical AI system, from perception to memory." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/8ca51a9d-0390-496e-a5fc-c0857d14aa5f/open-source-stack-for-physical-ai-robotics-ai-layers.jpg" /></p>
+<p><a id="perception-turns-signals-into-observations"></a></p>
+<h3>Perception turns signals into observations</h3>
+<p>The bottom layer receives camera frames, IMU readings, LiDAR returns, microphone input, and other environmental signals. <strong>Vision for Robotics</strong> isn't just object recognition. A useful perception system must help the robot estimate position, identify surfaces, understand obstacles, and detect changes that affect movement.</p>
+<p>Audio matters too. A motor sound, spoken instruction, collision, alarm, or unusual background event may provide context that a camera misses. Multimodal audio and video become especially valuable when the robot operates around people or machinery.</p>
+<p><a id="state-estimation-maintains-continuity"></a></p>
+<h3>State estimation maintains continuity</h3>
+<p>A robot needs to know how it is moving through space and how recent observations relate to one another. State estimation combines sensor signals to track motion, position, and timing. Without that continuity, a planner may treat each camera frame as an isolated image rather than part of a moving scene.</p>
+<p>This layer also provides the timestamps that connect video, audio, IMU bursts, and robot events. Those relationships later determine whether a search result is useful or merely visually similar.</p>
+<p><a id="world-models-organize-meaning"></a></p>
+<h3>World models organize meaning</h3>
+<p>The world-model layer builds a spatial and semantic representation of the environment. It may contain maps, tracked objects, scene relationships, or task-relevant state. The exact representation depends on the robot, but the purpose is stable: give planning more than raw pixels and sensor values.</p>
+<p>A warehouse robot may need aisle and obstacle context. A smart-glasses app may need places, people, and objects. A surveillance system may need camera locations and event context. These are different applications, yet each benefits from structured environmental memory.</p>
+<p><a id="planning-and-control-connect-decisions-to-movement"></a></p>
+<h3>Planning and control connect decisions to movement</h3>
+<p>Planning determines what the system should do. Control executes that decision through motors, actuators, and hardware interfaces. Behavior trees, model-predictive control, motion primitives, and learned policies can occupy this layer, but they don't remove the need for dependable execution.</p>
+<p>The control loop has stricter timing requirements than a search interface. A delayed retrieval result is inconvenient. A delayed actuator command can make a robot unstable or unsafe. Keeping planning and control separate from noncritical search work helps teams protect the real-time path.</p>
+<p><a id="memory-and-search-preserve-experience"></a></p>
+<h3>Memory and search preserve experience</h3>
+<p>Memory stores episodes, events, spatial context, and multimodal observations. Search exposes that history through natural-language, visual, audio, or state-based queries. A developer might ask for the last failed grasp, a loud impact before a stop, or the moment a person entered a restricted area.</p>
+<blockquote>
+<p><strong>Architectural rule:</strong> Keep control responsible for immediate action, and let memory and search explain what happened without interrupting the safety-critical loop.</p>
+</blockquote>
+<p>The advantage of this hierarchy is replaceability. A team can change a camera model without rewriting control, or change the search interface without changing the robot's planner. Clean contracts matter more than selecting one supposedly complete platform.</p>
+<p><a id="open-middleware-and-benchmark-building-blocks"></a></p>
+<h2>Open Middleware and Benchmark Building Blocks</h2>
+<p><strong>ROS 2</strong> remains the de facto open-source middleware baseline for robotics stacks. Open Robotics reported <strong>531,452,142 ROS package downloads in 2024</strong>, with ROS 2 representing <strong>72% of downloads by October 2024</strong>, and reported <strong>984,135,185 downloads in 2025</strong>, when ROS 2 represented <strong>91.2%</strong> of downloads. The same report describes an <strong>85.18% year-over-year increase</strong> in total downloads. These figures indicate strong ecosystem momentum and a clear shift toward ROS 2 as the default open middleware layer. (<a href="https://huggingface.co/blog/huggingface/state-of-os-hf-spring-2026">Open Robotics and Hugging Face ecosystem data</a>)</p>
+<p>ROS 2's strength is interoperability. Nodes can publish sensor observations, subscribe to state, and exchange commands through familiar interfaces. That flexibility comes with configuration and performance costs, especially when a graph spans multiple computers, containers, networks, and hardware vendors.</p>
+<p><a id="middleware-and-data-components-side-by-side"></a></p>
+<h3>Middleware and data components side by side</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Role in Stack</th>
+<th>License</th>
+<th>Key Strength</th>
+<th>Main Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROS 2</td>
+<td>Robotics middleware and communication graph</td>
+<td>Varies by package</td>
+<td>Broad interoperability and ecosystem support</td>
+<td>Requires careful graph, transport, and real-time configuration</td>
+</tr>
+<tr>
+<td>RobotPerf</td>
+<td>ROS 2 robotics benchmark suite</td>
+<td>Open project terms</td>
+<td>Compares hardware and software on real robotics workloads</td>
+<td>Benchmark results still need interpretation on the target robot</td>
+</tr>
+<tr>
+<td>Open X-Embodiment</td>
+<td>Cross-embodiment robot trajectories</td>
+<td>Dataset-specific terms</td>
+<td>Broad reusable data across robot embodiments</td>
+<td>Embodiment differences complicate transfer and validation</td>
+</tr>
+<tr>
+<td>DROID</td>
+<td>Robot manipulation demonstrations</td>
+<td>Dataset-specific terms</td>
+<td>Useful manipulation data and shared evaluation context</td>
+<td>Coverage may not match every robot or task</td>
+</tr>
+<tr>
+<td>AgiBotWorld-Beta</td>
+<td>Robot-native trajectories and embodied data</td>
+<td>Dataset-specific terms</td>
+<td>Adds data from multiple robots and real-world scenes</td>
+<td>Teams must verify suitability, terms, and sensor compatibility</td>
+</tr>
+</tbody>
+</table>
+<p>RobotPerf is important because isolated model inference doesn't tell you how a complete robotics graph behaves. The open, vendor-agnostic suite includes workloads such as stereo image processing, depth image processing, resize, and visual SLAM. Official <a href="https://ros.org/reps/rep-2014.html">REP-2014 benchmarking guidance</a> recommends grey-box, non-functional benchmarking for individual nodes and complete computational graphs, using tracepoints to examine latency, throughput, and end-to-end behavior.</p>
+<p>The data layer is expanding alongside middleware. Open X-Embodiment pooled <strong>more than 1 million robot trajectories across 60 datasets and 22 robot embodiments</strong>. DROID contributed <strong>76,000 demonstrations over 350 hours and 564 scenes</strong>, while AgiBotWorld-Beta added <strong>more than 1 million trajectories from 100 robots and 2,976.4 hours of robot-native data</strong>. (<a href="https://egxodata.com/resources/robotics-data-release-tracker-2026">Robotics Data Release Tracker</a>)</p>
+<p>Those datasets don't eliminate the need for calibration, task definitions, or safety review. They do change the starting point. The open stack now includes shared data commons, not only a message bus.</p>
+<p><a id="multimodal-search-as-the-memory-layer"></a></p>
+<h2>Multimodal Search as the Memory Layer</h2>
+<p>Raw recordings aren't memory. A robot, dashcam, CCTV camera, or smart-glasses device may preserve video and audio, but an operator still needs a way to locate the moment that matters. A <strong>multimodal search layer</strong> turns continuous experience into recall without requiring a person to scrub through every file.</p>
+<p><img alt="A four-step infographic illustrating a multimodal search process for video surveillance data using AI technologies." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/94caa5e8-0dd5-4a40-bc6f-ffcfbb6269e6/open-source-stack-for-physical-ai-robotics-multimodal-search.jpg" /></p>
+<p><a id="the-user-asks-for-an-event-not-a-file"></a></p>
+<h3>The user asks for an event, not a file</h3>
+<p>Consider the query, “the moment the worker dropped the box.” A useful result needs more than a keyword match. The system must connect visual changes with timing, align relevant audio, and return a segment that gives enough surrounding context to understand what happened.</p>
+<p>The same principle applies to robotics:</p>
+<ul>
+<li><strong>Vision for Robotics:</strong> Find the frame sequence where a gripper contacted the wrong surface.</li>
+<li><strong>Audio for Robotics:</strong> Find the motor noise or impact that preceded a control failure.</li>
+<li><strong>Dashcam review:</strong> Locate the scene involving a sudden stop, vehicle maneuver, or visible plate.</li>
+<li><strong>CCTV search:</strong> Find a person, object, or movement across recorded camera history.</li>
+<li><strong>Advertisement video edition:</strong> Locate every scene containing a product, spoken phrase, or visual treatment so an editor can review candidate clips.</li>
+</ul>
+<p>This isn't a replacement for the robot's immediate perception loop. Search serves a different time horizon. Perception helps the robot act now, while memory and retrieval help an operator investigate, compare, label, and improve later.</p>
+<p><a id="edge-and-cloud-have-different-jobs"></a></p>
+<h3>Edge and cloud have different jobs</h3>
+<p>On-device retrieval can reduce dependence on network availability and keep sensitive footage closer to its source. It also forces hard choices about model size, thermal limits, storage, and battery. A cloud workflow can support broader fleet analysis and heavier processing, but it introduces connectivity, transfer, and operational dependencies.</p>
+<p>Foxglove describes a Physical AI data engine that captures logs or edge demonstrations, synchronizes them to cloud or on-premises storage, finds critical events across large data collections, and supports 3D frame-by-frame replay for evaluation. That illustrates the broader design pattern: capture at the edge, preserve timing and context, then make experience searchable for evaluation and operations. (<a href="https://www.shutterstock.com/video/search/dashboard-cam">Foxglove Physical AI search context</a>)</p>
+<p>NVIDIA's multimodal video workflow demonstrates another practical pattern. Its tutorial segments audio and video at consistent intervals, stores them as <code>.mpg</code> and <code>.wav</code> files, sends video to a vision-language model, and sends audio to speech recognition. It uses GStreamer components such as <code>splitmuxsink</code> and queues to handle chunked live RTSP streams. (<a href="https://developer.nvidia.com/blog/build-real-time-multimodal-xr-apps-with-nvidia-ai-blueprint-for-video-search-and-summarization">NVIDIA multimodal video workflow</a>)</p>
+<p>Teams should treat retrieval quality as a product requirement, not a demo effect. Test natural-language queries, visual similarity, audio events, and timestamp precision against recordings from the actual device. A search result that looks plausible but points to the wrong moment can mislead an operator and contaminate a training set.</p>
+<p><a id="real-devices-and-real-use-cases"></a></p>
+<h2>Real Devices and Real Use Cases</h2>
+<p>The open stack becomes easier to understand when mapped to devices people already deploy. A dashcam, smart-glasses camera, mobile robot, and CCTV system all produce physical-world records, but their users ask different questions and accept different delays.</p>
+<p><a id="dashcams-and-vehicle-footage"></a></p>
+<h3>Dashcams and vehicle footage</h3>
+<p>A driver or fleet operator may ask for the moment a vehicle ran a red light, a sudden braking event, or a relevant license plate. Natural-language search can narrow long driving recordings to candidate segments, while the robot-style memory layer can keep event timing connected to motion and sensor context.</p>
+<p>Dashcam footage has a strong edge requirement. Connectivity may be intermittent, and the device may need to identify candidate moments before uploading anything. The system should also separate search from driving control. Retrieval can help review an incident, but it shouldn't be allowed to interfere with the vehicle's immediate safety functions.</p>
+<p><a id="cctv-and-video-surveillance"></a></p>
+<h3>CCTV and video surveillance</h3>
+<p>Security teams often search across many cameras and sites rather than one local file. Eagle Eye Networks describes a Video API that accepts natural-language searches across cameras and returns camera names, start and end times, and view links after parsing and deeper search. (<a href="https://developer.eagleeyenetworks.com/docs/video-search">Eagle Eye video search API</a>)</p>
+<p>SearchByVideo describes related workflows for CCTV and dashcam footage, including queries based on a person wearing a red jacket, incidents, license plates, or driving maneuvers. These examples address a clear operational pain point: manual scrubbing is slow, especially when the reviewer doesn't know the exact camera or timestamp.</p>
+<p><a id="smart-glasses-and-mobile-companions"></a></p>
+<h3>Smart glasses and mobile companions</h3>
+<p>Smart glasses connect personal memory with mobile software. A wearer may want to find what they saw, what they heard, or what someone said during a repair. The mobile app becomes the bridge between wearable capture, local processing, and later retrieval.</p>
+<p>Solos says its SDK supports production iOS and Android apps, with camera support on AirGo V 1/2, audio support on AirGo 3/A5, and Video Streaming and Video Recording added on V2. (<a href="https://solosglasses.com/pages/developers">Solos developer platform</a>) That device variety shows why a Physical AI stack needs cross-platform capture interfaces rather than a cloud-only video API.</p>
+<p><a id="robots-and-field-systems"></a></p>
+<h3>Robots and field systems</h3>
+<p>A mobile robot can treat long-horizon experience as searchable memory. An operator might ask why a grasp failed, which obstacle caused a route change, or whether a sound preceded repeated faults. The answer can combine video, audio, state, and event metadata without changing the robot's control architecture.</p>
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>Primary Search Use Case</th>
+<th>Core Open-Stack Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashcam</td>
+<td>Incident, maneuver, and plate review</td>
+<td>Edge capture, multimodal memory, timestamped retrieval</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>Natural-language surveillance triage</td>
+<td>Camera integration, video search, event context</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Personal visual and audio recall</td>
+<td>Mobile SDK, wearable capture, local or cloud memory</td>
+</tr>
+<tr>
+<td>Mobile robot</td>
+<td>Failure analysis and task replay</td>
+<td>ROS 2, sensor history, robot telemetry, multimodal search</td>
+</tr>
+<tr>
+<td>GoPro-style camera</td>
+<td>Field footage discovery and editing</td>
+<td>Media ingestion, visual search, audio context, clip export</td>
+</tr>
+</tbody>
+</table>
+<p>The same architecture adapts to advertisement video edition as well. Editors can search for product appearances, spoken phrases, environments, or actions across a large media library, then inspect the returned moments manually before publishing.</p>
+<p><a id="pain-points-the-open-stack-still-has-not-solved"></a></p>
+<h2>Pain Points the Open Stack Still Has Not Solved</h2>
+<p>An open component is not automatically a production-ready system. The gap becomes visible when teams move from a controlled demonstration to a robot, camera, or wearable operating around real people.</p>
+<p><img alt="A diagram illustrating the four major pain points in the current open-source stack for Physical AI development." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/d9a16aab-84fc-418d-a1ca-b5b6f660c0cc/open-source-stack-for-physical-ai-robotics-pain-points.jpg" /></p>
+<p><a id="data-quality-still-limits-reuse"></a></p>
+<h3>Data quality still limits reuse</h3>
+<p>Open X-Embodiment, DROID, and AgiBotWorld-Beta provide meaningful shared resources, but a dataset's size doesn't guarantee transfer to your hardware. Sensor calibration, action conventions, labeling quality, environmental coverage, and safety taxonomies may differ. Teams can inherit undocumented blind spots even when the source code and files are available.</p>
+<p>The data problem also extends beyond robot trajectories. Human video, audio, teleoperation records, and environmental events may be valuable, but their permissions and structure often differ. A stack is only partially open if the most important collection and labeling workflows remain private.</p>
+<p><a id="safety-verification-remains-underserved"></a></p>
+<h3>Safety verification remains underserved</h3>
+<p>Public robotics coverage often focuses on models, simulation, and benchmark tasks. Production buyers also need fault detection, runtime assurance, traceability, and deployment checks. There isn't a universal open harness that proves a multimodal search result won't supply misleading context during a safety decision.</p>
+<p>The distinction matters. Search can assist an investigation, but a safety controller must know which signals it can trust and what happens when a model is uncertain. Teams need explicit fallbacks, audit trails, and tests that cover degraded sensors, missing audio, occlusion, timing errors, and hardware changes.</p>
+<p><a id="interoperability-stops-at-the-embodiment-boundary"></a></p>
+<h3>Interoperability stops at the embodiment boundary</h3>
+<p>A policy trained on one arm may not transfer cleanly to another. A quadruped's motion representation doesn't map directly to a humanoid, and a camera event isn't the same as a robot action. Shared datasets help expose the problem, but the community still needs stronger common ontologies for observations, actions, embodiment capabilities, and environmental state.</p>
+<p>Other friction points include fragmented licenses, incompatible edge accelerators, and limited evaluation of retrieval on real deployed hardware.</p>
+<blockquote>
+<p><strong>Production question:</strong> Don't ask only whether a model works. Ask whether the complete stack can explain, test, monitor, and safely fail when the model or sensor is wrong.</p>
+</blockquote>
+<p>The central challenge is cultural as well as technical. Teams often ask which model to use before deciding how they'll collect evidence, investigate failures, and maintain the system across hardware revisions. Physical AI requires both capability and proof.</p>
+<p><a id="assembling-a-practical-open-stack-today"></a></p>
+<h2>Assembling a Practical Open Stack Today</h2>
+<p>A practical stack begins with the device and its communication needs. A dashcam may need local event capture, smart glasses may need low-latency search, and a robot may coordinate several sensors and processes. ROS 2 fits the last case well, especially when messages must move across computers or robots. Pair the middleware with a workload-focused benchmark, then test the complete perception-to-control path on target hardware.</p>
+<p><a id="a-four-piece-assembly-plan"></a></p>
+<h3>A four-piece assembly plan</h3>
+<ol>
+<li>
+<p><strong>Choose middleware and measure the graph.</strong> ROS 2 provides a useful baseline for multi-node robotics applications. Apply the benchmarking principles in REP-2014 and RobotPerf to examine end-to-end timing and behavior, not only isolated inference results.</p>
+</li>
+<li>
+<p><strong>Anchor learning in reusable data.</strong> Open X-Embodiment provides cross-embodiment coverage, while DROID and AgiBotWorld-Beta address different manipulation and robot-native data needs. Track dataset versions, licenses, sensor assumptions, and evaluation splits alongside model versions. This record helps connect training data with failures observed on a new arm, camera, or mobile device.</p>
+</li>
+<li>
+<p><strong>Size edge inference for each device.</strong> ONNX Runtime Mobile, LiteRT, <code>llama.cpp</code>, and vendor SDKs suit different workloads. Choose based on memory, thermal limits, accelerator support, offline operation, and update strategy. A mobile app, smart glasses, dashcam, and robot computer will not share the same constraints.</p>
+</li>
+<li>
+<p><strong>Add multimodal memory and search.</strong> Index video moments, audio segments, timestamps, and relevant device state so a query returns a reviewable event instead of an unstructured file. V-Modal AI provides a <strong>Visual Memory Layer for Physical AI</strong> with multimodal video and audio search, robotics edge memory, natural-language retrieval, Android and Flutter SDKs, and support for mobile, smart glasses, robotics, edge hubs, and IoT cameras. (<a href="https://github.com/v-modal">V-Modal AI</a>)</p>
+</li>
+</ol>
+<p>Operational rules complete the assembly. Define how uncertainty is recorded, how operators correct search results, and how failed episodes become evaluation data. Send useful telemetry to the team after deployment, then schedule safety verification, long-horizon tests, and monitoring as engineering work rather than assuming one package installation solves them.</p>
+<p><a id="frequently-asked-questions-for-builders"></a></p>
+<h2>Frequently Asked Questions for Builders</h2>
+<p><a id="is-open-source-the-same-as-permissively-licensed"></a></p>
+<h3>Is open source the same as permissively licensed?</h3>
+<p>No. Middleware, models, and datasets can use different licenses. Apache 2.0 and MIT are common in open software, but Open X-Embodiment, DROID, and AgiBotWorld-Beta have dataset-specific terms that govern use and redistribution. Review every component's license before training, shipping, or sharing derived data.</p>
+<p><a id="should-search-run-on-the-device-or-in-the-cloud"></a></p>
+<h3>Should search run on the device or in the cloud?</h3>
+<p>Use the edge when latency, privacy, offline operation, or continuous capture matters, as it often does for dashcams, smart glasses, and CCTV incident review. Use the cloud for fleet-wide analysis, shared archives, and heavier reprocessing. A hybrid design usually gives operators local recall while preserving broader analytics.</p>
+<p><a id="how-should-a-team-evaluate-a-stack"></a></p>
+<h3>How should a team evaluate a stack?</h3>
+<p>Test benchmark coverage, edge footprint, retrieval quality at the target workload, license terms, hardware compatibility, documentation, and maintenance activity. Use recordings from the actual camera and robot, not only polished sample media.</p>
+<p><a id="should-a-new-project-start-with-ros-2"></a></p>
+<h3>Should a new project start with ROS 2?</h3>
+<p>Start with ROS 2 when multi-node communication and robotics interoperability are central. A slimmer runtime may be more appropriate for a single-device consumer product with limited processes and no need for a broad robotics graph.</p>
+<hr />
+<p>V-Modal AI helps teams add a dedicated memory and search layer for <strong>Multimodal Video, Audio Search</strong> across mobile devices, smart glasses, IoT cameras, and robotics systems. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to evaluate its SDKs and open examples alongside your ROS 2, edge inference, and Physical AI architecture.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
