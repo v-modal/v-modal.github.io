@@ -4,9 +4,9 @@
 
 ---
 
-A space dedicated to exploring modern technology statck in **AI** and **Physical AI**: the intersection of Vision, Audio, Search  and Physical Sensory interaction. Here you will find in-depth articles on cutting-edge research, practical tutorials, and insights into building intelligent systems that understand the world beyond a single modality.
+A blog providing some info in **AI** and **Physical AI** and **Visual Memory**: the intersection of Vision, Audio, Search  and Physical Sensory interaction. Here you will find in-depth articles on cutting-edge research, practical tutorials, and insights into building intelligent systems that understand the world beyond a single modality.
 
-As artificial intelligence matures, the boundaries between digital reasoning and physical reality are dissolving. Yesterday's search engines matched keywords on text pages. Today's systems must understand and navigate the continuous flow of the physical world. This blog serves as your guide to the core principles and strategies driving this transformation. We focus specifically on four pillars:
+As artificial intelligence matures, the boundaries between digital reasoning and physical reality are dissolving. Yesterday's search engines matched keywords on text pages. Today's systems must understand and navigate the continuous visual flow of the physical world: Visual and temporal. 
 
 | Pillar | Description |
 |---|---|
