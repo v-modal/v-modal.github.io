@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Nvidia Stack Isaac ROS Explained for Physical AI Search</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Nvidia Stack Isaac ROS Explained for Physical AI Search</h1>
+    <p>A robot has completed a warehouse route, a dashcam has recorded a full drive, and a security camera has watched an entrance all day. When a team needs to find the moment a person entered, the sound that accompanied an equipment fault, or the visual condition that preceded a navigation error, the useful evidence is often buried inside hours of recordings and disconnected sensor logs. The system can perceive the physical world, yet the people operating it still can't ask that world a simple question.</p>
+<p>That gap explains why <strong>Physical AI</strong> needs more than fast inference. NVIDIA's Isaac ROS can accelerate the perception and robotics pipeline, while a multimodal memory layer can help teams recall what cameras, microphones, robots, smart glasses, GoPro devices, and mobile applications observed. This guide connects the <strong>Nvidia stack Isaac ROS</strong> with video analysis software, multimodal audio and video search, and practical deployment decisions, without exposing proprietary search implementation details.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#introduction-to-video-analysis-in-the-physical-ai-era">Introduction to Video Analysis in the Physical AI Era</a></li>
+<li><a href="#the-difference-between-perception-and-memory">The difference between perception and memory</a></li>
+<li><a href="#what-nvidia-stack-isaac-ros-is-and-how-it-works">What Nvidia Stack Isaac ROS Is and How It Works</a></li>
+<li><a href="#a-shared-workbench-instead-of-repeated-deliveries">A shared workbench instead of repeated deliveries</a></li>
+<li><a href="#inside-the-accelerated-architecture-and-performance-gains">Inside the Accelerated Architecture and Performance Gains</a></li>
+<li><a href="#what-the-published-figures-mean">What the published figures mean</a></li>
+<li><a href="#hardware-still-sets-the-boundary">Hardware still sets the boundary</a></li>
+<li><a href="#comparing-isaac-ros-with-isaac-sim-perceptor-and-manipulator">Comparing Isaac ROS With Isaac Sim Perceptor and Manipulator</a></li>
+<li><a href="#isaac-platform-layers-at-a-glance">Isaac Platform Layers at a Glance</a></li>
+<li><a href="#real-world-use-cases-from-robotics-to-dashcam-and-cctv">Real World Use Cases From Robotics to Dashcam and CCTV</a></li>
+<li><a href="#robotics-and-humanoid-teleoperation">Robotics and humanoid teleoperation</a></li>
+<li><a href="#media-and-mobile-capture">Media and mobile capture</a></li>
+<li><a href="#cctv-and-video-surveillance">CCTV and video surveillance</a></li>
+<li><a href="#how-to-choose-and-integrate-video-analysis-software-for-edge-and-mobile">How to Choose and Integrate Video Analysis Software for Edge and Mobile</a></li>
+<li><a href="#match-the-software-to-the-device">Match the software to the device</a></li>
+<li><a href="#build-around-practical-interfaces">Build around practical interfaces</a></li>
+<li><a href="#deployment-best-practices-and-how-to-evaluate-what-really-works">Deployment Best Practices and How to Evaluate What Really Works</a></li>
+<li><a href="#test-the-conditions-that-cause-production-failures">Test the conditions that cause production failures</a></li>
+</ul>
+<p><a id="introduction-to-video-analysis-in-the-physical-ai-era"></a></p>
+<h2>Introduction to Video Analysis in the Physical AI Era</h2>
+<p>A robot avoids an obstacle, a dashcam captures a traffic incident, and a CCTV camera records an entrance without interruption. Each system can produce useful observations, yet finding a specific moment later remains difficult. <strong>Physical AI</strong> connects perception, reasoning, learning, and action to the physical world, while video analysis helps people recover evidence from that world after the event.</p>
+<p>For a ROS developer, the starting point may be a camera topic, a point cloud, or a localization failure. For a product team, it may be a customer asking why a robot stopped, a driver reporting an incident, or a security operator reviewing a long recording. The shared challenge is that <strong>physical data is rich, continuous, and difficult to recall</strong>.</p>
+<p><img alt="An illustration showing various data sources like cameras and robots feeding information into an AI system" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/509f14fe-0bae-4345-8042-53f096a0bc16/nvidia-stack-isaac-ros-ai-integration.jpg" /></p>
+<p>A robot's vision pipeline may identify objects in real time, but that output does not automatically become an accessible record of what the robot observed. A mobile app may upload dashcam footage, yet reviewing it can still require manual scrubbing. Smart glasses may capture a wearer's view and ambient audio, while CCTV systems collect continuous streams. Without a shared recall layer, these sources stay separated.</p>
+<p><a id="the-difference-between-perception-and-memory"></a></p>
+<h3>The difference between perception and memory</h3>
+<p><strong>Perception</strong> answers a present-tense question, such as whether an obstacle is visible or a marker appears in a frame. <strong>Memory</strong> answers a historical question, such as when the obstacle first appeared, what the operator heard, or which camera recorded the relevant moment.</p>
+<p>That difference affects several workflows:</p>
+<ul>
+<li><strong>Vision for robotics:</strong> Live visual input supports movement, object detection, and manipulation.</li>
+<li><strong>Audio for robotics:</strong> Microphones add context through speech, alarms, impacts, and machine sounds.</li>
+<li><strong>Dashcam and GoPro workflows:</strong> Drivers, athletes, and field workers create long recordings that require selective review.</li>
+<li><strong>CCTV and video surveillance:</strong> Operators need to locate people, vehicles, or events without watching every minute.</li>
+<li><strong>Advertisement video edition:</strong> Editors search large media libraries for usable shots, spoken phrases, reactions, or visual moments.</li>
+</ul>
+<p>Queries such as finding a <strong>person in a red jacket at the front entrance</strong> or locating <strong>the car that ran a red light</strong> show how search can turn hours of footage into a specific task, as illustrated by <a href="https://searchbyvideo.net/use-cases">video search use cases for CCTV and dashcam content</a>.</p>
+<p>Isaac ROS can serve as the perception backbone for Physical AI, helping robotics systems interpret sensor input with low latency. A multimodal search and memory layer completes that stack by making video, audio, and sensor history available for later questions. The result connects what a robot perceives now with what teams need to recall later.</p>
+<p><a id="what-nvidia-stack-isaac-ros-is-and-how-it-works"></a></p>
+<h2>What Nvidia Stack Isaac ROS Is and How It Works</h2>
+<p>A robot that must detect a person, estimate depth, and avoid an obstacle cannot treat perception as an isolated model. It needs a connected processing system that turns sensor data into decisions quickly. <strong>Isaac ROS</strong> provides that perception backbone for Physical AI. It extends ROS 2 with <strong>ROS 2 based, CUDA accelerated computing packages and AI models</strong> for NVIDIA workstations and embedded Jetson systems, supporting workloads such as perception, navigation, object detection, collision detection, and trajectory optimization, as outlined in NVIDIA's <a href="https://www.nvidia.com/en-us/industries/robotics/">robotics platform description</a>.</p>
+<p>ROS 2 remains the foundation. Nodes publish and subscribe to messages, while a graph links sensors, processing steps, planners, and controllers. This modular structure lets developers combine components, but camera images and point clouds can be large. Passing them repeatedly between nodes may consume memory bandwidth and CPU time. Isaac ROS adds NVIDIA acceleration and communication patterns suited to demanding perception graphs.</p>
+<p><img alt="A diagram illustrating the NVIDIA Isaac ROS stack architecture, highlighting CUDA-accelerated cores, perception, navigation, manipulation, and simulation components." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/14a80cff-47dc-489e-b546-788cff287fce/nvidia-stack-isaac-ros-architecture-diagram.jpg" /></p>
+<p><a id="a-shared-workbench-instead-of-repeated-deliveries"></a></p>
+<h3>A shared workbench instead of repeated deliveries</h3>
+<p>A camera frame behaves like a heavy object on a shared workbench. In a less efficient graph, every processing node creates another copy and carries it to the next station. An optimized Isaac ROS graph lets compatible nodes share data paths, so the GPU can process the payload without repeatedly sending it through CPU memory.</p>
+<p>That approach combines <strong>GPU acceleration and zero-copy data paths</strong> through ROS 2 type adaptation and type negotiation. For nodes running in one process, the graph can avoid some CPU memory-copy overhead. The <a href="https://developer.nvidia.com/isaac/ros">Isaac ROS performance summary</a> documents the relevant approach, while the practical result depends on the complete graph, hardware, and node compatibility. A GPU alone does not guarantee an efficient pipeline.</p>
+<p>Isaac ROS appeared as ROS 2 deployments moved toward edge AI hardware. NVIDIA introduced it in early access in <strong>March 2022</strong>, followed by Developer Preview <strong>0.10.1 on July 12, 2022</strong> and Developer Preview <strong>0.20.0 on October 19, 2022</strong>, according to the <a href="https://nvidia-isaac-ros.github.io/releases/index.html">Isaac ROS release history</a>. NVIDIA also announced Isaac ROS Developer Preview 2 at ROSCon 2022. These milestones describe a stack that developed quickly during its first public year.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Treat Isaac ROS as an accelerated robotics layer inside a larger ROS 2 system, not as a complete product application.</p>
+</blockquote>
+<p>That boundary matters to product teams. Isaac ROS can interpret live sensor input, but teams still must define data retention, observability, device management, user workflows, and historical recall. A multimodal search and memory layer completes the stack by preserving video, audio, and sensor history for later questions. It connects what the robot perceives now with what operators need to investigate later, especially as a prototype becomes a fleet.</p>
+<p><a id="inside-the-accelerated-architecture-and-performance-gains"></a></p>
+<h2>Inside the Accelerated Architecture and Performance Gains</h2>
+<p>A robot may process one camera frame through image correction, marker detection, localization, depth estimation, and planning. Each stage can be efficient on its own, yet repeated CPU memory copies add delay across the full chain. Isaac ROS matters here as more than a speed boost. It provides part of the perception backbone for Physical AI, where sensor input must become timely information for action.</p>
+<p>NVIDIA introduced <strong>NITROS pipelines</strong> to improve communication between ROS 2 nodes and support accelerated data movement. The Isaac ROS AprilTag release history records a <strong>June 30, 2022</strong> update using NITROS for improved performance. The package supports CUDA based GPU backends on NVIDIA platforms and a PVA backend on Jetson devices, as documented in NVIDIA's <a href="https://developer.nvidia.com/blog/improve-perception-performance-for-ros-2-applications-with-nvidia-isaac-transport-for-ros/">NITROS technical explanation</a>.</p>
+<p><img alt="A diagram illustrating the NVIDIA Isaac ROS NITROS pipeline architecture showing performance gains in latency, throughput, and CPU usage." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/85fee4c1-b8ca-4451-bdc0-032b04285071/nvidia-stack-isaac-ros-architecture-gains.jpg" /></p>
+<p><a id="what-the-published-figures-mean"></a></p>
+<h3>What the published figures mean</h3>
+<p>NVIDIA's performance summary reports AprilTag detection at 720p with these results:</p>
+<ul>
+<li><strong>AGX Thor T5000:</strong> 385 fps at 2.9 ms.</li>
+<li><strong>DGX Spark:</strong> 462 fps at 2.4 ms.</li>
+<li><strong>x86_64 with an RTX 5090:</strong> 596 fps at 2.0 ms.</li>
+</ul>
+<p>The same performance page cited above provides these figures. They compare perception-node performance on specified systems, not the operating rate of a complete robot. Camera drivers, DDS configuration, synchronization, container boundaries, recording, planning, and control can all change end-to-end behavior.</p>
+<p>NVIDIA's open benchmarking examples show the same principle across other workloads: visual SLAM moves from <strong>120 ms of CPU time to 18 ms of GPU time</strong>, object detection from <strong>55 ms to 12 ms</strong>, and stereo depth from <strong>180 ms to 25 ms</strong>. The reported speedups range from <strong>4.6x to 7.2x</strong>, depending on the workload. These results describe selected benchmark paths, so teams should treat them as reference points rather than deployment guarantees.</p>
+<p><a id="hardware-still-sets-the-boundary"></a></p>
+<h3>Hardware still sets the boundary</h3>
+<p>Acceleration does not remove hardware limits. NVIDIA's AprilTag documentation records compatibility updates such as <strong>JetPack 5.0.2 on August 31, 2022</strong> and <strong>JetPack 6.0 on May 30, 2024</strong>. It also warns that the <strong>Jetson Orin Nano 4GB may not have enough memory to run many Isaac ROS packages</strong>.</p>
+<p>A graph that works on a workstation may need redesign on a small Jetson device. Teams should measure memory use, transport behavior, thermal conditions, and complete graph latency on the target hardware. For Physical AI products, this perception backbone also needs a memory layer that retains video, audio, and sensor history, so operators can search past events instead of relying only on the robot's current frame.</p>
+<p><a id="comparing-isaac-ros-with-isaac-sim-perceptor-and-manipulator"></a></p>
+<h2>Comparing Isaac ROS With Isaac Sim Perceptor and Manipulator</h2>
+<p>The Isaac family contains several layers, and product teams often treat them as interchangeable because they share the Isaac name. They serve different jobs.</p>
+<p><strong>Isaac ROS</strong> is the accelerated ROS 2 software layer that connects perception and robotics processing to NVIDIA hardware. <strong>Isaac Sim</strong> is the physically based virtual environment for simulation and testing. <strong>Isaac Perceptor</strong> focuses on multi-camera 3D surround vision for autonomous mobile robots, while <strong>Isaac Manipulator</strong> targets robot arms that need to perceive and interact with their surroundings. NVIDIA distinguishes these roles in its <a href="https://nvidianews.nvidia.com/news/robotics-industry-development-ai-autonomous-machines">robotics platform announcement</a>.</p>
+<p><a id="isaac-platform-layers-at-a-glance"></a></p>
+<h3>Isaac Platform Layers at a Glance</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Primary Role</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Isaac ROS</td>
+<td>Accelerated ROS 2 packages and AI models</td>
+<td>Connecting perception, navigation, and robotics workloads to workstations or Jetson systems</td>
+</tr>
+<tr>
+<td>Isaac Sim</td>
+<td>Physically based virtual simulation and testing</td>
+<td>Testing behavior, building simulated environments, and supporting sim-to-real workflows</td>
+</tr>
+<tr>
+<td>Isaac Perceptor</td>
+<td>Multi-camera 3D surround vision</td>
+<td>Autonomous mobile robots that need broad environmental perception</td>
+</tr>
+<tr>
+<td>Isaac Manipulator</td>
+<td>Perception and interaction for robot arms</td>
+<td>Manipulation tasks involving grasping, placement, and environmental interaction</td>
+</tr>
+</tbody>
+</table>
+<p>The table also clarifies an important boundary. Isaac ROS isn't the same as a simulator, and a simulator isn't a historical search system. A robot may use Isaac Sim to test a navigation policy, Isaac ROS to run perception on hardware, and another layer to store and retrieve recordings from real operation.</p>
+<p>Physical AI requires <strong>perception plus action</strong>. Video search alone can identify relevant moments for a human reviewer, but it doesn't replace localization, planning, collision detection, or control. Conversely, a fast perception pipeline can still leave operators unable to understand why the system behaved a certain way unless the surrounding platform preserves usable context.</p>
+<p>For teams building complete products, the right architecture may combine all these layers. Simulation supports safe iteration, accelerated ROS 2 packages support runtime operation, specialized components support mobility or manipulation, and multimodal memory supports review, diagnosis, and operational learning.</p>
+<p><a id="real-world-use-cases-from-robotics-to-dashcam-and-cctv"></a></p>
+<h2>Real World Use Cases From Robotics to Dashcam and CCTV</h2>
+<p>A warehouse robot may need live vision to avoid obstacles, but the operations team may later ask which aisle contained a blocked path and what the robot's microphones captured at the same time. A dashcam application may record an entire journey, while the driver only needs the segment involving a traffic event. A CCTV operator may need to locate a person, vehicle, or unusual sound without manually scanning every recording.</p>
+<p>These are different products with a shared requirement: <strong>turn continuous physical content into usable recall</strong>.</p>
+<p><img alt="Three illustrations depicting NVIDIA Isaac ROS technology: robotic warehouse automation, car dashboard video tracking, and security surveillance monitoring." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/a60155ec-8855-438e-8aac-6608cac342b1/nvidia-stack-isaac-ros-automation-monitoring.jpg" /></p>
+<p><a id="robotics-and-humanoid-teleoperation"></a></p>
+<h3>Robotics and humanoid teleoperation</h3>
+<p>NVIDIA's recent <a href="https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_physical_ai">Isaac ROS Physical AI repository</a> provides an application-level bringup package for humanoid robotics. It supports the <strong>Unitree G1</strong> with AGILE locomotion, bimanual inverse kinematics, finger control from an XR headset, and XR teleoperation, with both MuJoCo simulation and real hardware supported.</p>
+<p>That example shows Isaac ROS moving toward specific Physical AI workflows rather than remaining only a collection of general mobile-robot components. In such a system, multimodal video can help operators locate a failed handoff or inspect an interaction, while multimodal audio can connect a spoken command or machine sound to the visual event.</p>
+<p><a id="media-and-mobile-capture"></a></p>
+<h3>Media and mobile capture</h3>
+<p>Advertisement video edition teams often search for a usable product shot, a spoken phrase, a reaction, or a scene transition across large libraries. GoPro users and dashcam applications face a similar problem, although the content comes from personal, driving, or field recordings instead of a production archive.</p>
+<p>Smart glasses introduce another layer. The device may capture a first-person view, while a companion mobile application manages uploads, playback, and user queries. Native Android Kotlin and Flutter integrations can help product teams connect capture interfaces to a broader memory workflow across Android and iOS.</p>
+<p><a id="cctv-and-video-surveillance"></a></p>
+<h3>CCTV and video surveillance</h3>
+<p>Security systems need practical retrieval rather than another dashboard. A query such as finding a person in a red jacket at the front entrance or locating a car that ran a red light gives an operator a direct starting point. Audio can add context when a siren, alarm, spoken phrase, or impact matters as much as the image.</p>
+<p>The strongest use cases combine <strong>multimodal video, multimodal audio, and physical context</strong>. Isaac ROS can support the robot's live perception backbone, while a search layer can help people inspect what happened across cameras, recordings, and sensor history.</p>
+<p><a id="how-to-choose-and-integrate-video-analysis-software-for-edge-and-mobile"></a></p>
+<h2>How to Choose and Integrate Video Analysis Software for Edge and Mobile</h2>
+<p>A Jetson robot may need to avoid an obstacle while a mobile app is uploading footage over an unstable connection. A smart-glasses companion app, dashcam, CCTV installation, and robot therefore need different choices for capture, storage, interaction, and response time. Select the operating environment before comparing feature lists.</p>
+<p>Isaac ROS can run on workstations and embedded Jetson systems, giving developers a route from development hardware to edge deployment. That route still requires careful integration. Its role extends across perception tasks such as object detection, collision detection, navigation, and trajectory optimization, so teams should treat it as the robot's real-time perception backbone rather than a general-purpose video archive.</p>
+<p><a id="match-the-software-to-the-device"></a></p>
+<h3>Match the software to the device</h3>
+<p>Ask these questions before choosing an SDK or API:</p>
+<ul>
+<li><strong>Where is capture happening?</strong> A dashcam or GoPro may upload intermittently, while CCTV and robots can produce continuous streams.</li>
+<li><strong>What must work offline?</strong> Robots and smart glasses may need local perception or recall when connectivity is weak.</li>
+<li><strong>What does the user ask for?</strong> Text-to-video, image-to-video, voice-to-audio, and environmental-state-to-video queries support different workflows.</li>
+<li><strong>What needs immediate response?</strong> Live obstacle avoidance requires a different response path from searching an advertisement library.</li>
+<li><strong>Which platforms must ship?</strong> Native Android Kotlin, Flutter, and embedded Linux integrations should share a consistent product model without forcing identical device behavior.</li>
+</ul>
+<p><a id="build-around-practical-interfaces"></a></p>
+<h3>Build around practical interfaces</h3>
+<p>A mobile-first design should handle signed streaming URLs, chunked multipart uploads, local playback, and interrupted connectivity. An embedded Linux edge hub may capture and retain history on the device, then send selected moments to a central application for review.</p>
+<p>Isaac ROS handles the live sensor-to-perception path. A separate multimodal memory layer can index the resulting video, audio, and spatial sensor history, much like a searchable notebook for Physical AI. <strong>V-Modal AI</strong> provides a multimodal search API for video, image, audio, and spatial sensor content, along with an edge-optimized memory layer, natural-language video search, Native Android Kotlin and Flutter SDKs, and media utilities for signed streaming URLs and chunked uploads. Teams can evaluate it as a <strong>Search Layer for Physical AI</strong> alongside Isaac ROS when they need historical recall across robots, mobile devices, smart glasses, IoT cameras, dashcams, or surveillance systems.</p>
+<blockquote>
+<p><strong>Design principle:</strong> Keep live control paths separate from historical search paths. A robot should not wait for a retrospective query before making a safety decision.</p>
+</blockquote>
+<p>The architecture should separate perception, control, capture, storage, and retrieval while defining clear interfaces between them. That division protects real-time behavior and gives product teams a practical way to search what happened across multimodal recordings and sensor history.</p>
+<p><a id="deployment-best-practices-and-how-to-evaluate-what-really-works"></a></p>
+<h2>Deployment Best Practices and How to Evaluate What Really Works</h2>
+<p>A successful demo shows that a package runs. Production validation must show that the complete system stays stable across mixed hardware, containers, networks, and long operating periods. For Physical AI, Isaac ROS is the perception backbone, while a separate search and memory layer helps teams recall what the robot sensed later.</p>
+<p><a id="test-the-conditions-that-cause-production-failures"></a></p>
+<h3>Test the conditions that cause production failures</h3>
+<p>Validate the following:</p>
+<ul>
+<li><strong>Environment compatibility:</strong> Align the operating system, ROS 2 distribution, Isaac ROS release, JetPack version, drivers, and container configuration.</li>
+<li><strong>DDS behavior:</strong> Test discovery, transport, and bandwidth across the network topology used in deployment.</li>
+<li><strong>ROS_DOMAIN_ID configuration:</strong> Prevent accidental separation or unwanted mixing between robot systems.</li>
+<li><strong>Native Linux versus Windows or WSL2:</strong> NVIDIA's ROS 2 FAQ reports lower throughput in Windows and WSL2 than native Linux for bandwidth-heavy topics such as images and point clouds. See the <a href="https://docs.isaacsim.omniverse.nvidia.com/6.1.0/ros2_tutorials/help/ros2_faq.html">ROS 2 environment FAQ</a>.</li>
+<li><strong>Operational failure modes:</strong> Check camera pose instability, startup crashes, release limitations, packet loss, and multi-container behavior.</li>
+</ul>
+<p>Use repeatable tests for throughput, latency, compute utilization, and connected graph behavior. The <a href="https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_benchmark">Isaac ROS benchmark repository</a> provides the benchmark stack and <strong>ros2_benchmark</strong> resources for this work. Compare results on the target device, not only on a development workstation.</p>
+<p><strong>Model speed may not block adoption. Integration overhead often does.</strong> V-Modal AI provides a Visual Memory Layer for Physical AI with multimodal video and audio search, continuous memory, and integrations for edge hardware, mobile devices, smart glasses, robotics, and IoT cameras. Teams can evaluate it alongside Isaac ROS to search and replay fleet history across video, audio, and sensor context, turning operational evidence into material that engineers and product teams can review. <a href="https://github.com/v-modal">V-Modal AI</a> offers a starting point for that evaluation.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
