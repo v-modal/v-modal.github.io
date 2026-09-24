@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Nvidia Stack: Holoscan</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Nvidia Stack: Holoscan</h1>
+    <p>You've got hours of dashcam footage, a robot's sensor logs, or a wall of CCTV recordings, and someone needs one precise moment. The request sounds simple: find the person who entered a restricted area, the spoken instruction before a machine stopped, or the frame where a package fell. In practice, an operator scrubs timelines, checks incomplete tags, and still can't prove that the relevant moment wasn't missed.</p>
+<p>That's the gap between <strong>real-time sensor processing</strong> and <strong>usable physical memory</strong>. NVIDIA Holoscan is strong at moving multimodal streams through capture, processing, inference, and visualization with low latency. A separate multimodal search layer is better suited to recalling moments through natural language, images, audio, or environmental context. Treating those as separate responsibilities produces a more reliable design than forcing one runtime to handle every part of the system.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#why-finding-moments-in-video-still-breaks-on-edge-devices">"Why Finding Moments in Video Still Breaks on Edge Devices"</a></li>
+<li><a href="#the-practical-meaning-of-physical-ai-search">The practical meaning of Physical AI search</a></li>
+<li><a href="#where-holoscan-belongs">Where Holoscan belongs</a></li>
+<li><a href="#comparing-holoscan-with-other-physical-ai-and-media-stacks">"Comparing Holoscan With Other Physical AI and Media Stacks"</a></li>
+<li><a href="#the-decision-is-architectural">The decision is architectural</a></li>
+<li><a href="#inside-the-physical-ai-technology-stack-for-multimodal-video-and-audio">"Inside the Physical AI Technology Stack for Multimodal Video and Audio"</a></li>
+<li><a href="#three-layers-that-need-to-agree">Three layers that need to agree</a></li>
+<li><a href="#benchmark-the-path-not-only-the-model">Benchmark the path, not only the model</a></li>
+<li><a href="#backpressure-is-a-product-concern">Backpressure is a product concern</a></li>
+<li><a href="#integrating-v-modal-search-apis-and-sdks-on-mobile-and-edge">"Integrating V-Modal Search APIs and SDKs on Mobile and Edge"</a></li>
+<li><a href="#start-with-the-device-boundary">Start with the device boundary</a></li>
+<li><a href="#wire-the-media-path-conservatively">Wire the media path conservatively</a></li>
+<li><a href="#test-every-client-as-a-field-device">Test every client as a field device</a></li>
+<li><a href="#industry-use-cases-that-prove-search-for-video-in-production">"Industry Use Cases That Prove Search for Video in Production"</a></li>
+<li><a href="#advertisement-video-edition">Advertisement video edition</a></li>
+<li><a href="#vision-for-robotics">Vision for robotics</a></li>
+<li><a href="#audio-for-robotics">Audio for robotics</a></li>
+<li><a href="#dashcam-and-gopro-workflows">DashCam and GoPro workflows</a></li>
+<li><a href="#cctv-and-video-surveillance">CCTV and video surveillance</a></li>
+<li><a href="#pain-points-challenges-and-how-to-verify-your-pipeline-works">"Pain Points Challenges and How to Verify Your Pipeline Works"</a></li>
+<li><a href="#problems-teams-encounter-first">Problems teams encounter first</a></li>
+<li><a href="#verification-should-follow-the-real-path">Verification should follow the real path</a></li>
+</ul>
+<p><a id="why-finding-moments-in-video-still-breaks-on-edge-devices"></a></p>
+<h2>"Why Finding Moments in Video Still Breaks on Edge Devices"</h2>
+<p>A security team reviewing CCTV footage often knows what happened semantically, not when it happened technically. They remember “the person in a reflective vest near the loading gate” or “the warning sound before the forklift reversed.” A dashcam operator might need “the cyclist crossing from the left after the rain started.” A robotics engineer may ask for “the last time the gripper encountered a loose object.”</p>
+<p>Manual scrubbing fails because the footage is continuous, while the request is selective. Static tags rarely capture the relationship between <strong>objects, speech, sounds, motion, and time</strong>. The problem gets worse on smart glasses, GoPro-style cameras, mobile devices, and autonomous machines, where data may be captured offline, split across files, or interrupted by network conditions.</p>
+<p><img alt="A security guard working in a dark control room, monitoring multiple surveillance camera screens and video tapes." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/2cb791a6-4064-492b-b054-4ab5b2d23e86/nvidia-stack-holoscan-surveillance-monitoring.jpg" /></p>
+<p><a id="the-practical-meaning-of-physical-ai-search"></a></p>
+<h3>The practical meaning of Physical AI search</h3>
+<p>Physical AI search means giving a machine a way to recall what its sensors experienced. It isn't limited to object detection or a live alert. The useful output is a <strong>specific time segment</strong>, linked to the relevant visual, spoken, acoustic, or sensor context.</p>
+<p>That distinction matters:</p>
+<ul>
+<li><strong>A dashcam</strong> can preserve driving context for later questions about road users, signs, hazards, or spoken events.</li>
+<li><strong>Smart glasses</strong> can help a worker retrieve what was seen or said during a task without replaying an entire shift.</li>
+<li><strong>A robot</strong> can connect a perception event with surrounding audio and environmental signals.</li>
+<li><strong>CCTV and video surveillance</strong> systems can narrow review from broad timelines to moments involving a face, scene, spoken word, or interaction.</li>
+</ul>
+<p>Independent industry material describes surveillance search in terms of finding footage by <strong>face, scene, or spoken word</strong>, while NVIDIA and partners have highlighted Holoscan Sensor Bridge for low-latency sensor fusion and 3D perception in physical AI applications. See <a href="https://www.ti.com/about-ti/newsroom/news-releases/2026/2026-03-05-ti-accelerates-the-next-generation-of-physical-ai-with-nvidia.html">Texas Instruments' announcement about physical AI with NVIDIA</a> for that deployment context.</p>
+<p><a id="where-holoscan-belongs"></a></p>
+<h3>Where Holoscan belongs</h3>
+<p>NVIDIA announced Clara Holoscan at GTC in November 2021 as a medical-device AI computing platform, with availability slated for <strong>November 15, 2021</strong>. The original positioning was an end-to-end, software-defined infrastructure for streaming medical-device data and real-time AI processing, as described in <a href="https://blogs.nvidia.com.tw/blog/nvidia-healthcare-expo-taiwan-2021/">NVIDIA's launch coverage</a>.</p>
+<p>The platform has since moved beyond that medical origin. NVIDIA describes Holoscan as a <strong>multimodal, domain-agnostic sensor processing platform</strong> for real-time edge or cloud streaming workloads. Its job is to keep sensor data moving through the application path with coordinated timing and accelerated processing. The search layer should handle recall and discovery, rather than turning Holoscan into a general-purpose archive interface.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Use Holoscan to make incoming experience usable in real time. Use a search layer to make past experience findable.</p>
+</blockquote>
+<p><a id="comparing-holoscan-with-other-physical-ai-and-media-stacks"></a></p>
+<h2>"Comparing Holoscan With Other Physical AI and Media Stacks"</h2>
+<p>Holoscan isn't automatically the right choice for every camera pipeline. A small mobile app may need a lightweight capture library and a remote search API. A robot with several synchronized sensors, strict latency requirements, and local decision-making may justify a broader runtime. The choice depends less on the feature list than on where your system must remain deterministic.</p>
+<p>A custom <strong>Jetson plus GStreamer plus Triton</strong> design can be effective when the team already understands each component and wants direct control. GStreamer provides familiar media plumbing, Triton can serve inference workloads, and Jetson offers an embedded target. The trade-off is integration ownership. Your team must coordinate buffers, scheduling, telemetry, failure handling, and deployment behavior across separate pieces.</p>
+<p>ROS 2 remains valuable for robotics communication, orchestration, and device integration, but it isn't a complete replacement for a sensor-processing runtime. OpenCV is useful for image operations and prototyping, though it doesn't by itself solve multimodal streaming, distributed sensor transport, or production scheduling. NVIDIA DeepStream can be a better fit for conventional video analytics, especially when the workload centers on camera streams and media metadata rather than heterogeneous physical sensors.</p>
+<p><img alt="A comparative table analyzing technical features of Holoscan versus other AI software stacks including ROS 2 and OpenCV." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/c3393fcf-4c06-4361-823a-43dd784d74c8/nvidia-stack-holoscan-stack-comparison.jpg" /></p>
+<p><a id="the-decision-is-architectural"></a></p>
+<h3>The decision is architectural</h3>
+<table>
+<thead>
+<tr>
+<th>Workload Profile</th>
+<th>Holoscan Advantage</th>
+<th>Lighter Alternative Wins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-sensor robotics perception</td>
+<td>Coordinated streaming, accelerated I/O, and application-level scheduling</td>
+<td>ROS 2 plus specialized nodes can be simpler for loosely coupled components</td>
+</tr>
+<tr>
+<td>Real-time industrial or medical streams</td>
+<td>Full-stack path from sensor ingress to inference and visualization</td>
+<td>DeepStream or GStreamer may reduce setup for conventional video</td>
+</tr>
+<tr>
+<td>Mobile capture and recall</td>
+<td>Edge processing can prepare streams before selective transfer</td>
+<td>A mobile SDK plus a multimodal search API is usually easier to ship</td>
+</tr>
+<tr>
+<td>Offline or intermittently connected devices</td>
+<td>Local processing reduces dependence on continuous cloud access</td>
+<td>A lightweight embedded pipeline may use fewer resources</td>
+</tr>
+<tr>
+<td>Media editing and content review</td>
+<td>Live processing can enrich incoming media context</td>
+<td>Cloud media services may be more convenient for archival batches</td>
+</tr>
+<tr>
+<td>Early prototype with one camera</td>
+<td>Holoscan provides room to grow, but may add operational weight</td>
+<td>OpenCV or GStreamer can be faster to validate</td>
+</tr>
+</tbody>
+</table>
+<p>Holoscan becomes harder to justify when the workload is a single stream, occasional inference, and simple upload. It becomes more compelling when several high-bandwidth inputs must share compute and the team needs a coherent application graph rather than a collection of loosely connected processes.</p>
+<p>By 2024, NVIDIA had extended Holoscan beyond healthcare and connected it to industrial-edge deployments through NVIDIA IGX, including enterprise software support for Holoscan on IGX announced at COMPUTEX on <strong>June 2, 2024</strong>. NVIDIA's <a href="https://developer.nvidia.com/holoscan-archive">Holoscan archive</a> documents continued releases into <strong>2026</strong>, including Holoscan <strong>4.6.0</strong> documented in August 2026. That cadence signals a platform intended for sustained deployment, not only a launch-era medical demonstration.</p>
+<p><a id="inside-the-physical-ai-technology-stack-for-multimodal-video-and-audio"></a></p>
+<h2>"Inside the Physical AI Technology Stack for Multimodal Video and Audio"</h2>
+<p>The Nvidia stack, Holoscan included, makes the most sense when you view it as infrastructure rather than as an inference API. NVIDIA positions the platform across hardware, software, optimized libraries, tools, and containers that connect sensors with edge servers, on-premises data centers, and cloud environments. The <a href="https://www.nvidia.com/en-us/edge-computing/holoscan/">official Holoscan platform overview</a> describes that broader bridge.</p>
+<p><img alt="A diagram illustrating the Physical AI Technology Stack for multimodal video and audio processing, divided into hardware, libraries, and microservices." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/570d92ed-820b-4f07-9c2b-c75aa4e95ecf/nvidia-stack-holoscan-ai-stack.jpg" /></p>
+<p><a id="three-layers-that-need-to-agree"></a></p>
+<h3>Three layers that need to agree</h3>
+<p>At the hardware layer, the design may include Jetson or IGX systems, discrete GPUs, network interfaces, cameras, microphones, and other sensors. The important question isn't only whether a device can run a model. It's whether the device can sustain capture, transfer, preprocessing, inference, output, and recovery under the conditions found in the field.</p>
+<p>The library and SDK layer supplies the mechanisms for accelerated I/O, sensor connectivity, data movement, and pipeline composition. NVIDIA describes Holoscan as combining low-latency sensor and network connectivity, accelerated data-processing libraries, and core microservices for streaming and imaging. Its open-source materials describe multimodal, multi-rate pipelines with Python or C++ support and TensorRT-powered inference. The <a href="https://nvidia-holoscan.github.io/">Holoscan documentation</a> provides that developer framing.</p>
+<p>The microservice layer contains the application behavior: inference operators, telemetry, event triggers, logging, visualization, and the handoff to memory or search. A visual memory layer sits here as a consumer of well-timed multimodal output. It doesn't need to know every transport detail, but it does need reliable timestamps and enough context to relate video, audio, and sensor events.</p>
+<p><a id="benchmark-the-path-not-only-the-model"></a></p>
+<h3>Benchmark the path, not only the model</h3>
+<p>NVIDIA's benchmark-mode example processes <strong>300 offscreen frames</strong> and tracks the path from video replayer through preprocessing, inference, telemetry, HoloViz rendering, and the sink, using data-flow tracking to show where latency accumulates. The <a href="https://developer.nvidia.com/holoscan-sdk">Holoscan SDK reference</a> makes the central engineering lesson clear: end-to-end performance includes stages that don't run inference.</p>
+<p>A model can be fast while the application remains slow. Telemetry, rendering, replay, buffering, and synchronization can add delay or create misleading test results. For a memory system, this also affects whether a returned moment lines up with the actual spoken phrase or physical event.</p>
+<p><a id="backpressure-is-a-product-concern"></a></p>
+<h3>Backpressure is a product concern</h3>
+<p>Holoscan's user guide notes a practical metadata size limit of <strong>several kilobytes</strong> for metadata passed between fragments. That constraint matters when developers try to move large histories, verbose annotations, or oversized payloads through metadata rather than using an appropriate data path. The Holoscan SDK User Guide is more useful for these operational details than launch material.</p>
+<p>Recent Holoscan updates emphasize runtime resilience, dynamic flow control, and distributed execution across Holoscan <strong>3.0 to 4.6</strong>. The design implication is straightforward. Bursty sensor rates, temporary network loss, competing GPU consumers, and partial stream failure need explicit policies. A pipeline that works only when every input arrives at a steady rate isn't ready for a robot, smart-glasses application, DashCam, or CCTV installation.</p>
+<p><a id="integrating-v-modal-search-apis-and-sdks-on-mobile-and-edge"></a></p>
+<h2>"Integrating V-Modal Search APIs and SDKs on Mobile and Edge"</h2>
+<p>A practical integration separates capture from recall. Holoscan can process or normalize incoming streams near the device, while a multimodal search API or SDK gives the application a way to request relevant moments. That separation keeps the real-time path focused and lets mobile developers expose search without rebuilding their media stack.</p>
+<p><img alt="A five-step infographic showing how to integrate V-Modal Search APIs and SDKs into mobile and edge projects." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/9f105285-7f6a-4380-abe1-4cef244293d3/nvidia-stack-holoscan-v-modal-search.jpg" /></p>
+<p><a id="start-with-the-device-boundary"></a></p>
+<h3>Start with the device boundary</h3>
+<p>First, decide where continuous capture lives. A phone or smart-glasses companion app may collect media locally and upload selected segments. A DashCam or GoPro-style device may buffer content until connectivity returns. A CCTV gateway may receive multiple network streams and keep the memory layer close to the cameras. A robot may require local recall even when its connection to a remote service is unavailable.</p>
+<p>Then choose the application surface:</p>
+<ol>
+<li><strong>Android Kotlin</strong> works well when the search experience belongs inside a native mobile companion app. Keep capture, permissions, lifecycle handling, and upload state in the mobile layer, while the search SDK remains responsible for query and retrieval interaction.</li>
+<li><strong>Flutter</strong> is useful when Android and iOS share most of the user experience. A cross-platform wrapper can reduce duplicated interface work, but camera, background execution, storage, and permissions still need platform-specific testing.</li>
+<li><strong>Embedded Linux or edge gateways</strong> suit CCTV, robotics, and industrial deployments. Here, the critical concerns are process supervision, storage rotation, network recovery, and how the runtime behaves when streams arrive late or disappear.</li>
+<li><strong>Smart glasses</strong> need aggressive control over battery, thermal load, and network usage. Keep the interactive query path light, and avoid making the wearable responsible for every historical asset.</li>
+</ol>
+<p><a id="wire-the-media-path-conservatively"></a></p>
+<h3>Wire the media path conservatively</h3>
+<p>Use signed streaming URLs when the client needs controlled playback of a returned segment. Use chunked multipart uploads for large or unstable transfers, particularly on mobile and edge networks. These utilities don't remove the need for retry logic. They make it possible to resume or manage transfers without treating an entire recording as one fragile request.</p>
+<p>The query surface should support the intent the user has:</p>
+<ul>
+<li><strong>Text to video</strong>, such as finding a person near a gate after a spoken warning.</li>
+<li><strong>Image to video</strong>, such as locating appearances of a reference object or visual scene.</li>
+<li><strong>Voice to audio</strong>, such as finding the alarm or instruction associated with a robot event.</li>
+<li><strong>Environmental state to video</strong>, such as recalling footage captured during a specific operating condition.</li>
+</ul>
+<p>Don't make the live control loop wait for historical search. A robot's immediate collision response and its later question about a previous obstruction are different workloads. The first needs deterministic local processing. The second can use a memory layer optimized for retrieval and user interaction.</p>
+<p><a id="test-every-client-as-a-field-device"></a></p>
+<h3>Test every client as a field device</h3>
+<p>Mobile software stacks fail in ways desktop demos hide. Background processes pause. Storage fills. Users switch networks. Smart glasses lose connectivity while the camera keeps recording. CCTV installations experience camera restarts. Edge gateways must recover after power interruption.</p>
+<p>Design the integration around explicit states: recording, queued, uploading, indexed, searchable, and unavailable. Show the user when a result is local, when it depends on a remote service, and when the relevant media hasn't completed processing. That honesty is more useful than presenting an apparently precise result with unknown freshness.</p>
+<p><a id="industry-use-cases-that-prove-search-for-video-in-production"></a></p>
+<h2>"Industry Use Cases That Prove Search for Video in Production"</h2>
+<p>Search becomes valuable when a team already has too much content to inspect manually and a clear operational question to answer. The same multimodal pattern appears across media production, robotics, mobile capture, and security, but each environment has a different tolerance for delay and connectivity.</p>
+<p><a id="advertisement-video-edition"></a></p>
+<h3>Advertisement video edition</h3>
+<p>An editor may remember a spoken line, a product close-up, or a particular background action without remembering the file name. Text-to-video search can narrow the review to scenes associated with the phrase, while image-to-video queries can locate visually similar shots. Audio matters because the best edit candidate may be defined by dialogue or a sound cue rather than by the dominant object in the frame.</p>
+<p>The right architecture usually keeps ingest and media handling separate from editorial recall. Holoscan can support real-time processing for live or rapidly arriving media streams, while the search interface helps an editor move from a creative description to candidate time segments. It won't replace editorial judgment. It reduces the time spent proving that a usable moment exists.</p>
+<p><a id="vision-for-robotics"></a></p>
+<h3>Vision for robotics</h3>
+<p>A robot needs vision for immediate perception, but historical recall serves a different purpose. Engineers may search for every earlier instance of a grasp failure, a blocked camera view, or a visual condition that preceded a navigation problem. A robot operator may ask for the last occurrence of an object in a workspace rather than inspect raw logs.</p>
+<p>Holoscan fits the sensor-processing side when several inputs must be coordinated near the machine. A memory layer then turns selected historical context into something humans and higher-level software can query. NVIDIA positions Holoscan alongside Isaac for robotics and Metropolis for visual agentic AI, with Jetson Thor presented as a platform for running that broader Physical AI stack. The <a href="https://developer.nvidia.com/blog/introducing-nvidia-jetson-thor-the-ultimate-platform-for-physical-ai/">Jetson Thor introduction</a> also describes Holoscan support in terms of secure partitioning, deterministic performance, fault tolerance, and data-leakage protection for mission-critical workloads.</p>
+<p><a id="audio-for-robotics"></a></p>
+<h3>Audio for robotics</h3>
+<p>Robots often treat audio as a secondary stream, even though alarms, speech, impacts, and machine noise can explain what vision alone cannot. A voice-to-audio query might locate the warning preceding a stop. A combined video and audio recall can help distinguish an object collision from an operator command.</p>
+<p>This is especially useful in shared human-machine spaces. The system can retain the relationship between what the robot saw and what it heard, while the immediate safety action remains in the pipeline. Search should support investigation and learning without becoming a hidden dependency in the control loop.</p>
+<p><a id="dashcam-and-gopro-workflows"></a></p>
+<h3>DashCam and GoPro workflows</h3>
+<p>Dashcam footage is recorded continuously but reviewed selectively. Drivers, fleet managers, and investigators may search for a lane change, a near miss, a siren, or a spoken event. GoPro-style cameras add a different challenge, because footage may be captured during sports, field work, or inspection and reviewed long after the device leaves coverage.</p>
+<p>A mobile or edge memory layer can keep capture usable when the network is weak. Holoscan is most valuable when the device or gateway must process multiple sensor streams or maintain real-time behavior. For a simple camera upload workflow, a lighter capture stack may be the better engineering choice.</p>
+<p><a id="cctv-and-video-surveillance"></a></p>
+<h3>CCTV and video surveillance</h3>
+<p>CCTV teams face a familiar request: find a person, vehicle, sound, or interaction across recorded footage. Natural-language and visual queries can narrow the review to relevant scenes, while audio search can surface spoken words or alarms. The operational value comes from connecting the query to a playable segment with trustworthy timing.</p>
+<p>Video surveillance also exposes reliability problems quickly. Cameras may be blocked, streams may drop, and lighting changes can degrade perception. Search results need clear availability and timestamp behavior, especially when operators use them to investigate incidents rather than browse media casually.</p>
+<p><a id="pain-points-challenges-and-how-to-verify-your-pipeline-works"></a></p>
+<h2>"Pain Points Challenges and How to Verify Your Pipeline Works"</h2>
+<p>The most dangerous assumption is that a high frame rate proves the system is ready. A production pipeline can process frames quickly on average and still return late, misaligned, or incomplete results when sensors compete for resources.</p>
+<p><a id="problems-teams-encounter-first"></a></p>
+<h3>Problems teams encounter first</h3>
+<ul>
+<li><strong>Opaque physical data:</strong> Raw streams contain useful context, but operators can't act on context they can't retrieve.</li>
+<li><strong>Fragmented audio and video:</strong> Separate clocks, missing timestamps, or dropped segments can make a sound appear unrelated to the visual event.</li>
+<li><strong>Bandwidth pressure:</strong> Mobile, smart-glasses, DashCam, and remote CCTV deployments can't assume a stable connection.</li>
+<li><strong>Disconnected history:</strong> A phone, robot, camera gateway, and cloud archive may each hold part of the same event.</li>
+<li><strong>Cross-platform friction:</strong> Kotlin, Flutter, embedded Linux, GStreamer, ROS 2, and NVIDIA runtimes each introduce different lifecycle and failure behavior.</li>
+<li><strong>Metadata overload:</strong> Holoscan's practical metadata limit is only <strong>several kilobytes</strong>, so large context should not be pushed through fragment metadata. See the Holoscan user guide for the documented constraint.</li>
+<li><strong>Tail-latency spikes:</strong> Independent analysis reports that Holoscan Sensor Bridge reference designs can reduce latency by up to <strong>5× versus USB</strong> and about <strong>1.5× versus MIPI</strong>, with a reference capture-to-display chain at about <strong>37 ms average</strong> and <strong>54 ms worst case</strong>. Those figures belong to the cited reference designs, not to every deployment. The <a href="https://taurotech.com/blog/holoscan-platform-for-robotics-and-edge-ai/">Tauro Technologies analysis</a> also reports <strong>21% to 30% lower maximum latency</strong> for up to five concurrent applications and <strong>35% lower maximum latency</strong> versus a default multi-GPU configuration after pipeline-level scheduling and GPU-sharing optimizations.</li>
+</ul>
+<p><a id="verification-should-follow-the-real-path"></a></p>
+<h3>Verification should follow the real path</h3>
+<p>NVIDIA's benchmark workflow tracks video replay, preprocessing, inference, telemetry, HoloViz rendering, and the sink. Reproduce that discipline with your own media and load profile.</p>
+<ol>
+<li><strong>Test ingestion first.</strong> Replay recorded camera, audio, and sensor inputs while checking timestamps, ordering, dropped data, and recovery after interruption.</li>
+<li><strong>Measure three latency checkpoints.</strong> Separate preprocessing, inference, and post-processing or visualization. Don't hide them behind one average.</li>
+<li><strong>Test recall quality offline.</strong> Use known events and verify that returned segments point to the correct visual and audio context.</li>
+<li><strong>Stress concurrency.</strong> Run competing streams and applications, then inspect maximum latency rather than only throughput.</li>
+<li><strong>Exercise failure states.</strong> Disconnect a camera, interrupt uploads, fill local storage, and restart services. Confirm that the application reports incomplete memory instead of presenting false certainty.</li>
+<li><strong>Regression-test every integration change.</strong> A new renderer, telemetry operator, transport setting, or mobile upload policy can alter the end-to-end result.</li>
+</ol>
+<blockquote>
+<p><strong>Shipping standard:</strong> If you haven't measured capture, processing, rendering, storage, and recall together, you haven't measured the product your user will experience.</p>
+</blockquote>
+<hr />
+<p>V-Modal AI provides a Visual Memory Layer for Physical AI, with multimodal video and audio search, continuous memory, mobile SDKs, and edge-oriented integration patterns. Use it alongside a sensor-processing backbone such as Holoscan when your devices need both real-time perception and practical recall, then explore the project through <a href="https://github.com/v-modal">V-Modal AI</a>.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
