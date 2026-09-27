@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Robotics Vision Software Stack: Face Detection Guide</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Robotics Vision Software Stack: Face Detection Guide</h1>
+    <p>You're running a robot, DashCam, smart glasses app, or CCTV platform that can capture everything but retrieve almost nothing. A face appears briefly in a crowded frame, a door closes somewhere outside the camera view, and an unusual sound occurs just before an event. Finding that moment by manually scrubbing recordings is slow, while treating every stream as a simple image feed throws away the context that makes physical environments understandable.</p>
+<p>A modern <strong>Robotics Vision software stack</strong> connects cameras, microphones, spatial sensors, edge inference, cloud services, and application logic. It doesn't just detect faces. It builds a searchable memory of what happened, where it happened, and which visual and auditory signals occurred together.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#the-modern-robotics-vision-software-stack">The Modern Robotics Vision Software Stack</a></li>
+<li><a href="#five-layers-that-matter">Five layers that matter</a></li>
+<li><a href="#geometry-and-meaning-need-different-jobs">Geometry and meaning need different jobs</a></li>
+<li><a href="#extracting-faces-from-video-streams">Extracting Faces from Video Streams</a></li>
+<li><a href="#a-practical-processing-sequence">A practical processing sequence</a></li>
+<li><a href="#accuracy-versus-latency">Accuracy versus latency</a></li>
+<li><a href="#edge-vs-cloud-inference-strategies">Edge vs Cloud Inference Strategies</a></li>
+<li><a href="#use-a-split-pipeline">Use a split pipeline</a></li>
+<li><a href="#match-placement-to-failure-cost">Match placement to failure cost</a></li>
+<li><a href="#real-world-applications-and-use-cases">Real-World Applications and Use Cases</a></li>
+<li><a href="#security-and-surveillance">Security and surveillance</a></li>
+<li><a href="#dashcams-and-gopros">DashCams and GoPros</a></li>
+<li><a href="#robots-and-smart-glasses">Robots and smart glasses</a></li>
+<li><a href="#integrating-with-v-modal-ai-sdks">Integrating with V-Modal AI SDKs</a></li>
+<li><a href="#start-with-the-native-path">Start with the native path</a></li>
+<li><a href="#flutter-for-shared-application-logic">Flutter for shared application logic</a></li>
+<li><a href="#build-observability-into-the-first-prototype">Build observability into the first prototype</a></li>
+<li><a href="#common-challenges-and-pain-points">Common Challenges and Pain Points</a></li>
+</ul>
+<p><a id="the-modern-robotics-vision-software-stack"></a></p>
+<h2>The Modern Robotics Vision Software Stack</h2>
+<p>A mobile robot enters a shared workspace as a machine starts nearby. Its cameras need to track geometry, its microphones need to register the machine's sound, and its memory needs to connect both signals to the robot's location and timeline. A factory arm, smart-glasses application, Dashcam, or CCTV system faces the same integration problem in a different form. <strong>Physical AI</strong> links perception, multimodal memory, reasoning, and action so the system can respond to events rather than isolated frames.</p>
+<p>The market reflects growing investment in this infrastructure. MarketsandMarkets estimates the robotic vision market at <strong>USD 3.29 billion in 2025</strong>, reaching <strong>USD 4.99 billion by 2030 at an 8.7% CAGR</strong>, according to its <a href="https://www.marketsandmarkets.com/Market-Reports/robotic-vision-market-196002505.html">robotic vision market analysis</a>. A separate estimate projects <strong>USD 3.56 billion in 2026</strong> and <strong>USD 5.56 billion by 2031 at a 9.33% CAGR</strong>. The figures differ because the estimates use different market scopes and methodologies. Together, they indicate that vision software is becoming part of automation infrastructure, not merely a camera feature.</p>
+<p><img alt="A five-layer infographic illustrating the modern robotics vision software stack from physical sensors to application output." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/e6e08243-ced7-4467-b62d-55acecfac11a/robotics-vision-software-stack-architecture-diagram.jpg" /></p>
+<p><a id="five-layers-that-matter"></a></p>
+<h3>Five layers that matter</h3>
+<p>A deployable stack usually connects five layers:</p>
+<ol>
+<li><strong>Physical sensors</strong> capture RGB, depth, thermal, audio, inertial, and environmental signals. CCTV cameras, Dashcams, mobile phones, GoPros, smart glasses, and robot-mounted stereo cameras each introduce different frame rates, fields of view, noise levels, and power limits.</li>
+<li><strong>Device and transport layers</strong> manage drivers, synchronization, compression, timestamps, calibration, buffering, and sensor health. Poor timing or calibration can invalidate otherwise accurate perception results.</li>
+<li><strong>Perception services</strong> detect objects, faces, poses, motion, sounds, surfaces, and spatial relationships. Some tasks use deterministic rules, while learned models handle ambiguous visual and acoustic patterns.</li>
+<li><strong>Multimodal memory and retrieval</strong> join video, audio, text, timestamps, and spatial context. The system should retrieve a relevant event through a natural-language, visual, voice, or environmental query, then preserve enough surrounding context for review.</li>
+<li><strong>Application output</strong> converts results into robot actions, operator alerts, video-editing selections, mobile experiences, or investigation timelines.</li>
+</ol>
+<p>The edge-to-cloud boundary cuts across these layers. Edge devices handle latency-sensitive detection, local safety decisions, and selective event extraction. Cloud services can store longer histories, run heavier models, and correlate audio and video across devices. Send compact events and embeddings upstream when bandwidth is limited, while retaining original media locally when auditability or later model review matters.</p>
+<p><a id="geometry-and-meaning-need-different-jobs"></a></p>
+<h3>Geometry and meaning need different jobs</h3>
+<p>Geometry-first pipelines remain the right choice for depth, calibration, SLAM, obstacle avoidance, grasping, and precise pose. Foundation models help with semantic interpretation, open-ended recognition, and language-level meaning. Combining both lets a system identify “a tool near the workbench” while a separate geometric pipeline supplies the pose required by a gripper.</p>
+<p>A semantic model can describe a scene without meeting control tolerances. A geometric pipeline can estimate position accurately without understanding intent, speech, or unusual context. The practical design is hybrid, with <strong>foundation models for meaning and dedicated geometry for control</strong>, as discussed in recent <a href="https://aicybr.com/blog/intrinsic-core-open-source-industrial-robotics">Physical AI robotics coverage</a>.</p>
+<p>ROS made this modular design easier to assemble. First publicly released in <strong>2007</strong>, ROS provides middleware for connecting camera drivers, calibration tools, image transport, perception nodes, and motion-planning interfaces. ROS 2 had more than <strong>1,000 packages in its core ecosystem by 2024</strong>, according to the ROS Index, rather than the market report cited for market estimates.</p>
+<p>The resulting system acts as a <strong>search layer for physical memory</strong>. A robot can connect a sound, visual observation, pose, and location; a smart-glasses application can retrieve a prior event; and an operator can search CCTV using what appeared and what was heard.</p>
+<p><a id="extracting-faces-from-video-streams"></a></p>
+<h2>Extracting Faces from Video Streams</h2>
+<p>Face extraction starts with a deceptively simple requirement: isolate useful face observations from an unreliable, continuous stream. The camera may move, faces may be partially blocked, lighting may change, and the same person may appear at different distances. A pipeline that works on a clean photograph can perform poorly on a DashCam, GoPro, mobile phone, or robot camera.</p>
+<p>The strongest implementations separate <strong>capture, detection, quality assessment, representation, and application policy</strong>. They also avoid treating every detected face as an identity claim. Detection answers whether a face-like region exists. Recognition or matching is a separate decision with different privacy, accuracy, and consent implications.</p>
+<p><a id="a-practical-processing-sequence"></a></p>
+<h3>A practical processing sequence</h3>
+<p><strong>1. Capture with stable timing.</strong><br />
+Start by preserving timestamps and source identity. A mobile app, CCTV recorder, and robot camera may produce different frame rates and compression artifacts. The downstream system needs to know when each observation occurred, even if frames arrive late or are dropped.</p>
+<p><strong>2. Sample for the task, not for the archive.</strong><br />
+Running face detection on every available frame can waste edge compute, particularly when the camera is static or the scene changes slowly. Sample more aggressively when the scene is stable, then increase sampling around motion, camera movement, or a detected face. Keep the original stream available when later review requires context.</p>
+<p><strong>3. Detect candidate regions.</strong><br />
+A lightweight detector is often appropriate for a constrained device. A heavier detector can help with small, angled, or partially occluded faces, but it consumes more compute and may increase latency. The right choice depends on whether the application needs a quick alert, a reliable crop for later review, or a continuous identity track.</p>
+<p><strong>4. Reject poor observations.</strong><br />
+Blur, extreme pose, glare, occlusion, tiny face size, and heavy compression should lower confidence. Don't pass every crop into later matching. Quality gates reduce duplicate observations and stop a low-quality frame from dominating the record.</p>
+<p><strong>5. Normalize carefully.</strong><br />
+Alignment and consistent preprocessing help compare observations from different frames and devices. However, aggressive enhancement can introduce artifacts. A sharpened or reconstructed face may look clearer to a human while becoming less trustworthy for automated matching.</p>
+<p><strong>6. Extract a representation.</strong><br />
+An embedding or feature representation lets the application compare observations without storing every crop as the primary record. Keep the representation tied to its timestamp, source, quality signals, and permissions. A face vector without provenance is difficult to audit and easy to misuse.</p>
+<p><strong>7. Track across nearby frames.</strong><br />
+Tracking reduces repeated work and helps group multiple observations of one face. It shouldn't be treated as proof of identity. Temporary occlusion, camera cuts, reflections, and similar-looking people can all break a track.</p>
+<p><strong>8. Attach multimodal context.</strong><br />
+The most useful event often isn't “face detected.” It may be “person entered the loading area while a warning tone played,” or “the same face appeared near the vehicle after a sudden impact.” Video and audio should retain aligned timestamps so applications can retrieve the surrounding event rather than an isolated crop.</p>
+<p><a id="accuracy-versus-latency"></a></p>
+<h3>Accuracy versus latency</h3>
+<p>A large model can improve difficult detections, but a robot still has to react within its control budget. A face detector running on a remote service may be acceptable for retrospective CCTV investigation and unacceptable for a door interaction or mobile safety alert. On-device processing usually gives a predictable response, while a remote model can provide more capacity for batch analysis.</p>
+<p>Hardware-aware design matters here. NVIDIA's recent Jetson guidance describes using dedicated accelerators for operations such as image processing, optical flow, stereo disparity, and compositing, allowing the GPU to focus on more demanding learned workloads. The <a href="https://developer.nvidia.com/blog/making-robot-perception-more-efficient-on-nvidia-jetson-thor/">Jetson perception guidance</a> is especially relevant when multiple cameras, depth pipelines, and detection models compete for the same device resources.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Treat a face as an observation with quality and context, not as an identity until the application has a clear, lawful reason to make that decision.</p>
+</blockquote>
+<p>For constrained hardware, process in stages. Decode and resize efficiently, run lightweight detection locally, retain only useful events when storage is limited, and defer expensive interpretation when the network and task allow it. Don't optimize the model before measuring dropped frames, thermal behavior, memory pressure, and end-to-end response time.</p>
+<p><a id="edge-vs-cloud-inference-strategies"></a></p>
+<h2>Edge vs Cloud Inference Strategies</h2>
+<p>The edge-versus-cloud decision isn't a binary choice between cheap hardware and powerful servers. It's a placement decision for each operation in the pipeline. A DashCam may need local event detection because connectivity is intermittent. A CCTV operator may accept remote processing for historical search. A robot may keep obstacle perception local while sending selected, permissioned events to a central service.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Edge (On-Device)</th>
+<th>Cloud (Remote)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency</td>
+<td>Predictable response when the device is healthy and the model is available locally</td>
+<td>Depends on network round trips, service availability, and queueing</td>
+</tr>
+<tr>
+<td>Bandwidth</td>
+<td>Sends compact events, embeddings, or selected clips instead of every frame</td>
+<td>Can upload richer media, but continuous streams consume more bandwidth</td>
+</tr>
+<tr>
+<td>Privacy</td>
+<td>Sensitive frames and audio can remain on the device</td>
+<td>Data leaves the device and requires stronger transport, retention, and access controls</td>
+</tr>
+<tr>
+<td>Model capacity</td>
+<td>Limited by device memory, power, thermals, and accelerator support</td>
+<td>Can support larger or more diverse models</td>
+</tr>
+<tr>
+<td>Offline operation</td>
+<td>Continues working during network loss</td>
+<td>Degrades or stops when the connection is unavailable</td>
+</tr>
+<tr>
+<td>Fleet updates</td>
+<td>Requires device deployment and compatibility testing</td>
+<td>Central model updates are simpler to roll out</td>
+</tr>
+<tr>
+<td>Debugging</td>
+<td>Local logs and replay are essential because remote inspection is limited</td>
+<td>Central observability is easier, but it may miss device-only failures</td>
+</tr>
+<tr>
+<td>Best fit</td>
+<td>Robot control, immediate alerts, privacy-sensitive events, intermittent connectivity</td>
+<td>Retrospective search, batch enrichment, cross-device analysis, model-heavy workloads</td>
+</tr>
+</tbody>
+</table>
+<p><a id="use-a-split-pipeline"></a></p>
+<h3>Use a split pipeline</h3>
+<p>A useful pattern is to keep the <strong>physical safety loop local</strong>. Camera capture, calibration, obstacle checks, emergency conditions, and basic tracking should not depend on a remote request. The device can then publish selected observations, compressed clips, or event metadata for broader analysis.</p>
+<p>Cloud services become more valuable when the question spans time, devices, or media types. An operator might search for a person near a gate, then correlate the result with an audio alarm and a DashCam segment. That kind of cross-source investigation can be expensive to run entirely on a small embedded system.</p>
+<p>The handoff needs explicit rules. Define which frames leave the device, what happens when the network disappears, how long local buffers persist, and how an operator can inspect a failed decision. Signed media references, chunked uploads, retry queues, and backpressure are more important than a demo that sends every frame upstream.</p>
+<p><a id="match-placement-to-failure-cost"></a></p>
+<h3>Match placement to failure cost</h3>
+<p>A false negative in a retrospective advertisement-editing workflow wastes editor time. A false negative in collision avoidance can create a safety event. Those are different engineering problems, even if both begin with video inference.</p>
+<p>NVIDIA's edge stack illustrates the same principle at a lower level. Its Jetson materials describe hardware-accelerated video encode and decode, dedicated vision engines, and runtime options designed for embedded robotics. The <a href="https://developer.nvidia.com/blog/accelerate-ai-inference-for-edge-and-robotics-with-nvidia-jetson-t4000-and-nvidia-jetpack-7-1/">JetPack edge and robotics overview</a> shows why teams should account for memory movement, power, thermal headroom, and runtime integration rather than comparing model accuracy alone.</p>
+<p>A hybrid system usually works best. Keep immediate perception and privacy-sensitive filtering close to the sensor. Send carefully selected context to the cloud when broader search, fleet learning, or long-term storage justifies the cost.</p>
+<p><a id="real-world-applications-and-use-cases"></a></p>
+<h2>Real-World Applications and Use Cases</h2>
+<p>A robotics vision stack earns its value in the handoff between raw media and a usable decision. The same components can support advertisement video editing, CCTV review, DashCam analytics, smart-glasses assistance, and robot perception, but each workflow needs different evidence, latency, and retention rules.</p>
+<p>An advertisement editor reviewing a long product shoot might search for a product in someone's hand, a person smiling at the camera, a visible logo, or a spoken phrase. A multimodal system can return time ranges where the visual and audio signals occur together, reducing manual scrubbing across every take. The editor still decides which shot works creatively. The software narrows the search and preserves the surrounding context.</p>
+<p><img alt="A diagram illustrating real-world applications of computer vision including surveillance, face recognition, and personalized advertisement video editing." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/afc9e4a0-ecb6-4e0e-aaf3-725d7f691fe9/robotics-vision-software-stack-computer-vision.jpg" /></p>
+<p><a id="security-and-surveillance"></a></p>
+<h3>Security and surveillance</h3>
+<p>CCTV operators often begin with a visual question, such as whether someone entered a restricted area. Audio can provide supporting evidence that video alone misses. A household surveillance robot described in <a href="https://dl.acm.org/doi/10.1007/s10846-008-9297-3">journal research on audio-visual abnormal-event detection</a> combines video and audio, and related surveillance systems use both signals to identify and track intruders in off-limit areas.</p>
+<p>This changes how an operator searches. Instead of reviewing every feed, they can inspect a visual event alongside a door opening, alarm, impact, or unusual sound. Results should include the relevant segment, nearby context, timestamp, location, and source device. A face crop without that surrounding information is difficult to verify and weak for incident review.</p>
+<p><a id="dashcams-and-gopros"></a></p>
+<h3>DashCams and GoPros</h3>
+<p>A DashCam records through changing exposure, reflections, road noise, motion, and intermittent connectivity. Edge processing can flag candidate events, such as sudden movement, a person near the vehicle, or a distinctive sound, then retain a short context window for later inspection. A GoPro creates a similar retrieval problem in sports, field inspection, and expedition work. There, the useful query may concern a person, gesture, landmark, or spoken instruction rather than a safety alert.</p>
+<p>A phone can serve as camera, microphone, companion display, and upload client at once. Smart glasses add hands-free interaction, which makes synchronized audio and visual context part of the interface rather than an optional feature. Simple questions should receive local answers quickly. Broader searches can move upstream when they need longer history or more compute.</p>
+<p><a id="robots-and-smart-glasses"></a></p>
+<h3>Robots and smart glasses</h3>
+<p>A warehouse robot may require geometry for navigation, semantic recognition for task interpretation, and historical memory to diagnose a failed run. Smart glasses may retrieve what the wearer saw earlier, identify a component, or connect a spoken request with the current scene. These workflows require synchronized sensor timestamps, spatial context, device identity, and a defined boundary between perception and action.</p>
+<p>Physical AI also brings multimodal policy models into production systems. The deployment pattern varies by robot and task, so teams should treat VLA output as one input to the control pipeline rather than as a replacement for deterministic checks. A VLA model can interpret a scene and propose a task-level response, while separate components verify geometry, safety zones, reachability, and actuator conditions before execution.</p>
+<blockquote>
+<p>The safest architecture lets semantic systems suggest meaning while deterministic components verify the geometry and conditions required for action.</p>
+</blockquote>
+<p>Across these applications, the shared requirement is a <strong>unified physical memory</strong>. Advertisement editing needs searchable media, surveillance needs correlated evidence, DashCams need event recall, and robots need operational history. Audio and video should remain linked through timestamps, device identity, location, confidence, and processing state. The edge can extract events and preserve short buffers, while cloud services can connect those events with longer-term records when the network and privacy rules permit. Separate audio and video tools force users to rebuild those relationships manually.</p>
+<p><a id="integrating-with-v-modal-ai-sdks"></a></p>
+<h2>Integrating with V-Modal AI SDKs</h2>
+<p>A mobile or robotics integration should begin with the media lifecycle, not the query screen. Decide which devices capture data, how streams are buffered, what metadata travels with each segment, and which results must be available offline. Android and Flutter applications then become clients of a memory layer rather than isolated upload forms.</p>
+<p><a id="start-with-the-native-path"></a></p>
+<h3>Start with the native path</h3>
+<p>For an Android companion app, use the Kotlin SDK to connect capture, session state, uploads, and retrieval to the application lifecycle. Keep camera and microphone work outside the UI thread, handle interruptions from calls or backgrounding, and preserve timestamps when the operating system pauses or resumes capture.</p>
+<p>A practical sequence looks like this:</p>
+<ol>
+<li><strong>Create a capture session.</strong> Associate the session with a device, user permission state, source type, and start time.</li>
+<li><strong>Buffer media in chunks.</strong> Avoid holding a complete recording in memory. Chunked handling is safer for long streams and unstable mobile networks.</li>
+<li><strong>Upload with resumable behavior.</strong> Retry failed chunks, apply backpressure, and expose clear status to the user rather than dropping media without notice.</li>
+<li><strong>Retain local references.</strong> The app should know which content is pending, uploaded, rejected, or ready for retrieval.</li>
+<li><strong>Submit a multimodal query.</strong> Support text-to-video, image-to-video, voice-to-audio, or an environmental-state request depending on the application.</li>
+<li><strong>Render time-based results.</strong> Open the relevant segment with source and timestamp context, not just a generic search result.</li>
+</ol>
+<p><img alt="Screenshot from https://github.com/v-modal" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/9bf24467-ac50-45e3-922a-d72cf7d53cb3/robotics-vision-software-stack-github-profile.jpg" /></p>
+<p><a id="flutter-for-shared-application-logic"></a></p>
+<h3>Flutter for shared application logic</h3>
+<p>Flutter is useful when the same companion experience must run across Android and iOS. Keep platform-specific capture, permissions, codecs, and background execution behind a narrow plugin boundary. Let shared code handle session state, query construction, result presentation, and retry policy.</p>
+<p>The integration should also support edge hardware and embedded Linux where the application needs a local memory layer. A robot may write event data locally during network loss, then synchronize selected history later. A smart-glasses companion may keep immediate retrieval close to the wearer while using remote services for broader searches.</p>
+<p>The platform described by <a href="https://github.com/v-modal">V-Modal AI's public SDK organization</a> is one option for this architecture. Its published materials describe multimodal video and audio search, continuous visual memory, robotics-oriented edge integration, Android and Flutter SDKs, signed streaming URLs, and chunked multipart uploads. Treat those capabilities as integration components to validate against your own device, permissions, retention, and latency requirements.</p>
+<p><a id="build-observability-into-the-first-prototype"></a></p>
+<h3>Build observability into the first prototype</h3>
+<p>Log capture state, upload state, query latency, result timestamps, and device health. Don't log sensitive media indiscriminately. A replayable event timeline is more useful than a dashboard that only reports request success.</p>
+<p>For robotics, separate search results from control commands. A retrieved clip or semantic match can inform an operator or planner, but safety-critical actuation should still pass through the robot's established validation and control layers.</p>
+<p><a id="common-challenges-and-pain-points"></a></p>
+<h2>Common Challenges and Pain Points</h2>
+<p>Robotics vision projects rarely fail because a team can't display a camera frame. They fail at the boundaries between devices, modalities, models, and operational policy.</p>
+<ul>
+<li><strong>Opaque physical data:</strong> Teams capture video, audio, depth, and sensor readings but can't connect them later by time and location.</li>
+<li><strong>Fragmented audio-visual analysis:</strong> Separate pipelines produce mismatched timestamps and force operators to compare evidence manually.</li>
+<li><strong>Manual scrubbing:</strong> Long CCTV, DashCam, GoPro, and robot recordings hide useful moments inside hours of footage.</li>
+<li><strong>Device history gaps:</strong> Mobile apps, smart glasses, robots, and edge cameras each retain fragments of context that don't form a continuous memory.</li>
+<li><strong>Unstable edge conditions:</strong> Heat, battery limits, memory pressure, dropped frames, and intermittent connectivity change behavior after deployment.</li>
+<li><strong>Semantic-geometric mismatch:</strong> A model can understand what an object means without estimating the pose needed for safe action, or calculate geometry without understanding the task.</li>
+<li><strong>Privacy and governance:</strong> Face observations, voices, and environmental recordings require clear permissions, retention rules, and access controls.</li>
+<li><strong>Difficult mobile integration:</strong> Background execution, uploads, playback, and cross-platform SDK behavior can overwhelm teams before the search experience is complete.</li>
+</ul>
+<p>The durable solution is not a single face detector or a larger model. It's a layered stack that preserves context from sensor capture through retrieval, keeps urgent decisions near the edge, and uses multimodal memory to connect what the system saw with what it heard.</p>
+<hr />
+<p>V-Modal AI offers a visual memory layer for Physical AI, with multimodal video and audio search, continuous memory, robotics edge integration, and native Android and Flutter SDK options. If you're building a searchable workflow for robots, smart glasses, DashCams, CCTV, or mobile media, explore the available repositories and SDK details at <a href="https://github.com/v-modal">V-Modal AI</a>.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
