@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>AI Video Analysis: The Physical AI Search Guide</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>AI Video Analysis: The Physical AI Search Guide</h1>
+    <p>A security operator hears an impact in a CCTV recording, a fleet manager needs the moment a driver looked away from the road, and a robotics engineer wants to know when a gripper lost contact with a package. The footage exists, but finding the relevant moment can still mean scrubbing through hours of recordings, switching between camera views, and guessing at timestamps.</p>
+<p>That gap defines modern <strong>AI video analysis</strong>. Recognizing a person, vehicle, or object is only the first step. The harder problem is turning visual streams, audio, and sensor history into <strong>searchable memory</strong> that a mobile app, robot, smart-glasses system, or surveillance workflow can query when it needs evidence.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#the-challenge-of-scrolling-through-hours-of-footage">The Challenge of Scrolling Through Hours of Footage</a></li>
+<li><a href="#recognition-is-not-memory">Recognition is not memory</a></li>
+<li><a href="#market-growth-and-the-evolution-of-visual-search">Market Growth and the Evolution of Visual Search</a></li>
+<li><a href="#from-pixels-to-multimodal-systems">From pixels to multimodal systems</a></li>
+<li><a href="#why-visual-search-is-the-next-layer">Why visual search is the next layer</a></li>
+<li><a href="#understanding-multimodal-fusion-for-robotics">Understanding Multimodal Fusion for Robotics</a></li>
+<li><a href="#audio-changes-what-video-means">Audio changes what video means</a></li>
+<li><a href="#physical-ai-needs-searchable-state">Physical AI needs searchable state</a></li>
+<li><a href="#edge-first-architecture-for-real-time-systems">Edge-First Architecture for Real-Time Systems</a></li>
+<li><a href="#cloud-processing">Cloud processing</a></li>
+<li><a href="#edge-processing">Edge processing</a></li>
+<li><a href="#integrating-search-layers-into-mobile-apps">Integrating Search Layers into Mobile Apps</a></li>
+<li><a href="#start-with-the-user-journey">Start with the user journey</a></li>
+<li><a href="#kotlin-integration">Kotlin integration</a></li>
+<li><a href="#flutter-integration">Flutter integration</a></li>
+<li><a href="#test-the-failures-first">Test the failures first</a></li>
+<li><a href="#deploying-search-for-surveillance-and-dashcams">Deploying Search for Surveillance and Dashcams</a></li>
+<li><a href="#dashcam-and-connected-fleets">Dashcam and connected fleets</a></li>
+<li><a href="#cctv-and-video-surveillance">CCTV and video surveillance</a></li>
+<li><a href="#overcoming-temporal-precision-challenges">Overcoming Temporal Precision Challenges</a></li>
+<li><a href="#why-sampling-misses-the-moment">Why sampling misses the moment</a></li>
+<li><a href="#design-for-reviewable-uncertainty">Design for reviewable uncertainty</a></li>
+</ul>
+<p><a id="the-challenge-of-scrolling-through-hours-of-footage"></a></p>
+<h2>The Challenge of Scrolling Through Hours of Footage</h2>
+<p>A robotics team can have several camera feeds from one test run, plus microphone recordings and sensor logs. After an incident, the engineer usually starts with a rough time estimate, opens the files, and scrubs backward and forward until something looks relevant. The same workflow appears in fleet operations, security control rooms, and advertisement video editing. Recording is easy. <strong>Retrieval is the bottleneck.</strong></p>
+<p><img alt="A frustrated security guard watching multiple surveillance screens replaced by an automated artificial intelligence video analysis system." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/1a700f2e-39b3-48c4-a245-2b2a9110296d/ai-video-analysis-security-automation.jpg" /></p>
+<p>Object detection has made isolated recognition practical. A system can identify a person, a car, a pallet, or a hand in a frame. That doesn't answer the operational question: <em>When did the person pick up the pallet, what did they say immediately before it, and which camera captured the handoff?</em></p>
+<p><a id="recognition-is-not-memory"></a></p>
+<h3>Recognition is not memory</h3>
+<p>A detector labels what appears in a frame. A searchable memory layer connects that observation to <strong>time, sequence, sound, and surrounding context</strong>. Those are different engineering problems.</p>
+<p>A useful search request might be:</p>
+<ul>
+<li><strong>Visual event:</strong> Find the moment a worker opens the side gate.</li>
+<li><strong>Audio event:</strong> Find the loud impact followed by a shouted warning.</li>
+<li><strong>Cross-modal event:</strong> Find when the robot stopped after a person called its name.</li>
+<li><strong>Visual comparison:</strong> Find clips where the same package appears near the loading bay.</li>
+<li><strong>Editing request:</strong> Find every usable shot where a product is visible without an obstruction.</li>
+</ul>
+<p>The system doesn't need to understand everything equally well. It needs to return a narrow, reviewable segment that a person or downstream system can validate.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> A video AI project should be judged by how quickly it retrieves useful evidence, not only by how many objects it labels.</p>
+</blockquote>
+<p>This distinction matters even more for Physical AI. A robot can't rely on a remote operator to search a cloud archive every time it encounters an unfamiliar state. Smart glasses need relevant history while the wearer is moving. A GoPro or dashcam may collect valuable evidence where connectivity is intermittent. CCTV operators need an answer tied to a timeline, not another unsearchable file.</p>
+<p>A search layer also changes debugging. Instead of asking why a model missed a frame, engineers can inspect the surrounding video, audio, and device state together. That makes it easier to separate a perception failure from a timestamp failure, a bad camera angle, or missing context.</p>
+<p><a id="market-growth-and-the-evolution-of-visual-search"></a></p>
+<h2>Market Growth and the Evolution of Visual Search</h2>
+<p>A warehouse camera can recognize a pallet, a worker, or a forklift in individual frames. The harder job starts when an operator asks, “When did that pallet move, and what happened immediately before it?” AI video analysis is shifting from frame-level recognition toward searchable memory, which explains the commercial momentum behind the field.</p>
+<p>The global market is projected to reach <strong>US$ 7.4 billion in 2026</strong> and <strong>US$ 51.1 billion by 2033</strong>, implying a <strong>31.8% CAGR</strong>. A separate estimate places it at <strong>US$ 20.75 billion in 2025</strong> and <strong>US$ 27.64 billion in 2026</strong>, representing <strong>33.2% year-over-year growth</strong>, according to <a href="https://www.persistencemarketresearch.com/market-research/ai-video-analytics-market.asp">Persistence Market Research's AI video analytics market outlook</a>.</p>
+<p><img alt="An infographic showing market growth trends for video data, AI video analysis, and robotic vision adoption." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/796d73ec-7a29-495d-b876-54f9f9599b23/ai-video-analysis-market-growth.jpg" /></p>
+<p>These projections reflect adoption across retail, industrial monitoring, media workflows, autonomous systems, and connected devices. North America was the largest regional market in 2024, while Asia-Pacific is expected to grow fastest. For practitioners, the implication is practical: teams will need storage and indexing systems that preserve searchable events, not only models that label live frames.</p>
+<p><a id="from-pixels-to-multimodal-systems"></a></p>
+<h3>From pixels to multimodal systems</h3>
+<p>Computer vision has progressed from detecting edges and simple shapes to supporting real-time recognition. Early neural-network experiments in the 1950s addressed basic visual features. Larry Roberts' MIT work in the early 1960s, published in 1965, became a landmark in computer vision. Optical character recognition brought early commercial use in the 1970s, larger online image datasets supported facial-recognition programs in the 1990s, and the Viola-Jones model in the early 2000s advanced real-time face detection, as documented in <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7953834/">this computer-vision history review</a>.</p>
+<p>Recognition is only the first layer. A deployed system still has to attach timestamps, track identities across frames, retain surrounding context, and return a short evidence window without forcing an engineer to inspect hours of footage.</p>
+<p><a id="why-visual-search-is-the-next-layer"></a></p>
+<h3>Why visual search is the next layer</h3>
+<p>The useful query is no longer only “what is visible?” It is “which moment answers my question?” A dedicated search layer converts detections, transcripts, sensor events, and device state into retrievable operational history.</p>
+<p>That distinction matters for Physical AI. A mobile robot or wearable device cannot depend on a remote operator searching a cloud archive whenever it encounters an unfamiliar state. Edge processing can produce local events, while a separate memory layer organizes them for later retrieval, debugging, and validation. Standard cloud processing may recognize objects accurately yet still leave the evidence difficult to find when connectivity is limited or response time matters.</p>
+<p><strong>Visual recognition produces observations. Visual search makes those observations usable memory.</strong></p>
+<p><a id="understanding-multimodal-fusion-for-robotics"></a></p>
+<h2>Understanding Multimodal Fusion for Robotics</h2>
+<p>A warehouse robot does not read the world as a clean stream of frames. It sees a package, hears a motor pitch change, measures depth, pulls in motion data, and tracks people moving through the same aisle. If each signal stays in its own pipeline, the result is fragmented evidence and slow debugging.</p>
+<p>A <strong>multimodal memory layer</strong> has to do more than collect inputs. It needs a single clock for every event, so an engineer can ask for the moment a package slipped after the conveyor noise changed, then pull the matching video, audio, and depth data without hunting across separate systems. In practice, that means hardware PTP sync at the sensor edge and a unified nanosecond epoch stored with each event record. That timestamp discipline matters more than another layer of model output.</p>
+<p><img alt="A diagram illustrating multimodal sensor fusion for robotics, connecting video, audio, and LiDAR data to a central memory layer." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/30c97b89-dc41-4896-a6bd-dd039b902d61/ai-video-analysis-robotics-fusion.jpg" /></p>
+<p><a id="audio-changes-what-video-means"></a></p>
+<h3>Audio changes what video means</h3>
+<p>Video may show a robot turning toward a person. Audio can tell you whether that person gave a command, shouted a warning, or caused an unexpected noise. In one medical and robotics example, researchers extracted video frames and speech separately, then combined a 3D CNN for video with a CRNN for speech through a multimodal fusion layer. Another robotics dataset paper combines WiFi sensing, video, and audio for activity recognition, with audio adding context around the activity.</p>
+<p>These fusion patterns are useful for <strong>Audio for Robotics</strong> because sound often carries evidence outside the camera's field of view. A motor's abnormal noise, a verbal instruction, glass breaking, or a collision can narrow a search even when the visual signal is unclear.</p>
+<p><a id="physical-ai-needs-searchable-state"></a></p>
+<h3>Physical AI needs searchable state</h3>
+<p>Traditional media workflows focus on playback, editing, captions, and distribution. Robotics and Physical AI need historical state that can be queried against actions, environments, and sensor changes.</p>
+<p>The difference shows up in the search target. Media teams want the shot. CCTV operators want the incident. A robot team wants the sequence that led to the reaction, including the sensor state before it moved.</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Primary question</th>
+<th>Useful memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Media content</td>
+<td>Which shot contains the product or speaker?</td>
+<td>Visual moments, speech, scenes</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>When did a person enter or an impact occur?</td>
+<td>People, sounds, time segments</td>
+</tr>
+<tr>
+<td>Robotics</td>
+<td>What changed before the robot reacted?</td>
+<td>Video, audio, depth, actions</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>What did I just see or hear?</td>
+<td>First-person context and recent events</td>
+</tr>
+</tbody>
+</table>
+<p>A unified stack does not remove perception errors. It does reduce the number of disconnected searches an operator has to run. The same event can be retrieved through text, an image example, a sound, or an environmental state. That is the basis for a <strong>Search Layer for Physical AI</strong>, where memory supports both human investigation and machine action.</p>
+<p>Causal reasoning is still a separate problem. Current systems can identify objects and interactions more reliably than they can explain why a multiparty event happened, what a person intended, or how cultural context changes interpretation. <a href="https://www.forasoft.com/blog/article/generative-ai-contextual-video-intelligence">Recent coverage of contextual video intelligence</a> points to that gap. A product team should treat “what happened next?” as a harder requirement than “what appears in the frame?”</p>
+<p><a id="edge-first-architecture-for-real-time-systems"></a></p>
+<h2>Edge-First Architecture for Real-Time Systems</h2>
+<p>Cloud processing is convenient for large archives, centralized governance, and heavyweight analysis. It becomes less attractive when a camera is mounted on a moving vehicle, a robot must react before a network round trip completes, or a pair of smart glasses is operating in a crowded environment.</p>
+<p>The practical choice isn't cloud versus edge in absolute terms. It's deciding which work must happen beside the sensor and which work can wait for a central service.</p>
+<p><img alt="A comparison infographic between cloud and edge-first architecture, highlighting benefits and operational differences for smart devices." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/f23e892c-7333-425e-ba27-24feb80205d9/ai-video-analysis-edge-vs-cloud.jpg" /></p>
+<p><a id="cloud-processing"></a></p>
+<h3>Cloud processing</h3>
+<p>A centralized design simplifies fleet-wide management. Teams can aggregate recordings, update models in one place, and give investigators a broad search surface. It works well for archived CCTV, media libraries, and workflows where a delay is acceptable.</p>
+<p>The weaknesses appear at the device boundary:</p>
+<ul>
+<li><strong>Latency:</strong> A live robot or dashcam may need a local response before the upload completes.</li>
+<li><strong>Bandwidth:</strong> Continuous high-resolution video is expensive to move and store remotely.</li>
+<li><strong>Connectivity:</strong> Tunnels, warehouses, roads, and field sites can interrupt service.</li>
+<li><strong>Privacy:</strong> Some environments shouldn't transmit raw audio or video by default.</li>
+</ul>
+<p><a id="edge-processing"></a></p>
+<h3>Edge processing</h3>
+<p>An edge-first design keeps time-sensitive interpretation near the camera, phone, smart glasses, GoPro, dashcam, or robot computer. It can preserve useful event context locally, then synchronize selected material when a connection becomes available.</p>
+<p>That approach introduces its own pain. On-device hardware has limited memory, thermal headroom, battery capacity, and storage. Developers must handle interrupted uploads, clock drift, corrupted files, model updates, and playback while processing continues. A system that works on a desktop GPU can still fail on a phone because it blocks the UI or exhausts memory during a large upload.</p>
+<blockquote>
+<p><strong>Engineering trade-off:</strong> Put urgent detection and compact memory close to the sensor. Push broad investigation and long-term aggregation to the cloud when the network and privacy policy allow it.</p>
+</blockquote>
+<p>For mobile stacks, the most resilient pattern is usually hybrid. A Kotlin Android application can monitor local capture and event state, while a Flutter layer can share search and playback flows across Android and iOS. Smart glasses can expose a lightweight query interface while the nearby phone or edge hub handles heavier work. The architecture should degrade gracefully instead of treating offline operation as an exception.</p>
+<p><a id="integrating-search-layers-into-mobile-apps"></a></p>
+<h2>Integrating Search Layers into Mobile Apps</h2>
+<p>Mobile developers don't need to turn an app into a full video-processing workstation. They need to make capture, upload, query, and evidence playback reliable under constrained conditions. The implementation should protect the user interface, preserve timestamps, and make failures recoverable.</p>
+<p><a id="start-with-the-user-journey"></a></p>
+<h3>Start with the user journey</h3>
+<p>Define the search request before choosing the SDK boundary. A fleet app might accept “show hard braking near the depot,” while a smart-glasses app might accept a voice request about an object seen moments ago. A media app may use an image reference to find similar shots for advertisement video edition.</p>
+<p>Then separate the flow into four responsibilities:</p>
+<ol>
+<li><strong>Capture and consent:</strong> Record the source, permissions, device clock, camera identity, and audio state.</li>
+<li><strong>Transfer:</strong> Use resumable or chunked uploads so a temporary network loss doesn't restart the entire file.</li>
+<li><strong>Query:</strong> Send natural-language, image, voice, or environmental-state intent to the search service.</li>
+<li><strong>Playback:</strong> Open the returned time segment immediately, with enough surrounding context for verification.</li>
+</ol>
+<p><a id="kotlin-integration"></a></p>
+<h3>Kotlin integration</h3>
+<p>A native Android stack should keep capture and upload work off the main thread. Kotlin coroutines are a natural fit for coordinating recording state, local queues, retry policies, and cancellation when a user leaves the screen.</p>
+<p>Use a local database for upload state rather than relying on an in-memory queue. Store the media identifier, capture start time, duration, upload parts, retry status, and the user's search request. The app should be able to resume after a process restart and show whether the result is local, synchronized, or still pending.</p>
+<p>Avoid loading entire recordings into memory. Stream files from storage, display progress from completed chunks, and keep search results as lightweight metadata until the user opens a segment. That design matters for dashcam clips, GoPro imports, and long CCTV exports.</p>
+<p><a id="flutter-integration"></a></p>
+<h3>Flutter integration</h3>
+<p>Flutter works well for shared search interfaces, result cards, filters, and timeline playback. Keep platform-specific capture, background transfer, Bluetooth, and hardware access behind a native bridge. Don't force one abstraction to control every camera and sensor.</p>
+<p>A useful boundary looks like this:</p>
+<ul>
+<li><strong>Flutter:</strong> Query composition, result presentation, annotations, and navigation.</li>
+<li><strong>Kotlin or Swift:</strong> Camera control, local persistence, background transfer, and device permissions.</li>
+<li><strong>Edge service:</strong> Local indexing, sensor coordination, and offline retrieval.</li>
+<li><strong>Remote service:</strong> Archive search, fleet-wide history, and cross-device access.</li>
+</ul>
+<p><a id="test-the-failures-first"></a></p>
+<h3>Test the failures first</h3>
+<p>Mobile video applications fail in ordinary conditions, not only under exotic loads. Test interrupted uploads, low battery, revoked microphone access, full storage, camera rotation, missing audio, device clock changes, and a user launching a second search before the first finishes.</p>
+<p>Natural-language search also needs a fallback. If “the package fell after the warning sound” returns nothing, show nearby events, available audio markers, or a broader visual query rather than an empty screen. The best interface makes uncertainty visible and gives the operator a fast way to refine intent.</p>
+<p><a id="deploying-search-for-surveillance-and-dashcams"></a></p>
+<h2>Deploying Search for Surveillance and Dashcams</h2>
+<p>A control room operator rarely wants a summary of an entire recording. They want the segment containing a person, a vehicle, a scream, a collision, or a door opening. Practical systems already mark people and sound events such as speech or screams on a timeline, as described in this accident-detection paper covering dashcam and CCTV analysis.</p>
+<p>That timeline changes the review workflow. An operator can begin with an event marker, inspect the surrounding footage, compare another camera, and export only the relevant evidence. The system doesn't replace judgment. It removes the least valuable part of the job, manually scanning irrelevant material.</p>
+<p><a id="dashcam-and-connected-fleets"></a></p>
+<h3>Dashcam and connected fleets</h3>
+<p>A fleet application can combine forward-facing road video with driver-facing footage, audio alerts, and location context. On-device systems can detect distracted driving, drowsiness, smoking, and mobile-phone use, then issue an in-cab alert while notifying an operations team. AFTECH describes this edge-oriented dashcam pattern, including HD 1080p recording, infrared night vision, and 4G dashboard access in its <a href="https://arxiv.org/pdf/2408.02033v1">AI dashcam overview</a>.</p>
+<p>The search requirement appears after the alert. A manager may need every clip associated with a driver behavior, a road event, or a specific date and time. Mobile-first retrieval is useful here because the person reviewing the event may be in the field, not at a desktop workstation.</p>
+<p><a id="cctv-and-video-surveillance"></a></p>
+<h3>CCTV and video surveillance</h3>
+<p>CCTV systems benefit from queries that combine visual and auditory clues. “Find the person who entered after the impact” is more useful than a person count alone. “Show the camera view before the alarm” requires temporal context and reliable synchronization across feeds.</p>
+<p>Robotics teams face a similar pattern during incident review. A stopped robot, an unexpected sound, and an object left outside its expected position may belong to one event. Searching those signals together can shorten diagnosis, provided the system returns evidence that engineers can replay and validate.</p>
+<p>The main pain points remain familiar:</p>
+<ul>
+<li><strong>False positives:</strong> Alerts create review work if thresholds are too aggressive.</li>
+<li><strong>Timestamp drift:</strong> Separate cameras and sensors may disagree about event order.</li>
+<li><strong>Poor audio:</strong> Wind, road noise, and distance reduce sound reliability.</li>
+<li><strong>Privacy controls:</strong> Retention and access policies must shape the design.</li>
+<li><strong>Evidence handling:</strong> Exported clips need clear provenance and permissions.</li>
+</ul>
+<p><a id="overcoming-temporal-precision-challenges"></a></p>
+<h2>Overcoming Temporal Precision Challenges</h2>
+<p>A video can be correctly labeled and still be operationally useless. If a search returns the right scene but misses the exact moment when a hand releases a tool, a vehicle makes contact, or a person crosses a boundary, the operator must repeat the investigation manually.</p>
+<p>Long-video analysis is difficult because models must preserve context across extended temporal dependencies. The <a href="https://arxiv.org/html/2510.17722v1">LVBench benchmark</a> uses videos with an average length of <strong>4,101 seconds</strong> and evaluates long-term memory, comprehension, and information extraction. Gemini-2.5-Pro reached <strong>67.4</strong> on the benchmark, while humans averaged <strong>94.4</strong>, showing that long-form understanding still has a substantial gap.</p>
+<p><a id="why-sampling-misses-the-moment"></a></p>
+<h3>Why sampling misses the moment</h3>
+<p>Many systems inspect selected frames instead of every frame. That saves compute, but a brief action between samples can disappear. The trade-off is especially serious in security review, sports footage, manufacturing, and robotics logs, where the decisive movement may last only seconds.</p>
+<p>Temporal localization is therefore a separate capability from recognition. In the Ego4D Point of No Return challenge, the SViT technical report defines the task as finding the key frame where an object changes state and reports an absolute temporal localization error of <strong>0.656</strong> on the test set, as documented in <a href="https://arxiv.org/html/2406.08035v3">the technical report</a>.</p>
+<p><a id="design-for-reviewable-uncertainty"></a></p>
+<h3>Design for reviewable uncertainty</h3>
+<p>Teams shouldn't promise frame-perfect retrieval before testing the actual camera, motion, lighting, and audio conditions. Build an evaluation set from real incidents and measure whether returned segments let a reviewer confirm the event quickly.</p>
+<p>A solid workflow should:</p>
+<ul>
+<li>Return a <strong>tight candidate segment</strong> plus nearby context.</li>
+<li>Preserve the original recording for verification.</li>
+<li>Show whether the result came from visual, audio, or fused evidence.</li>
+<li>Allow the reviewer to correct the time range.</li>
+<li>Record the query and selected evidence for later debugging.</li>
+</ul>
+<p>Long-form systems are improving, but current reviews note that models remain stronger on roughly 30 to 60 minute videos than on multi-hour material, and brief events can still be missed by sparse inspection, as discussed in <a href="https://kanerika.com/blogs/ai-video-analysis/">this analysis of AI video-analysis limitations</a>. The practical answer isn't to send every raw stream to the cloud. It's to build a dedicated search layer that preserves local context, handles multimodal signals, and makes uncertainty visible.</p>
+<p>The most useful AI video analysis system is not the one that produces the longest description. It's the one that helps a person or robot retrieve the right evidence at the moment a decision matters.</p>
+<hr />
+<p>V-Modal AI offers a Visual Memory Layer for Physical AI with multimodal video and audio search, edge-oriented memory for robotics and mobile devices, natural-language retrieval, and Kotlin and Flutter integration patterns. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to evaluate a dedicated search layer for robotics, smart glasses, dashcams, CCTV, and other physical systems.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
