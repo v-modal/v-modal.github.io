@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Vidio Search Engine: How Multimodal Video Search Works</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Vidio Search Engine: How Multimodal Video Search Works</h1>
+    <p>You've just finished a shift, a drive, or a test run, and someone asks a simple question. When did the forklift stop at the gate? Where did you leave that tool? Which clip shows the product close-up?</p>
+<p>You know the answer is somewhere in hours of video. What you don't have is hours to scrub through it.</p>
+<p>That's the problem a video search engine is built to solve. Instead of treating a recording as one long file you drag through by hand, it lets a device or app keep a <strong>memory layer</strong> over what it saw and heard. You ask in plain language, with a picture, or with a sound, and you get back the moment.</p>
+<p>People searching for a <strong>Vidio search engine</strong> often land on two different ideas at once. One is Vidio, the Indonesian streaming service. The other is video search itself, the technology that finds moments inside recordings. Keeping those ideas separate makes the rest of this topic much easier to judge, whether you're building for a robot, a dashcam, CCTV, smart glasses, or an ad library.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-video-search-returns-and-how-multimodal-search-works">What Video Search Returns and How Multimodal Search Works</a></li>
+<li><a href="#what-multimodal-means-in-practice">What multimodal means in practice</a></li>
+<li><a href="#two-recent-examples-that-clarify-the-category">Two recent examples that clarify the category</a></li>
+<li><a href="#pain-points-that-make-manual-video-review-fail">Pain Points That Make Manual Video Review Fail</a></li>
+<li><a href="#where-the-work-breaks-down">Where the work breaks down</a></li>
+<li><a href="#physical-ai-stack-compared-with-media-content-search">Physical AI Stack Compared With Media Content Search</a></li>
+<li><a href="#the-two-rows-that-decide-most-designs">The two rows that decide most designs</a></li>
+<li><a href="#robotics-dashcam-and-wearable-search-workflows">Robotics, Dashcam and Wearable Search Workflows</a></li>
+<li><a href="#vision-and-audio-for-robotics">Vision and audio for robotics</a></li>
+<li><a href="#dashcam-gopro-smart-glasses-and-mobile">Dashcam, GoPro, smart glasses, and mobile</a></li>
+<li><a href="#cctv-surveillance-and-ad-editing-in-recent-practice">CCTV, Surveillance and Ad Editing in Recent Practice</a></li>
+<li><a href="#one-event-searched-once">One event, searched once</a></li>
+<li><a href="#the-same-move-inside-an-ad-library">The same move inside an ad library</a></li>
+<li><a href="#pick-your-first-integration-path">Pick Your First Integration Path</a></li>
+<li><a href="#a-three-step-checklist">A three step checklist</a></li>
+</ul>
+<p><a id="what-video-search-returns-and-how-multimodal-search-works"></a></p>
+<h2>What Video Search Returns and How Multimodal Search Works</h2>
+<p>Say a delivery driver returns to the depot and a supervisor asks, "When did the red van stop at the north gate?" The dashcam holds a full morning of driving. Nobody wants the whole file. They want the ten seconds when that van appears, slows down, and stops.</p>
+<p>A video search engine returns that <strong>exact moment</strong>, not the whole recording. You type a description, speak a phrase, or show a picture, and you get a ranked clip with a start time and an end time. Playback jumps straight there.</p>
+<p>Think of a librarian for web search. You ask for a topic and the librarian hands you useful pages. Video search works closer to a concierge who has watched the film for you. She doesn't hand you the whole film. She points to the second where the man dropped his keys near the door, even if nobody wrote that moment down in a file name.</p>
+<p><a id="what-multimodal-means-in-practice"></a></p>
+<h3>What multimodal means in practice</h3>
+<p><strong>Multimodal</strong> sounds technical, but the idea is simple. A recording carries more than one kind of signal at once. There's the picture in each frame, the sound from the microphone, spoken words, and context such as time, place, or weather.</p>
+<p>A single-signal search can miss the point. If you only search captions or file names, you'll never find a silent event. If you only search images, you'll miss the alarm, horn, or spoken instruction that explains what happened next. Multimodal search reads video as a sequence of frames with sound and context attached, so one query can draw on the evidence that fits it best.</p>
+<table>
+<thead>
+<tr>
+<th>Query type</th>
+<th>Example input</th>
+<th>What comes back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text description</td>
+<td>'red delivery van stopping at a gate'</td>
+<td>Matching clip with start and end timestamps</td>
+</tr>
+<tr>
+<td>Image</td>
+<td>Product photo</td>
+<td>Clips where that product appears</td>
+</tr>
+<tr>
+<td>Voice</td>
+<td>'glass breaking'</td>
+<td>Audio moment and the matching frames</td>
+</tr>
+<tr>
+<td>Environment state</td>
+<td>'night, heavy rain, wet road'</td>
+<td>Segments where those conditions occur</td>
+</tr>
+</tbody>
+</table>
+<p>Read the table by asking what evidence your user has. A fleet manager has words. An editor has a product photo. A security operator may only remember a sound. A test driver may remember rain and a wet road, not the clock time.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Decide first whether your user needs a moment, a short clip, or a whole file. Most operational questions need a moment, and that choice shapes every later decision about devices and storage.</p>
+</blockquote>
+<p><a id="two-recent-examples-that-clarify-the-category"></a></p>
+<h3>Two recent examples that clarify the category</h3>
+<p>The <a href="https://trec.nist.gov/pubs/trec34/papers/ncsu-las.avs.pdf">2025 TREC Ad-hoc Video Search evaluation</a> provides systems with short text queries and asks for ranked lists of <strong>up to 1,000 relevant video segments</strong> from a large corpus. The submissions used several approaches, including language-based expansion, splitting a query by evidence type, reranking with vision and language models, and selective audio retrieval. You don't need those internal details to apply the lesson. One request might need an object in a frame, another a spoken phrase, and another an environmental sound. Segment level results match how people interact with robots, dashcams, GoPros, smart glasses, and phones.</p>
+<p>Vidio is a useful contrast, because it's a media catalog, not a search product for your own device footage. According to <a href="https://developers.google.com/search/case-studies/vidio-case-study">Google's Vidio case study</a>, Vidio was established in Indonesia in <strong>2014</strong> and by <strong>2023</strong> its catalog contained <strong>more than 1 million videos</strong>. After adding machine readable VideoObject descriptions, and while publishing about <strong>30%</strong> more videos between the first quarter of 2022 and the first quarter of 2023, it saw roughly <strong>a threefold increase in video impressions</strong> and <strong>nearly a twofold increase in video clicks</strong> on Google Search within one year. The delivery format didn't have to change. Better descriptions changed discovery.</p>
+<p>That's the shared principle, at two scales. A streaming catalog gets found when machines can read what each video contains. A robot or camera gets useful memory when its own recordings can be asked about in the same direct way.</p>
+<p><a id="pain-points-that-make-manual-video-review-fail"></a></p>
+<h2>Pain Points That Make Manual Video Review Fail</h2>
+<p>Manual review fails gradually at first. One person can check one short clip. The work breaks when footage is continuous, devices multiply, and the important event lasts only a few seconds.</p>
+<p>Outside China, the installed base of network cameras was expected to reach <strong>562 million by the end of 2025</strong> and <strong>736 million by 2029</strong>, according to a <a href="https://jabil.com/dam/jcr:db849c26-d50a-4e7a-9203-6b0c929cca7d/jabil_ai-physical-security_wp_fnlpdf.pdf">Jabil AI physical security white paper</a>. That same source notes <strong>nearly 80% of cameras shipped in 2024 included onboard analytics</strong>, while approximately <strong>two-thirds included deep-learning capability</strong>. Cameras increasingly produce streams a machine can work with. People still get stuck reviewing them as if they were tapes.</p>
+<p><a id="where-the-work-breaks-down"></a></p>
+<h3>Where the work breaks down</h3>
+<ul>
+<li><strong>Manual scrubbing:</strong> Reviewing a three hour shift of dashcam or CCTV footage can take hours, and a tired reviewer can still miss a ten second event.</li>
+<li><strong>Tag dependence:</strong> Hand written tags and file names only cover what someone thought to describe, so "bicycle near the loading dock" returns nothing if nobody tagged a bicycle.</li>
+<li><strong>Split audio and video:</strong> The sound sits in one tool and the matching picture in another, so reviewers lose sync precisely when a horn, alarm, or spoken warning matters.</li>
+<li><strong>Bandwidth and cost:</strong> Uploading continuous footage from remote robots, vehicles, or field cameras is slow, and metered connections make it expensive.</li>
+<li><strong>Latency:</strong> An alert about a person entering a restricted zone has to arrive in seconds, not after a long upload and a remote review queue.</li>
+<li><strong>Privacy and retention:</strong> Some footage can't leave the site, and customers apply different retention rules, which makes a single cloud only workflow hard to approve.</li>
+<li><strong>Device fragmentation:</strong> Smart glasses, a GoPro, a dashcam, and phones store and name files differently, so one review workflow rarely fits all of them without adaptation.</li>
+</ul>
+<p>Each pain points to a different fix. Scrubbing and tag dependence argue for searching by meaning, where video search in V-Modal AI requires <strong>no manual tags and no scrubbing of timelines</strong>. Bandwidth, latency, and privacy argue for processing near the device. Fragmentation argues for testing each device stack on its own footage instead of assuming one integration covers everything.</p>
+<p>Rank these pains for your project before you pick tools. If latency is first, you'll design differently than a team whose main problem is finding takes in an archive. That ranking decides where memory should live, which queries matter first, and what a successful test looks like.</p>
+<p><a id="physical-ai-stack-compared-with-media-content-search"></a></p>
+<h2>Physical AI Stack Compared With Media Content Search</h2>
+<p><strong>Physical AI</strong> means software running on machines that move through or observe the world around us. Robots, vehicles, cameras, and wearables capture what happens around them, and they need a memory of what they saw and heard so a person, or the machine itself, can ask about it later.</p>
+<p>Media content search looks similar from a distance. An editor also asks for a moment. The difference is that the editor searches finished files in a catalog, while a device in the field searches its own recent experience, often with weak connectivity and a decision waiting on the answer.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Physical AI devices</th>
+<th>Media content library</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Footage source</td>
+<td>Robot cameras, microphones, dashcams, smart glasses</td>
+<td>Studio masters, creator uploads, finished ads</td>
+</tr>
+<tr>
+<td>Connectivity</td>
+<td>Often intermittent or metered</td>
+<td>Usually stable upload pipelines</td>
+</tr>
+<tr>
+<td>Where memory is kept</td>
+<td>On the device or a nearby edge hub</td>
+<td>Central cloud storage</td>
+</tr>
+<tr>
+<td>Typical query</td>
+<td>'Did the forklift cross the blue marker?'</td>
+<td>'Find the product close-up in the spring campaign'</td>
+</tr>
+<tr>
+<td>Cost of a miss</td>
+<td>Missed event, safety risk, delayed response</td>
+<td>Slower editing and wasted review time</td>
+</tr>
+</tbody>
+</table>
+<p><a id="the-two-rows-that-decide-most-designs"></a></p>
+<h3>The two rows that decide most designs</h3>
+<p>Start with <strong>connectivity</strong>. A warehouse robot asked whether a forklift crossed the blue floor marker needs an answer from its own recent memory, even in a corner of the building with poor coverage. An editor asking for a product close-up can usually wait for a central library to respond. That single difference pushes Physical AI toward memory on the device or a nearby hub, and media libraries toward central indexing.</p>
+<p>Then look at the <strong>cost of a miss</strong>. In a catalog, a miss wastes time. On a vehicle or robot, a miss can mean a delayed response, a lost incident record, or a safety question nobody can answer. Teams feel that difference in testing. A media tool can be judged on whether editors find takes faster. A Physical AI tool also has to be judged on whether it answers offline, quickly, and on the messy footage the device really captures.</p>
+<p>Market spending points the same way. Edge video analytics was estimated at <strong>$4.2 billion globally in 2025</strong> and projected to reach <strong>$17.8 billion by 2034</strong>, a <strong>21.3% compound annual growth rate</strong>, according to <a href="https://marketintelo.com/report/edge-video-analytics-market">MarketIntelo's edge video analytics report</a>. Hardware accounted for about <strong>$1.62 billion, or 38.6% of 2025 revenue</strong>, while security and surveillance was the largest application at <strong>38.2%</strong>. Buyers are already putting serious hardware near cameras and machines. Searchable memory fits that direction.</p>
+<p>Many real systems end up hybrid. The device keeps searchable memory locally, and only selected segments move to central storage for sharing, training review, or long term records. That keeps the everyday question fast and private, while still giving a team a shared archive when it needs one.</p>
+<blockquote>
+<p>If the device must act in seconds or keep working offline, plan for edge memory. If you're searching a finished catalog, central indexing is usually enough.</p>
+</blockquote>
+<p><a id="robotics-dashcam-and-wearable-search-workflows"></a></p>
+<h2>Robotics, Dashcam and Wearable Search Workflows</h2>
+<p>The same search question changes meaning by device. "Find it" on a robot means recall from the robot's own cameras and microphones. On a phone, it means a companion app that stays responsive while large files move in the background.</p>
+<p><img alt="A robot and a person using mobile search to locate a warehouse pallet with a blue label." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/1586eafc-f4c0-4f1d-a31e-bdb22992c9bb/video-search-engine-warehouse-automation.jpg" /></p>
+<p><a id="vision-and-audio-for-robotics"></a></p>
+<h3>Vision and audio for robotics</h3>
+<p>"Where's the pallet with the blue label that arrived after the 14:00 shift?" A warehouse robot answers from its own camera memory, returning the segment where that label passes into view and where the pallet was set down. The operator doesn't replay the shift. They check the returned moment and send the robot, or a person, to that spot. This is the <strong>Robotics</strong> stack, and its core need is nearby memory with low delay.</p>
+<p>Audio asks a different question. "What happened right after the forklift horn?" The robot heard a horn, or a dropped box, and needs the matching frames before anyone decides whether it was a near miss or routine noise. <strong>Multimodal Audio</strong> search connects the sound to the picture at the same timestamp, so the team reviews one event instead of hunting separately through sound and video recordings.</p>
+<p><a id="dashcam-gopro-smart-glasses-and-mobile"></a></p>
+<h3>Dashcam, GoPro, smart glasses, and mobile</h3>
+<p>"Show me sudden braking near a school zone." A fleet manager gets timestamped segments from long drives instead of full route files. The <strong>DashCam</strong> stack has to cope with vehicles that connect only at depots or over metered links, so useful segments matter more than uploading everything.</p>
+<p>A rider with a <strong>GoPro</strong> asks something simpler. "Find the jump, and find the crash." The value is skipping a long ride file and landing on the few seconds worth sharing or reviewing. Playback should open at the moment, ready to trim.</p>
+<p>Smart glasses turn search into personal recall. A technician asks, "Where did I leave the torque wrench?" The <strong>Smart Glasses</strong> stack returns the clip showing the wrench set down on a bench. Capture has to be unobtrusive, and retrieval has to be quick enough to help during the job, not after it.</p>
+<p>The <strong>Mobile</strong> stack ties many of these together. Companion apps written natively in Swift for iOS, Kotlin for Android, or once in Flutter for both, need visible upload progress, real cancellation, and playback that doesn't freeze the phone during large uploads or live streams. Users forgive a slow network. They don't forgive an app that stops responding.</p>
+<table>
+<thead>
+<tr>
+<th>Device stack</th>
+<th>Typical workflow</th>
+<th>Core need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Robotics</td>
+<td>Find a pallet by its label or a forklift horn from robot memory</td>
+<td>Edge memory and low latency</td>
+</tr>
+<tr>
+<td>Dashcam</td>
+<td>Find sudden braking near a school zone</td>
+<td>Segments from long drives with intermittent connectivity</td>
+</tr>
+<tr>
+<td>GoPro</td>
+<td>Find the jump or the crash in a ride file</td>
+<td>Playback without scrubbing long files</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Find where the torque wrench was left</td>
+<td>On-device capture and quick clip retrieval</td>
+</tr>
+<tr>
+<td>Mobile</td>
+<td>Companion apps on Android, iOS and Flutter</td>
+<td>Upload progress, cancellation and no UI freezes</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>Find a person at a boundary with glass breaking</td>
+<td>On-premises control and proof</td>
+</tr>
+</tbody>
+</table>
+<p>Be honest about the limit here. These devices don't share one proven common software stack. Camera placement, microphones, storage, and connectivity differ enough that a query which works on a phone sample can disappoint on glasses or a robot. Test each device with its own real footage, including bad light and background noise, before you commit to a design.</p>
+<p><a id="cctv-surveillance-and-ad-editing-in-recent-practice"></a></p>
+<h2>CCTV, Surveillance and Ad Editing in Recent Practice</h2>
+<p>Surveillance buyers still keep systems close to home. On-premises systems represented <strong>64.35% of AI video-surveillance revenue in 2025</strong>, while hardware represented <strong>56.15%</strong>, according to <a href="https://www.mordorintelligence.com/industry-reports/ai-in-video-surveillance-market">Mordor Intelligence's AI in video surveillance market report</a>. Commercial facilities accounted for <strong>43.05% of end-user demand</strong>, perimeter security represented <strong>27.95% of applications</strong>, and Asia-Pacific held <strong>36.55% of global revenue</strong>.</p>
+<p>Those splits describe market structure, not the accuracy of any one search product. They still tell integrators something practical. Customers want local control, compatibility with cameras they already own, alerts without delay, and searches that shorten review without exporting every stream to a remote service.</p>
+<p><img alt="A split illustration showing security surveillance, video editing, and various device applications for intelligent video search technology." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/48ff4b45-6d47-491f-8472-00e90dfb6234/vidio-search-engine-video-analytics.jpg" /></p>
+<p><a id="one-event-searched-once"></a></p>
+<h3>One event, searched once</h3>
+<p>Say a warehouse operator gets a vague report from the night shift. Someone crossed the yard boundary, and someone else heard glass breaking near a side door. In an older workflow, those become two reviews. One person scans the boundary camera. Another looks for the sound, if audio was kept with the video at all.</p>
+<p>A multimodal query treats it as one event. The operator searches for a person crossing the boundary together with glass breaking or an alarm sounding, then checks the returned segment as evidence. <strong>CCTV</strong> and <strong>Video Surveillance</strong> work is judged on speed, retention, and proof. The result has to be a clip a supervisor, insurer, or investigator can replay, with the time and camera clear.</p>
+<p>That doesn't remove human judgement. It changes where judgement gets spent. Instead of paying people to watch empty yards, you pay them to decide whether a returned moment is a trespasser, a contractor who took a shortcut, or a false alarm worth tuning.</p>
+<p><a id="the-same-move-inside-an-ad-library"></a></p>
+<h3>The same move inside an ad library</h3>
+<p>Advertisement video editing rewards the same moment retrieval, under different pressure. An editor building a cut describes the scene she needs, such as a hand holding the product at a bright window. Search jumps to matching segments across the library, ready to compare and trim, instead of forcing her to watch every clip from a long shoot.</p>
+<p>Here a miss costs time and creative choice, not site security. Approval matters more than retention law. Storage can usually sit centrally, and an editor may prefer several near matches over one strict answer, because the second best take sometimes cuts better.</p>
+<blockquote>
+<p>Write the requirement in the user's words before you pick the tool. "Find a person at the fence when glass breaks" and "find the hand held product shot at the window" lead to different storage, latency, and approval choices, even though both are moment searches.</p>
+</blockquote>
+<p>Put side by side, surveillance cares about answering fast, keeping footage under local rules, and proving what happened. Ad editing cares about finding the right take quickly and moving it into a timeline. If you mix those requirements up, you'll buy the wrong thing. A catalog tool dropped into a control room may demand uploads the site can't allow. A locked down surveillance tool handed to editors may make sharing takes painfully slow. Name the job first, then judge the search.</p>
+<p><a id="pick-your-first-integration-path"></a></p>
+<h2>Pick Your First Integration Path</h2>
+<p>Start narrow. A first integration should prove one real query on one device stack, not attempt every camera and use case at once.</p>
+<p><a id="a-three-step-checklist"></a></p>
+<h3>A three step checklist</h3>
+<ol>
+<li><strong>Pick the platform you'll ship on.</strong> That might be Android in Kotlin, Flutter across Android and iOS, smart glasses, IoT or camera hardware, or robotics edge hardware.</li>
+<li><strong>Confirm where footage lives.</strong> Decide what must stay on the device or site, what can move to a nearby hub, and what may be uploaded for shared review.</li>
+<li><strong>Test one real query on your own short clip.</strong> Use the words your user would say, then check whether the returned moment is the right one before you scale to an archive or a fleet.</li>
+</ol>
+<p>The order matters. Platform choice without a storage answer leads to redesigns when a customer refuses uploads. A storage plan without a real query test leads to confident architecture diagrams and disappointing results on actual footage.</p>
+<table>
+<thead>
+<tr>
+<th>Target platform</th>
+<th>SDK or resource</th>
+<th>License or status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android (Kotlin)</td>
+<td>com.vmodal.vmodal-sdk-android, repo v-modal/vmodal_sdk_android</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>Flutter (Android and iOS)</td>
+<td>Flutter SDK wrapper</td>
+<td>Cross-platform wrapper for Android and iOS</td>
+</tr>
+<tr>
+<td>Smart glasses, IoT and cameras</td>
+<td>Smart Glasses / IoT / Camera SDK</td>
+<td>Released; license to confirm</td>
+</tr>
+<tr>
+<td>Developer documentation</td>
+<td>v-modal.com/developers</td>
+<td>Developer hub with setup guidance</td>
+</tr>
+</tbody>
+</table>
+<p>The first run follows a short path. Add the SDK to your app, configure a project with an API key, upload a video, and run the first search. That loop takes <strong>minutes</strong>, which makes it practical to test before you argue about a full rollout. Our developer hub is at <strong>v-modal.com/developers</strong>, setup questions go to our developer community on <strong>Discord</strong> with the team, and you can also review the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">DevHunt listing for the visual video search SDK</a> while you compare options.</p>
+<p>Apply the architecture verdict to your starting point. If answers are needed offline or within seconds, begin with the edge facing SDK for glasses, cameras, or robotics hardware, and keep memory near the source. If you're serving a catalog to viewers or editors, begin with the mobile SDK and a small test library of your own footage. Either way, judge the first build by one plain question. Did it return the moment your user asked for?</p>
+<hr />
+<p>Bring one real clip, one real question, and the device you plan to ship, then test whether searchable memory returns the moment in seconds instead of asking your team to scrub for hours. V-Modal AI builds multimodal video and audio search for Physical AI across mobile, smart glasses, cameras, and robotics, with SDKs to help you run that first test quickly. Start exploring the code and examples at <a href="https://github.com/v-modal">V-Modal AI</a>, then pick the platform path that matches your device.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
