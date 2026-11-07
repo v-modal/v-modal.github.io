@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Search in Video: How to Build Searchable Video in Apps</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Search in Video: How to Build Searchable Video in Apps</h1>
+    <p>You've got the recording, but not the moment you need. Someone's dragging a playback slider through a long file while the app team debates whether a search box would solve the problem. It might, but only if the result opens the right evidence and the device can keep working after the demo ends.</p>
+<p><strong>Search in video is a retrieval, trust, and operations problem.</strong> A useful build gives users reviewable moments, makes uncertainty visible, and handles interrupted uploads, offline recording, and deletion without leaving misleading results behind.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-search-in-video-returns-at-each-stage">What Search in Video Returns at Each Stage</a></li>
+<li><a href="#pipeline-stages-outputs-and-common-failure-points">Pipeline stages, outputs and common failure points</a></li>
+<li><a href="#how-to-build-searchable-video-in-your-app">How to Build Searchable Video in Your App</a></li>
+<li><a href="#build-the-smallest-complete-workflow">Build the smallest complete workflow</a></li>
+<li><a href="#define-done-before-adding-scale">Define done before adding scale</a></li>
+<li><a href="#query-modes-for-text-image-voice-and-sensor-input">Query Modes for Text, Image, Voice and Sensor Input</a></li>
+<li><a href="#query-modes-example-inputs-and-typical-weak-points">Query modes, example inputs and typical weak points</a></li>
+<li><a href="#keep-the-meaning-of-each-input-clear">Keep the meaning of each input clear</a></li>
+<li><a href="#reading-results-timestamps-and-confidence">Reading Results, Timestamps and Confidence</a></li>
+<li><a href="#give-reviewers-context-without-burying-the-event">Give reviewers context without burying the event</a></li>
+<li><a href="#run-a-repeatable-verification-routine">Run a repeatable verification routine</a></li>
+<li><a href="#running-search-on-phones-glasses-and-edge-hardware">Running Search on Phones, Glasses and Edge Hardware</a></li>
+<li><a href="#device-classes-main-constraints-and-starting-settings">Device classes, main constraints and starting settings</a></li>
+<li><a href="#define-what-the-device-preserves">Define what the device preserves</a></li>
+<li><a href="#industry-use-cases-from-ads-to-robotics-and-cctv">Industry Use Cases from Ads to Robotics and CCTV</a></li>
+<li><a href="#industry-use-cases-typical-queries-and-success-measures">Industry use cases, typical queries and success measures</a></li>
+<li><a href="#match-the-evidence-standard-to-the-job">Match the evidence standard to the job</a></li>
+<li><a href="#run-a-pilot-before-you-commit-to-search-in-video">Run a Pilot Before You Commit to Search in Video</a></li>
+<li><a href="#set-acceptance-rules-before-running-queries">Set acceptance rules before running queries</a></li>
+<li><a href="#prove-the-integration-before-approving-deployment">Prove the integration before approving deployment</a></li>
+</ul>
+<p><a id="what-search-in-video-returns-at-each-stage"></a></p>
+<h2>What Search in Video Returns at Each Stage</h2>
+<p>Say a fleet manager needs the eight seconds before a hard brake. Across town, a media editor needs a three-second product shot on a white table. Neither wants a list of vaguely relevant files. They need a usable clip.</p>
+<p>The scale makes manual review an expensive default. <a href="https://datareportal.com/reports/digital-2025-april-global-statshot">DataReportal's April 2025 global analysis</a> found that <strong>more than 9 in 10 internet users watched online video each week</strong>, excluding major subscription services such as Netflix. For developers, that's a reason to treat retrieval as a core workflow, not an optional catalog filter.</p>
+<p>A filename can identify a recording. It can't reliably describe everything that happened inside it. Search therefore needs a clear handoff from captured media to a result someone can verify.</p>
+<p><a id="pipeline-stages-outputs-and-common-failure-points"></a></p>
+<h3>Pipeline stages, outputs and common failure points</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What you do</th>
+<th>Output you get</th>
+<th>Where it usually fails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source capture</td>
+<td>Choose cameras, microphones, phone or glasses feeds</td>
+<td>Continuous video and audio streams</td>
+<td>Dropped frames and mismatched device clocks</td>
+</tr>
+<tr>
+<td>Ingest</td>
+<td>Upload or stream media in chunks</td>
+<td>Stored media with progress and cancel state</td>
+<td>Interrupted uploads on cellular networks</td>
+</tr>
+<tr>
+<td>Indexing</td>
+<td>Index frames, speech and audio events</td>
+<td>Searchable multimodal index</td>
+<td>Coarse sampling misses brief events</td>
+</tr>
+<tr>
+<td>Query</td>
+<td>Send text, image, voice or sensor context</td>
+<td>Ranked candidate moments</td>
+<td>Vague wording returns near-duplicate scenes</td>
+</tr>
+<tr>
+<td>Result handling</td>
+<td>Read start and end timestamps for each hit</td>
+<td>Clip ranges with confidence</td>
+<td>Audio and video timestamps drift apart</td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>Play the expanded clip before acting</td>
+<td>Confirmed, rejected or uncertain hit</td>
+<td>Fluent summaries hide missed events</td>
+</tr>
+</tbody>
+</table>
+<p>Each output becomes the next stage's input. A polished results screen can't repair footage that never arrived, and a convincing description doesn't establish that the camera clock was correct.</p>
+<p>Keep these stages visible in the application's state model. <strong>Uploading, processing, searchable, unavailable, and deleted</strong> should mean different things to the user. Don't show an empty search result when the actual problem is unfinished processing.</p>
+<p>Mark which rows your app owns, which the hardware or cloud service handles, and which require a human check. Assign an owner to each failure state before adding more query features.</p>
+<p><a id="how-to-build-searchable-video-in-your-app"></a></p>
+<h2>How to Build Searchable Video in Your App</h2>
+<p>Start with the client, not the search interface. Android lifecycle behavior, Flutter playback integration, and an embedded Linux deployment create different failure modes even when they expose the same search workflow.</p>
+<p>The first build should prove a complete path from a known recording to a playable, verified result. Keep the retrieval implementation behind the SDK boundary rather than building a separate search engine.</p>
+<p><img alt="A flowchart showing four steps to build searchable video functionality in mobile and camera applications." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/791214df-8fab-44b4-b8ec-53b5ff10b803/search-in-video-process-flow.jpg" /></p>
+<p><a id="build-the-smallest-complete-workflow"></a></p>
+<h3>Build the smallest complete workflow</h3>
+<ol>
+<li>
+<p><strong>Pick the client that owns the user interaction.</strong> Choose the native Android SDK in Kotlin for an Android companion app, Flutter for a shared Android and iOS application, or the edge build for embedded Linux robots and camera hubs. Don't assume a cross-platform interface removes platform-specific work around background execution, permissions, and playback.</p>
+</li>
+<li>
+<p><strong>Read the example before writing integration code.</strong> The Android package is <code>com.vmodal.vmodal-sdk-android</code>, published in <code>v-modal/vmodal_sdk_android</code>; the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">SDK integration listing</a> is another starting point for evaluation. Check the example's initialization and media lifecycle rather than guessing method names or copying an outdated dependency declaration.</p>
+</li>
+<li>
+<p><strong>Create a project and configure credentials deliberately.</strong> Load the API key through build configuration or a secure store, never a committed source file. Build configuration keeps secrets out of the repository, but it doesn't make a credential embedded in a distributed application impossible to extract, so review the supported credential controls before release.</p>
+</li>
+<li>
+<p><strong>Choose the input scope.</strong> Start with full video, audio-only recordings, still images, or a clearly defined mix, and label each source with its device name and timezone. Assuming every device clock agrees makes later cross-camera review unnecessarily difficult.</p>
+</li>
+<li>
+<p><strong>Make transfer controls real.</strong> Use chunked uploads, display progress, and connect cancellation to the underlying upload rather than merely dismissing the screen. Don't send full-resolution footage over cellular by default; let users understand the transfer cost and choose an appropriate connection.</p>
+</li>
+<li>
+<p><strong>Search for a known event.</strong> For example, use a clip of about ten minutes containing an unmistakable object or spoken instruction, then log the returned start and end times. Begin with a concrete text query so you can separate integration failures from ambiguous search wording.</p>
+</li>
+<li>
+<p><strong>Open the returned range in the player.</strong> Add a little surrounding playback context and confirm that the event is visible or audible. A result card that renders correctly isn't proof that seeking, authorization, and media access work together.</p>
+</li>
+</ol>
+<p><a id="define-done-before-adding-scale"></a></p>
+<h3>Define done before adding scale</h3>
+<p>A working first build survives leaving and reopening the app, reports a failed upload clearly, and opens a result without requiring the user to hunt through the original recording. Test with the same media file throughout this stage so changes remain explainable.</p>
+<blockquote>
+<p><strong>Build gate:</strong> Don't add live streams until a recorded-file workflow can upload, cancel, search, and play back reliably.</p>
+</blockquote>
+<p>Keep a small integration log with the source identifier, transfer outcome, processing state, query, returned range, and playback outcome. That's enough to identify which boundary broke without exposing the search implementation or collecting unnecessary media in application logs.</p>
+<p><a id="query-modes-for-text-image-voice-and-sensor-input"></a></p>
+<h2>Query Modes for Text, Image, Voice and Sensor Input</h2>
+<p>Offer the input the user already has. A technician holding a photo shouldn't have to describe the object from scratch, and an operator investigating an alarm shouldn't have to guess which recording contains it.</p>
+<p>The platform supports <strong>text-to-video, image-to-video, voice-to-audio, and environmental-state-to-video</strong> intents. Combined inputs are useful refinements, but they shouldn't make the simplest search harder to submit.</p>
+<p><a id="query-modes-example-inputs-and-typical-weak-points"></a></p>
+<h3>Query modes, example inputs and typical weak points</h3>
+<table>
+<thead>
+<tr>
+<th>Query mode</th>
+<th>Example input</th>
+<th>Best use</th>
+<th>Typical weak point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text-to-video</td>
+<td>Product close-up on white background</td>
+<td>Ad editors finding B-roll in a catalog</td>
+<td>Vague adjectives return similar scenes</td>
+</tr>
+<tr>
+<td>Image-to-video</td>
+<td>Photo of a missing torque wrench</td>
+<td>Finding where a known object appeared</td>
+<td>Low light and different angles lower matches</td>
+</tr>
+<tr>
+<td>Voice-to-audio</td>
+<td>Spoken phrase stop the conveyor</td>
+<td>Robotics operators and dashcam review</td>
+<td>Background noise and strong accents</td>
+</tr>
+<tr>
+<td>Environmental-state-to-video</td>
+<td>Temperature alarm or door-open event</td>
+<td>Physical AI and inspection logs</td>
+<td>Needs a synced sensor timestamp</td>
+</tr>
+<tr>
+<td>Combined text and image</td>
+<td>Reference photo plus same person near exit</td>
+<td>Narrowing broad results</td>
+<td>Conflicting cues split the results</td>
+</tr>
+</tbody>
+</table>
+<p>Text works best when users name observable details: an object, action, setting, or spoken phrase. Terms such as nice and modern leave too much room for interpretation. Provide editable example prompts rather than rewriting a user's intent.</p>
+<p>Image queries carry appearance information, but a reference photo isn't a guarantee of recognition. Darkness, glare, occlusion, and a different viewing angle can weaken a match. Let users crop the reference to the relevant object and switch to a description when the image is unhelpful.</p>
+<p><a id="keep-the-meaning-of-each-input-clear"></a></p>
+<h3>Keep the meaning of each input clear</h3>
+<p><strong>Voice input isn't always an audio-evidence query.</strong> A person dictating a description of a red toolbox has a different intent from someone searching for a previously spoken instruction. Label those actions clearly, and let users inspect any recognized wording before submission.</p>
+<p>Environmental-state queries need a trustworthy relationship between the sensor event and the recording. A temperature alarm paired with a door-open event is useful context only when the application can place both on the video timeline.</p>
+<p>Combined text and image can narrow a broad result set, but conflicting cues need an explicit response. Don't pretend that an image of one object and text describing another express a coherent request.</p>
+<p>For every hit, show the supporting cue: the visible object, matched speech, acoustic event, or associated sensor record. <strong>Explain the match without turning that explanation into a claim of certainty.</strong></p>
+<p><a id="reading-results-timestamps-and-confidence"></a></p>
+<h2>Reading Results, Timestamps and Confidence</h2>
+<p>Returning only the highest-ranked result is a fragile product decision. In a <a href="https://arxiv.org/html/2505.13928">long-video retrieval benchmark</a> covering videos from <strong>8 seconds to 1 hour</strong>, the strongest tested model achieved <strong>47.3% Recall@1 and 87.5% Recall@20</strong>, while another reached <strong>40.3% and 81.9%</strong>, respectively.</p>
+<p>Those results aren't a forecast for your application. They demonstrate why a ranked evidence set can be more useful than a single confident-looking answer: relevant evidence may exist below the first result.</p>
+<p><img alt="A digital interface showcasing a video search tool displaying results for a man with a red backpack." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/c243100a-f0cf-405a-9ea6-60c230371d6d/search-in-video-video-search.jpg" /></p>
+<p><a id="give-reviewers-context-without-burying-the-event"></a></p>
+<h3>Give reviewers context without burying the event</h3>
+<p>I would start with five to ten ranked hits as a pilot interface setting, not an accuracy promise. Make each hit open an expanded playback window rather than a frozen frame stripped of context.</p>
+<p>For a hypothetical short event, try five seconds before and ten seconds after the match, then adjust based on reviewer feedback. A shift-length incident needs a different review window from a dropped tool. Merge overlapping playback windows so reviewers don't watch the same event repeatedly.</p>
+<p>Show <strong>absolute timestamps, timezone, and camera or device name</strong> as the primary evidence reference. Keep the file-relative offset available for seeking and diagnostics, but don't force reviewers to calculate when an event happened.</p>
+<p>Preserve aligned audio during playback. A visible reaction may make sense only after the reviewer hears the instruction, alarm, or impact immediately around it.</p>
+<p><a id="run-a-repeatable-verification-routine"></a></p>
+<h3>Run a repeatable verification routine</h3>
+<ul>
+<li><strong>Play the expanded window:</strong> Inspect the frames and listen to the available audio before accepting the match.</li>
+<li><strong>Classify the result:</strong> Mark it correct, near miss, false positive, or uncertain.</li>
+<li><strong>Record the reason:</strong> Note wrong object, wrong time, missing context, inaudible speech, or another concrete failure.</li>
+<li><strong>Keep the review outcome:</strong> Associate the decision with the query and source so the pilot team can compare failures consistently.</li>
+</ul>
+<p>A confidence score needs careful labeling. Unless it has been calibrated for your deployment, don't display it as the probability that an event happened. A ranking score can help order review without establishing factual certainty.</p>
+<p>Long windows can hide brief evidence, duplicates consume reviewer attention, and top-result-only evaluation ignores useful lower-ranked matches. Check each separately.</p>
+<blockquote>
+<p>A summary can sound right while the linked clip shows the wrong event. Require frame-level review before a safety, legal, or operational decision.</p>
+</blockquote>
+<p><a id="running-search-on-phones-glasses-and-edge-hardware"></a></p>
+<h2>Running Search on Phones, Glasses and Edge Hardware</h2>
+<p>A cloud demo rarely answers what happens when the device loses connectivity, fills its storage, or gets too hot to continue background work. Those aren't unusual exceptions for mobile and edge products. They're operating conditions.</p>
+<p>The <a href="https://reports.weforum.org/docs/WEF_Physical_AI_Powering_the_New_Age_of_Industrial_Operations_2025.pdf">World Economic Forum's report on Physical AI in industrial operations</a> describes the importance of deploying physical intelligence under constrained compute, power, memory, and connectivity. Treat local versus cloud processing as a deployment decision, not a slogan: local work consumes device resources, while remote work requires transfer and service availability.</p>
+<p><a id="device-classes-main-constraints-and-starting-settings"></a></p>
+<h3>Device classes, main constraints and starting settings</h3>
+<table>
+<thead>
+<tr>
+<th>Device class</th>
+<th>Main constraint</th>
+<th>Setting to start with</th>
+<th>Watch for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android companion app</td>
+<td>Battery, thermal throttling, cellular upload</td>
+<td>Index on Wi-Fi while charging, cap preview resolution</td>
+<td>Background kills during long uploads</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Heat close to skin, small storage</td>
+<td>Index short rolling windows, keep the audio path light</td>
+<td>Overheating after long sessions</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Storage loop, intermittent cellular</td>
+<td>Keep a rolling buffer, upload only flagged segments</td>
+<td>Missing evidence when storage fills</td>
+</tr>
+<tr>
+<td>GoPro or action camera</td>
+<td>Battery, SD card speed, very long files</td>
+<td>Index after recording ends</td>
+<td>Slow scrubbing through long clips</td>
+</tr>
+<tr>
+<td>CCTV or NVR server</td>
+<td>Many streams, retention rules</td>
+<td>Recent footage in detail, older footage as summaries</td>
+<td>Clock drift across cameras</td>
+</tr>
+<tr>
+<td>Edge hub or robot</td>
+<td>Power budget, offline operation</td>
+<td>Local index with scheduled sync</td>
+<td>Model updates that invalidate old indexes</td>
+</tr>
+</tbody>
+</table>
+<p>Use these as starting policies, then measure on the actual hardware. An Android emulator won't tell you how a phone behaves while recording, charging, and transferring media in a warm vehicle.</p>
+<p>For smart glasses, keep capture usable before adding continuous processing. Heat near the skin is a product constraint, not merely a slower benchmark. For GoPro footage, post-recording processing avoids competing with capture for battery and storage access.</p>
+<p><a id="define-what-the-device-preserves"></a></p>
+<h3>Define what the device preserves</h3>
+<p>A rolling buffer must distinguish disposable footage from protected evidence. If a DashCam flags an event, make the protection state visible and test whether storage cleanup respects it.</p>
+<p>For CCTV, recent detail and older summaries can reduce the review burden, but <strong>a summary isn't retained evidence</strong>. If the original footage expires, the interface must stop implying that the user can verify its contents.</p>
+<p>On robots and edge hubs, schedule synchronization around operational needs. During a model update, preserve a rollback path and decide whether previously searchable history remains available while rebuilding. Don't present partial coverage as a complete search.</p>
+<p>Before launch, answer these questions explicitly:</p>
+<ul>
+<li><strong>Offline duration:</strong> What remains searchable after prolonged disconnection, and how does the interface show incomplete coverage?</li>
+<li><strong>Full storage:</strong> Which content is removed first, and which protected recordings must survive?</li>
+<li><strong>Transfer recovery:</strong> Can interrupted work resume without duplicate sources or misleading completion states?</li>
+<li><strong>Model changes:</strong> Who approves the update, tests historical queries, and owns rollback?</li>
+<li><strong>Deletion scope:</strong> Does removal cover originals, previews, searchable derivatives, and synchronized copies?</li>
+<li><strong>Resource limits:</strong> What pauses first when battery, temperature, or available storage crosses your operating limits?</li>
+</ul>
+<p>Decide these policies before weeks of recordings accumulate. Recovery is much harder when nobody can explain which copy is authoritative.</p>
+<p><a id="industry-use-cases-from-ads-to-robotics-and-cctv"></a></p>
+<h2>Industry Use Cases from Ads to Robotics and CCTV</h2>
+<p>Conventional robotics stacks often keep perception, control, and telemetry in separate components. A <strong>Physical AI</strong> memory layer connects historical camera observations, spoken commands, machine sounds, and operational context so an operator can investigate what preceded an action.</p>
+<p>That differs from media content search. An editor wants a reusable shot; a robot operator wants evidence about a physical sequence. Both benefit from multimodal video and multimodal audio, but they shouldn't share the same acceptance criteria.</p>
+<p><img alt="A diagram illustrating multimodal memory technology applications in robotics, video editing, dashcams, and automated surveillance security systems." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/03ceb8ea-7c8d-432c-9227-56ebfd95189c/search-in-video-robotics-ai.jpg" /></p>
+<p><a id="industry-use-cases-typical-queries-and-success-measures"></a></p>
+<h3>Industry use cases, typical queries and success measures</h3>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Typical query</th>
+<th>Signals combined</th>
+<th>Success measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Advertisement video edition</td>
+<td>Product close-up on white background</td>
+<td>Frames, speech, music cues</td>
+<td>Time from brief to usable clip</td>
+</tr>
+<tr>
+<td>Vision for robotics</td>
+<td>Pallet blocking aisle 3</td>
+<td>Camera plus robot telemetry</td>
+<td>Correct moment in top five hits</td>
+</tr>
+<tr>
+<td>Audio for robotics</td>
+<td>Metallic impact near conveyor</td>
+<td>Microphone plus motor state</td>
+<td>Time from alarm to reviewable clip</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Hard braking at an intersection with horn</td>
+<td>Front and cabin camera, GPS, audio</td>
+<td>Evidence clip with original timestamps</td>
+</tr>
+<tr>
+<td>CCTV and video surveillance</td>
+<td>Person near loading door after 22:00</td>
+<td>Multiple fixed cameras, glass-break sound where lawful</td>
+<td>Reviewer hours per incident</td>
+</tr>
+<tr>
+<td>Smart glasses and GoPro</td>
+<td>Where did I leave the torque wrench</td>
+<td>Camera and microphone</td>
+<td>Correct hit within the last session</td>
+</tr>
+</tbody>
+</table>
+<p>These are example queries and proposed pilot measures, not promised performance levels. Choose the measure that reflects the user's completed task rather than counting search requests.</p>
+<p><a id="match-the-evidence-standard-to-the-job"></a></p>
+<h3>Match the evidence standard to the job</h3>
+<p>For <strong>advertisement video edition</strong>, an editor might search a product catalog for clean B-roll, then reject otherwise relevant shots because packaging is outdated or the framing won't fit the placement. Search can reduce discovery work, but it doesn't establish usage rights or editorial suitability.</p>
+<p><strong>Vision for Robotics</strong> needs context around occlusion and movement. A pallet visible beside an aisle isn't necessarily blocking it, and a robot's later position doesn't prove where the obstruction began. Pair the camera view with the relevant operational record.</p>
+<p><strong>Audio for Robotics</strong> can surface an impact that the camera missed. However, a metallic sound alone doesn't identify a failed component. Review motor state and surrounding activity before escalating to maintenance.</p>
+<p>DashCam systems illustrate the shift from passive recording toward operational support. A <a href="https://dataintelo.com/report/fleet-dashcam-market">Dataintelo 2025 fleet-dashcam market estimate</a> attributed <strong>58.0% of market value to edge AI dashcams</strong> and <strong>64.0% of spending to software and subscription services</strong>. For a fleet pilot, test the complete hard-braking-and-horn scenario, including poor weather, night imagery, and restricted access to cabin footage.</p>
+<p>CCTV and video surveillance introduce multi-camera ambiguity. Similar clothing, blind spots, and unsynchronized recordings can produce plausible but incorrect sequences. Privacy and retention rules must also govern who can search and export clips.</p>
+<p>Smart glasses and GoPro searches are narrower but still uncertain. Finding the last recorded appearance of a wrench doesn't prove it's still there. Phrase the answer as a recorded observation, not a statement about its current location.</p>
+<p><a id="run-a-pilot-before-you-commit-to-search-in-video"></a></p>
+<h2>Run a Pilot Before You Commit to Search in Video</h2>
+<p>Better retrieval can increase risk if users overtrust a fluent explanation. Research on <a href="https://dl.acm.org/doi/10.1007/s11390-026-6292-8">physical-AI timing and safety guarantees</a> identifies a gap between current edge perception and dependable real-world sense-think-act requirements. Your pilot should test reviewer behavior as well as search quality.</p>
+<p>Choose a bounded task, such as locating a blocked warehouse aisle. Name the reviewer, agree on a review deadline, and define where disputed clips go. An uncertain result should trigger escalation, not an automatic operational conclusion.</p>
+<p><a id="set-acceptance-rules-before-running-queries"></a></p>
+<h3>Set acceptance rules before running queries</h3>
+<p>As a practical pilot design, gather <strong>30 to 50 real queries</strong> with human-marked reference moments. Set a proposed acceptance rule that the correct moment appears in the top five and a reviewer confirms it within an agreed time; these are test settings, not benchmark claims.</p>
+<p>Include absent events and ambiguous requests, not just easy positive examples. A useful system must let reviewers conclude that the available recording doesn't establish an answer.</p>
+<ul>
+<li><strong>Offline test:</strong> Disable the network for an hour during recording, then inspect capture continuity, local availability, and recovery.</li>
+<li><strong>Deletion test:</strong> Remove a source and confirm it disappears from search and cannot be reopened through an old result.</li>
+<li><strong>Review test:</strong> Track confirmed matches, misses, false positives, uncertainty, and time to a defensible decision.</li>
+</ul>
+<p><a id="prove-the-integration-before-approving-deployment"></a></p>
+<h3>Prove the integration before approving deployment</h3>
+<p>Check the SDK repositories and examples under the <code>v-modal</code> GitHub organization before starting. Add the SDK, configure the project API key securely, upload a test video in chunks, and search for a known moment.</p>
+<p>Our mobile media features include <strong>signed streaming URLs, chunked multipart uploads, progress reporting, and real upload cancellation</strong>. The initial add-configure-upload-search path is designed to take minutes, but that first result isn't deployment acceptance.</p>
+<p>Make the decision explicit. <strong>Go</strong> when the agreed retrieval, review, offline, and deletion checks pass; <strong>extend</strong> when failures are understood and bounded; <strong>stop</strong> when reviewers repeatedly encounter false positives they can't verify quickly.</p>
+<hr />
+<p>V-Modal AI offers a Visual Memory Layer for Physical AI with multimodal video and audio search for mobile, edge hardware, and connected cameras. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to inspect the SDKs and examples, then build a pilot around one recording, one known event, and a clear human verification rule.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
