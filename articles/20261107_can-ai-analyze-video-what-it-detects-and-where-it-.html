@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Can AI Analyze Video? What It Detects and Where It Fails</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Can AI Analyze Video? What It Detects and Where It Fails</h1>
+    <p>A dashcam clip may contain the moment a car changes lanes, while a CCTV recording may hold one brief visual clue among hours of footage. AI can return labeled objects, actions, speech and timed events, but the result depends on the footage and the task. Face-identification performance, for example, varies with video quality and how a system handles the scene, so test it on the footage you intend to use.</p>
+<p>The useful question is what the system can return, how precisely it can locate a moment, and what you should verify before acting. A label identifies something; a timestamp helps you find when it happened. Those answers can be useful in different ways, even when they come from the same recording.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-ai-can-pull-out-of-a-video">What AI Can Pull Out of a Video</a></li>
+<li><a href="#detection-isnt-interpretation">Detection isn't interpretation</a></li>
+<li><a href="#choose-the-output-before-the-tool">Choose the output before the tool</a></li>
+<li><a href="#why-timed-events-matter-more-than-labels">Why Timed Events Matter More Than Labels</a></li>
+<li><a href="#boundaries-are-part-of-correctness">Boundaries are part of correctness</a></li>
+<li><a href="#test-a-moment-you-already-know">Test a moment you already know</a></li>
+<li><a href="#why-video-is-harder-than-a-single-photo">Why Video Is Harder Than a Single Photo</a></li>
+<li><a href="#check-the-capture-conditions-first">Check the capture conditions first</a></li>
+<li><a href="#separate-misses-from-false-alarms">Separate misses from false alarms</a></li>
+<li><a href="#audio-and-video-together-in-robots-dashcams-and-cctv">Audio and Video Together in Robots, Dashcams and CCTV</a></li>
+<li><a href="#the-reviewers-task-changes-the-standard">The reviewer's task changes the standard</a></li>
+<li><a href="#adoption-doesnt-establish-retrieval-accuracy">Adoption doesn't establish retrieval accuracy</a></li>
+<li><a href="#choosing-edge-phone-or-cloud-for-video-analysis">Choosing Edge, Phone or Cloud for Video Analysis</a></li>
+<li><a href="#use-a-hybrid-decision-rule">Use a hybrid decision rule</a></li>
+<li><a href="#mobile-and-device-stacks-for-video-search">Mobile and Device Stacks for Video Search</a></li>
+<li><a href="#match-the-stack-to-the-recording-pattern">Match the stack to the recording pattern</a></li>
+<li><a href="#measure-the-whole-application">Measure the whole application</a></li>
+<li><a href="#privacy-limits-to-check-before-you-deploy">Privacy Limits to Check Before You Deploy</a></li>
+<li><a href="#protect-against-inference-not-just-identification">Protect against inference, not just identification</a></li>
+<li><a href="#apply-a-purpose-limited-checklist">Apply a purpose-limited checklist</a></li>
+<li><a href="#run-your-first-video-search-in-minutes">Run Your First Video Search in Minutes</a></li>
+<li><a href="#make-the-pilot-decision-explicit">Make the pilot decision explicit</a></li>
+</ul>
+<p><a id="what-ai-can-pull-out-of-a-video"></a></p>
+<h2>What AI Can Pull Out of a Video</h2>
+<p>Video AI returns different kinds of answers. Finding a forklift, recognizing unsafe driving and transcribing a conversation are separate tasks, even when an application presents them in the same search box.</p>
+<p>Think of analysis as a chain: <strong>detect something, interpret it, locate it in time and present a result someone can check</strong>. Success at one link doesn't guarantee success at the next. A system might correctly detect a person beside a fence while incorrectly describing that person as climbing it.</p>
+<p><strong>AI video analysis capabilities at a glance</strong></p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it returns</th>
+<th>Example query</th>
+<th>Reliability note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Object detection</td>
+<td>Labeled boxes on specific frames</td>
+<td>Show every frame with a forklift</td>
+<td>Strong for clear, well-lit objects; small or distant ones are missed</td>
+</tr>
+<tr>
+<td>Action recognition</td>
+<td>Action label for a clip segment</td>
+<td>Find a person climbing a fence</td>
+<td>Confused by visually similar actions</td>
+</tr>
+<tr>
+<td>Speech and audio transcription</td>
+<td>Timestamped text</td>
+<td>When does the speaker mention pricing?</td>
+<td>Accuracy drops with noise, overlap and accents</td>
+</tr>
+<tr>
+<td>Scene classification</td>
+<td>Scene label for segments</td>
+<td>Find all parking-lot scenes in a dashcam day</td>
+<td>Works best with distinct environments</td>
+</tr>
+<tr>
+<td>Temporal event localization</td>
+<td>Start and end times for an event</td>
+<td>Find the two seconds a person enters the loading dock</td>
+<td>Sparse frame sampling can miss short events</td>
+</tr>
+<tr>
+<td>Audio-visual event matching</td>
+<td>Matched sound and visual moments</td>
+<td>Find a horn that follows a visible cut-in</td>
+<td>Requires synchronized audio and video timestamps</td>
+</tr>
+</tbody>
+</table>
+<p><a id="detection-isnt-interpretation"></a></p>
+<h3>Detection isn't interpretation</h3>
+<p>A labeled box says that a model found an object in an image region. It doesn't establish who owns it, why it's there or whether someone used it correctly. Similarly, a transcript provides words, not proof that the speaker's statement is true.</p>
+<p>This distinction has a long history. In <a href="https://www.nist.gov/system/files/documents/2021/05/12/frvt_2002_overview_and_summary.pdf">NIST's Face Recognition Vendor Test 2002</a>, the leading three systems experienced an average performance decline of about <strong>3 percentage points</strong> when video imagery replaced still photographs under controlled indoor lighting. Detecting faces across footage could assist the pipeline without making the actual identity match more reliable.</p>
+<p><a id="choose-the-output-before-the-tool"></a></p>
+<h3>Choose the output before the tool</h3>
+<p>General multimodal assistants suit exploratory questions about uploaded clips. Enterprise video agents connect observations to operational workflows, such as inspection review or incident routing. Dedicated search layers for <strong>Physical AI</strong> serve a different purpose: helping applications retrieve relevant moments from camera, phone and robot history.</p>
+<p>For a mobile product team, a useful result might be a product scene that opens directly in the player. For a security operator, it might be an entrance event with surrounding footage. For a robot developer, it could be a past interaction associated with a spoken instruction.</p>
+<p>The important shift is from asking for a description of the whole file to asking for <strong>labeled moments you can inspect</strong>.</p>
+<p><a id="why-timed-events-matter-more-than-labels"></a></p>
+<h2>Why Timed Events Matter More Than Labels</h2>
+<p>A clip-level label tells you which book is on the library shelf. A timestamp tells you which page to open. Both help with navigation, but only one gets you close to the passage you need.</p>
+<p><strong>Temporal event localization</strong> returns the beginning and end of an event matching a description. Say an operator has a thirty-minute CCTV recording and needs the two-second moment when someone enters a restricted loading dock. These are hypothetical test conditions, but they expose a practical difference: returning the entire recording labeled “person” doesn't solve the operator's problem.</p>
+<p><a id="boundaries-are-part-of-correctness"></a></p>
+<h3>Boundaries are part of correctness</h3>
+<p>Opening and closing a door can look similar in an isolated frame. Entering before an alarm is different from entering after it. An event's duration also matters: briefly touching a control isn't equivalent to holding it down.</p>
+<p>The <a href="https://ar5iv.labs.arxiv.org/html/2503.06526">TimeLoc paper</a> reports improvements over prior best systems of <strong>1.3 and 1.9 percentage points in mean average precision</strong> on THUMOS14 and EPIC-Kitchens-100, respectively. Those are benchmark improvements, not promises about accuracy on your warehouse footage.</p>
+<p>A result can identify the right activity but still start too late or end too early. That matters when the missing context changes the interpretation, such as whether a person placed an object down or picked it up.</p>
+<p>Sparse keyframes create another failure point. A brief action can happen between the frames a tool examines, just as a security guard taking occasional snapshots could miss a quick handoff.</p>
+<blockquote>
+<p><strong>Practical check:</strong> Ask for an event's start time, end time and available confidence information, then play the surrounding footage rather than accepting the thumbnail.</p>
+</blockquote>
+<p><a id="test-a-moment-you-already-know"></a></p>
+<h3>Test a moment you already know</h3>
+<p>Use a recording you've manually reviewed. Search for a brief event, a similar-looking non-event and a sequence whose order matters. Check whether the tool separates them.</p>
+<p>If the application only returns broad clip labels, treat them as <strong>navigation aids</strong>, not event-level evidence. A confidence score can help prioritize review, but it's not a substitute for checking the actual segment.</p>
+<p><a id="why-video-is-harder-than-a-single-photo"></a></p>
+<h2>Why Video Is Harder Than a Single Photo</h2>
+<p>A clear photograph isn't equivalent to a video frame. A photographer can wait for a face to turn toward the lens; a ceiling camera records whatever happens under the lighting available.</p>
+<p>In its <strong>2017 Face in Video Evaluation</strong>, <a href="https://www.nist.gov/news-events/news/2017/04/identifying-faces-video-images-major-challenge-nist-report-shows">NIST tested 36 prototype algorithms from 16 commercial suppliers on 109 hours of video</a>, reporting identification rates among stronger algorithms ranging from approximately <strong>60% to above 99%</strong>, depending on video quality and scene handling. This was a face-identification evaluation, not a universal accuracy measurement for every kind of video analysis.</p>
+<p><a id="check-the-capture-conditions-first"></a></p>
+<h3>Check the capture conditions first</h3>
+<p>Before changing software, inspect what the camera recorded. Enlarging a distant subject on your screen doesn't recover missing detail. A more confident answer from a model won't restore a face hidden by an unfavorable angle.</p>
+<p><strong>Conditions that degrade video analysis and what to do</strong></p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Why it hurts results</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small or distant subjects</td>
+<td>Few pixels to match or classify</td>
+<td>Use a closer camera angle or a higher-resolution stream</td>
+</tr>
+<tr>
+<td>Uneven or low light</td>
+<td>Colors and edges become unreliable</td>
+<td>Add lighting or test night footage separately</td>
+</tr>
+<tr>
+<td>Compression and motion blur</td>
+<td>Detail is lost between frames</td>
+<td>Raise the bitrate or frame rate for fast motion, and check exposure</td>
+</tr>
+<tr>
+<td>Subject not facing the camera</td>
+<td>Face and pose cues disappear</td>
+<td>Add a second angle or rely on action and object cues</td>
+</tr>
+<tr>
+<td>Long recordings with few relevant seconds</td>
+<td>Keyframes skip brief events</td>
+<td>Use event-aware sampling and check returned timestamps</td>
+</tr>
+<tr>
+<td>Noisy or overlapping audio</td>
+<td>Speech and sound cues blur</td>
+<td>Place the microphone close to the source and test with real noise</td>
+</tr>
+</tbody>
+</table>
+<p>Low-resolution phone exports and action-camera footage deserve particular attention. A clip that looks acceptable during ordinary playback may lack the detail needed to distinguish similar objects.</p>
+<p>Higher frame rates also aren't a cure for every motion problem. If exposure remains too long, individual frames can still be blurred. Check the captured frames rather than assuming a recording setting solved the issue.</p>
+<p><a id="separate-misses-from-false-alarms"></a></p>
+<h3>Separate misses from false alarms</h3>
+<p>Practitioners face different costs when software misses an event and when it flags something harmless. A media editor can discard an irrelevant highlight candidate. A surveillance operator repeatedly interrupted by false alarms may stop trusting the system.</p>
+<p>Use confidence thresholds to control review workload, but examine what disappears when you raise them. Include hard negatives, such as an employee walking past a restricted door without entering.</p>
+<blockquote>
+<p>A vendor demonstration shows what worked in the demonstration. Your acceptance test must show what works with your camera placement, lighting and recording settings.</p>
+</blockquote>
+<p>Keep difficult footage in the test set. Removing darkness, crowds and awkward camera angles produces a cleaner demonstration, not a more dependable deployment.</p>
+<p><a id="audio-and-video-together-in-robots-dashcams-and-cctv"></a></p>
+<h2>Audio and Video Together in Robots, Dashcams and CCTV</h2>
+<p>A robot may see a tool in its gripper while a microphone captures an unusual motor sound. Neither observation alone tells the operator everything they need. <strong>Multimodal Video</strong> and <strong>Multimodal Audio</strong> become useful when the application can connect observations from the same event.</p>
+<p><a href="https://www.capgemini.com/wp-content/uploads/2026/05/CRI_Physical-AI-Report-8th-draft-web-version.pdf">Capgemini's Physical AI report</a> describes multimodal foundation models combining audio and tactile inputs with images, text and video. That supports the technology direction, but it doesn't establish a universal accuracy threshold for robotics or surveillance.</p>
+<p><strong>Audio and visual cues by setting</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Visual cue</th>
+<th>Audio cue</th>
+<th>What the search returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Warehouse or factory robot</td>
+<td>Tool visible in the gripper</td>
+<td>Unusual motor sound</td>
+<td>Timed clip where both occur</td>
+</tr>
+<tr>
+<td>Dashcam</td>
+<td>Vehicle cutting in</td>
+<td>Horn</td>
+<td>Seconds of footage before the horn</td>
+</tr>
+<tr>
+<td>CCTV and video surveillance</td>
+<td>Person entering a restricted door</td>
+<td>Glass break or alarm</td>
+<td>Timed segment for operator review</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Object in the wearer's view</td>
+<td>Spoken request</td>
+<td>Moment the request was made</td>
+</tr>
+<tr>
+<td>GoPro and action cameras</td>
+<td>Rider or skier mid-jump</td>
+<td>Crowd cheering or wind noise</td>
+<td>Highlight candidates to trim</td>
+</tr>
+<tr>
+<td>Advertisement video edition</td>
+<td>Product on screen with a person speaking</td>
+<td>Voiceover line</td>
+<td>All clips for one ad variant</td>
+</tr>
+</tbody>
+</table>
+<p><a id="the-reviewers-task-changes-the-standard"></a></p>
+<h3>The reviewer's task changes the standard</h3>
+<p><strong>Vision for Robotics</strong> can locate a visible interaction; <strong>Audio for Robotics</strong> can help locate a relevant machine sound or instruction. The robot developer still needs to distinguish an association from a cause. A sound occurring while a tool is visible doesn't prove that tool produced it.</p>
+<p>For dashcams and video surveillance, preserve lead-in context. A horn can follow an unrelated event, and an alarm may originate outside the camera's view. For GoPro footage, wind noise may produce a candidate worth reviewing without being a reliable highlight signal.</p>
+<p>In <strong>advertisement video edition</strong>, the editor's task is different: find usable product-and-voiceover combinations, then check branding, rights and continuity. Search produces a shortlist, not a finished campaign.</p>
+<p><a id="adoption-doesnt-establish-retrieval-accuracy"></a></p>
+<h3>Adoption doesn't establish retrieval accuracy</h3>
+<p>Wistia's 2025 report found that <strong>41% of surveyed businesses used AI for video creation</strong>, more than double the 2024 level, according to <a href="https://cmscritic.com/lights-camera-ai-action-key-takeaways-from-wistias-2025-state-of-video-report">CMS Critic's account</a>. <a href="https://adwave.com/resources/ai-video-statistics-2026">Adwave's summary of Wyzowl's 2026 survey</a> reports that <strong>63% of video marketers</strong> had used AI tools to create or edit marketing videos.</p>
+<p>For surveillance, a Genetec survey cited by <a href="https://dataintelo.com/report/video-management-software-market">Dataintelo</a> found that <strong>37% of surveyed video-management-system end users planned AI-powered features in 2025</strong>, up from <strong>10% in 2024</strong>. <a href="https://www.mordorintelligence.com/industry-reports/global-ai-video-analytics-market">Mordor Intelligence</a> attributes <strong>42.34% of 2025 global AI video-analytics revenue</strong> to video-content analytics, including object detection, motion analysis and scene analysis.</p>
+<p>These figures describe adoption, intent and revenue, not search quality. Across settings, the useful deliverable remains a <strong>timed segment or shortlist for review</strong>, with camera, microphone and robot-log timestamps aligned.</p>
+<p><a id="choosing-edge-phone-or-cloud-for-video-analysis"></a></p>
+<h2>Choosing Edge, Phone or Cloud for Video Analysis</h2>
+<p>A camera sees an event, but the analysis may happen on the camera, a nearby phone or a remote server. Each choice shifts the balance among response time, bandwidth, privacy and battery use. Published measurements offer examples, though they compare different systems rather than a single controlled test.</p>
+<p><strong>Reported latency and bandwidth by architecture</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setup</th>
+<th style="text-align: right;">Reported latency</th>
+<th>Bandwidth effect</th>
+<th>Context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cloud-dependent architecture</td>
+<td style="text-align: right;">About 730 ms</td>
+<td>Comparison baseline</td>
+<td>Privacy-preserving system tests</td>
+</tr>
+<tr>
+<td>Cloud path under data-rate limits</td>
+<td style="text-align: right;">About 900 ms</td>
+<td>Constrained data rate</td>
+<td>Same tests with added constraints</td>
+</tr>
+<tr>
+<td>Privacy-preserving edge system</td>
+<td style="text-align: right;">About 180 ms</td>
+<td>85% lower</td>
+<td>91.7% detection accuracy in tested threat scenarios</td>
+</tr>
+<tr>
+<td>Multi-UAV edge testbed (ViEdge)</td>
+<td style="text-align: right;">302 ms average end-to-end</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>A <a href="https://www.scitepress.org/Papers/2025/138584/138584.pdf">2025 edge-system paper</a> reports about <strong>180 ms</strong> average detection latency for its edge system, compared with <strong>730 ms</strong> for its cloud-dependent architecture and <strong>900 ms</strong> when data rates were constrained. The paper also reports <strong>85% lower bandwidth use</strong> and <strong>91.7% detection accuracy</strong> in the tested threat scenarios. Separately, the <a href="https://dl.acm.org/doi/abs/10.1145/3742794">ViEdge multi-UAV testbed</a> reports <strong>302 ms average end-to-end latency</strong>.</p>
+<p><img alt="A comparison chart showing how to choose between Edge, Phone, or Cloud architectures for video analysis applications." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/09027d53-0570-42a0-b99d-945ece938384/can-ai-analyze-video-architecture-comparison.jpg" /></p>
+<p><a id="use-a-hybrid-decision-rule"></a></p>
+<h3>Use a hybrid decision rule</h3>
+<p>Run time-critical detection near the device. Send uncertain cases for further analysis only when connectivity and permission allow. Use cloud infrastructure for heavier archive analysis when the task and network can support it.</p>
+<p>A phone can process video from smart glasses or a camera, but sustained analysis competes with other app tasks. Check where the design may fail:</p>
+<ul>
+<li><strong>Connectivity:</strong> Uploads can stall or fail as coverage changes.</li>
+<li><strong>Cost and capacity:</strong> Metered networks and constrained uplinks make continuous video expensive to transfer.</li>
+<li><strong>Heat and memory:</strong> Sustained capture and analysis can affect device behavior.</li>
+<li><strong>Model compression:</strong> Quantization can reduce memory requirements while lowering accuracy.</li>
+</ul>
+<p>Treat the infographic's rankings as architecture shorthand, not measured guarantees. Cloud processing still uses a mobile device's transmission power, and local processing alone does not make an entire application private.</p>
+<p>Test daylight, darkness, occlusion and motion blur separately. Choose the arrangement that meets the task's timing and review needs on the hardware you will deploy.</p>
+<p><a id="mobile-and-device-stacks-for-video-search"></a></p>
+<h2>Mobile and Device Stacks for Video Search</h2>
+<p><strong>Android developers</strong> commonly use Kotlin for camera capture, application state and background-work coordination. Start with the camera lifecycle: recording, app suspension and interrupted transfers should behave predictably before you add analysis.</p>
+<p><strong>iOS developers</strong> use Swift with Apple's camera frameworks, such as AVFoundation, for capture and playback. Confirm which processing tasks can continue when the app leaves the foreground. Flutter can share interface and application logic, but camera permissions, background execution and device integrations still need platform-specific testing.</p>
+<p><a id="match-the-stack-to-the-recording-pattern"></a></p>
+<h3>Match the stack to the recording pattern</h3>
+<table>
+<thead>
+<tr>
+<th>Device stack</th>
+<th>Practical design priority</th>
+<th>First field test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Smart glasses</td>
+<td>Short event clips and selective transfer</td>
+<td>Capture while the companion phone disconnects</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Local recording with usable timestamps</td>
+<td>Retrieve an event across a recording-file boundary</td>
+</tr>
+<tr>
+<td>GoPro and action cameras</td>
+<td>Balance resolution, bitrate and fast motion</td>
+<td>Inspect moving subjects in exported footage</td>
+</tr>
+<tr>
+<td>CCTV recorder or NVR</td>
+<td>Choose recorder-side or local edge processing</td>
+<td>Retrieve footage while the uplink is unavailable</td>
+</tr>
+</tbody>
+</table>
+<p>For Android SDK evaluation, use the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">visual video search SDK listing</a> as a discovery entry point, then verify installation and platform requirements in the current repository. Don't assume a shared API means identical background behavior on Android and iOS.</p>
+<p><a id="measure-the-whole-application"></a></p>
+<h3>Measure the whole application</h3>
+<p>Record <strong>time to first usable result</strong>, <strong>battery or heat impact</strong>, and <strong>upload size on a mobile network</strong>. Measure from the user's action, not just from the moment server processing begins.</p>
+<p>For CCTV, include recorder access and playback startup. For smart glasses, include the companion connection. For action cameras, include file transfer and export behavior. These are often the delays a user notices, even when model inference itself feels fast.</p>
+<p><a id="privacy-limits-to-check-before-you-deploy"></a></p>
+<h2>Privacy Limits to Check Before You Deploy</h2>
+<p>More frames don't automatically mean safer or more accurate analysis. A tool can infer sensitive information from ordinary surroundings even when nobody asks it to identify a face.</p>
+<p>A <a href="https://arxiv.org/html/2511.02367">2025 benchmark of 508 everyday personal videos</a> found that vision-language models inferred multiple private attributes with performance exceeding human evaluators, and that frame-sampling strategies could outperform full-video analysis for some attributes. The dataset came from Chinese users and excluded audio, so its findings don't establish equivalent risks across cultures, languages, accents or combined audio-video inputs.</p>
+<p><a id="protect-against-inference-not-just-identification"></a></p>
+<h3>Protect against inference, not just identification</h3>
+<p>A room's contents, visible documents, routines and interactions can reveal information beyond the event someone intended to record. Blurring faces doesn't remove every contextual clue.</p>
+<p>Continuous ambient capture makes this especially important for smart glasses, CCTV and robotics. People in view may not be the device owner, the application user or someone who expects their surroundings to become searchable.</p>
+<blockquote>
+<p><strong>Deployment boundary:</strong> Permission to record an event isn't automatically permission to infer everything visible within it.</p>
+</blockquote>
+<p>A warehouse application designed to find misplaced tools shouldn't become an unrestricted way to investigate workers' personal characteristics. Define the allowed purpose in terms an operator can understand and administrators can enforce.</p>
+<p><a id="apply-a-purpose-limited-checklist"></a></p>
+<h3>Apply a purpose-limited checklist</h3>
+<ul>
+<li><strong>Collect necessary signals:</strong> Capture and make searchable only what the stated task requires.</li>
+<li><strong>Separate events from sensitive inferences:</strong> Finding a door opening shouldn't expose unrelated personal conclusions.</li>
+<li><strong>Set retention and deletion controls:</strong> Include recordings, generated results and accessible copies in deletion testing.</li>
+<li><strong>Keep raw footage local where practical:</strong> Limit transfers rather than assuming every query requires a cloud upload.</li>
+<li><strong>Record query permissions:</strong> Specify who can search which sources and review access logs.</li>
+<li><strong>Test combined inputs:</strong> Review what becomes inferable when sound, video and device context are available together.</li>
+</ul>
+<p>Test privacy with the same care as retrieval quality. Ask whether a user can issue an out-of-purpose query, whether deleted footage remains accessible through prior results and whether a shared device exposes another person's history.</p>
+<p>A useful system should answer the permitted question without expanding what people can discover.</p>
+<p><a id="run-your-first-video-search-in-minutes"></a></p>
+<h2>Run Your First Video Search in Minutes</h2>
+<p>A first prototype should test the complete path from a real recording to a verifiable result. Getting a search response is only part of the job; you also need to know whether the application handles interruptions and opens the right moment.</p>
+<p>Use this flow to keep the experiment focused.</p>
+<p><img alt="A four-step infographic illustrating how to perform a video search using various devices like cameras and sensors." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/96981572-6f3e-4715-b184-ac9b2c89b78d/can-ai-analyze-video-video-search.jpg" /></p>
+<ol>
+<li>
+<p><strong>Choose one real video.</strong> Use a dashcam clip, CCTV segment or product shoot you're authorized to process. Manually note a target event and a similar-looking moment that shouldn't match, so you can distinguish retrieval from a plausible answer.</p>
+</li>
+<li>
+<p><strong>Add the SDK for your stack.</strong> Our Android package, <code>com.vmodal.vmodal-sdk-android</code>, is published in <code>v-modal/vmodal_sdk_android</code>; Flutter and the released Smart Glasses / IoT / Camera SDK provide other integration paths. Check the current repository instructions before configuring dependencies.</p>
+</li>
+<li>
+<p><strong>Configure a project with an API key.</strong> Request keys through the contact page on v-modal.com. Our starting workflow is to add an SDK, configure the project, upload a video and search the first moment, which can take minutes; that isn't a guarantee for production integration.</p>
+</li>
+<li>
+<p><strong>Upload and test interruption behavior.</strong> Watch progress reporting, then deliberately cancel a test upload. Confirm that cancellation stops the operation and leaves the interface in a state the user can understand.</p>
+</li>
+<li>
+<p><strong>Search and inspect playback.</strong> Submit a text query or input image for the target moment. Compare the returned timestamp with your manual note, and inspect the preceding and following footage.</p>
+</li>
+</ol>
+<p><a id="make-the-pilot-decision-explicit"></a></p>
+<h3>Make the pilot decision explicit</h3>
+<p>Record whether the first result is correct, how long the complete request takes and how much data crosses the mobile network. Keep failed queries alongside successful ones.</p>
+<p>Move to a limited pilot only when timestamps match your footage on most test queries and the remaining errors are acceptable for the task. If matches drift, clarify the query or improve the camera angle, then rerun the same test set before expanding access.</p>
+<hr />
+<p>V-Modal AI offers a Visual Memory Layer for Physical AI with multimodal video and audio search, helping applications retrieve relevant moments from device history. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to explore the SDK repositories and start with a real recording whose results you can verify.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
