@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>AI Search Image: How Visual Search Works in 2026</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>AI Search Image: How Visual Search Works in 2026</h1>
+    <p>Google reported that Lens handled <strong>nearly 20 billion visual searches per month in 2024</strong>, based on global internal data from August to September 2024, according to <a href="https://business.google.com/us/think/search-and-video/google-search-innovations/">Google's overview of Search innovations</a>. That's not a niche feature anymore. People point a camera, upload a photo, or search what's on a screen because they don't know the right words, or because words alone aren't enough. AI search image tools grew from that habit, and they're now moving into video, audio, robots, dashcams, and CCTV.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-ai-image-search-is-and-the-queries-it-handles">What AI Image Search Is and the Queries It Handles</a></li>
+<li><a href="#five-ways-to-ask">Five Ways to Ask</a></li>
+<li><a href="#how-embeddings-connect-images-and-words">How Embeddings Connect Images and Words</a></li>
+<li><a href="#how-the-map-gets-built">How the Map Gets Built</a></li>
+<li><a href="#where-the-map-gets-blurry">Where the Map Gets Blurry</a></li>
+<li><a href="#fusing-image-audio-and-video-signals-into-one-search">Fusing Image, Audio and Video Signals Into One Search</a></li>
+<li><a href="#the-physical-ai-difference">The Physical AI Difference</a></li>
+<li><a href="#industry-use-cases-from-advertising-to-robotics-and-cctv">Industry Use Cases From Advertising to Robotics and CCTV</a></li>
+<li><a href="#comparing-the-main-use-cases">Comparing the Main Use Cases</a></li>
+<li><a href="#mobile-wearable-and-edge-stacks-for-image-and-video-search">Mobile, Wearable and Edge Stacks for Image and Video Search</a></li>
+<li><a href="#the-model-size-trade-off">The Model Size Trade-Off</a></li>
+<li><a href="#pain-points-and-trust-checks-users-run-into">Pain Points and Trust Checks Users Run Into</a></li>
+<li><a href="#a-match-is-not-proof">A Match Is Not Proof</a></li>
+<li><a href="#confirm-your-setup-before-you-build-the-search">Confirm Your Setup Before You Build the Search</a></li>
+<li><a href="#your-first-small-test">Your First Small Test</a></li>
+</ul>
+<p><a id="what-ai-image-search-is-and-the-queries-it-handles"></a></p>
+<h2>What AI Image Search Is and the Queries It Handles</h2>
+<p>Think of asking a librarian for help. You don't remember a catalogue code, so you say, "It's the book with a blue cover about ships." A good librarian understands what you mean, not just what you typed.</p>
+<p><strong>AI image search</strong> works in a similar spirit. You give the system a picture or a sentence, and it returns photos, video frames, or moments that match in <strong>meaning</strong>, not only in filename or manual tag. A search for "red bicycle leaning on a fence" can find that photo even if nobody ever labeled it "bicycle."</p>
+<p><a id="five-ways-to-ask"></a></p>
+<h3>Five Ways to Ask</h3>
+<p>The query type matters because it decides what you need to collect. A still photo library is different from a dashcam that records sound and motion.</p>
+<table>
+<thead>
+<tr>
+<th>Query type</th>
+<th>What the user provides</th>
+<th>What the system returns</th>
+<th>Everyday example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text-to-image</td>
+<td>A written description</td>
+<td>Matching photos or video frames</td>
+<td>Finding a red bicycle in a photo library</td>
+</tr>
+<tr>
+<td>Image-to-image</td>
+<td>A photo</td>
+<td>Visually or semantically similar images</td>
+<td>Finding the same product in another listing</td>
+</tr>
+<tr>
+<td>Image-to-video</td>
+<td>A still picture</td>
+<td>Video clips or time segments</td>
+<td>Locating the scene where a logo appears</td>
+</tr>
+<tr>
+<td>Voice-to-audio</td>
+<td>A spoken phrase</td>
+<td>Matching audio moments</td>
+<td>Finding when a siren was heard</td>
+</tr>
+<tr>
+<td>Environment-to-video</td>
+<td>A sensor or device state</td>
+<td>Recordings tied to that state</td>
+<td>Pulling footage from when a robot stopped</td>
+</tr>
+</tbody>
+</table>
+<p>Say you're an e-commerce seller. A shopper uploads a photo of a sneaker, and image-to-image search finds the same style in another listing, even from a different angle. Say you're reviewing GoPro footage from a bike ride. A still frame of a trail marker can pull the video segment where you passed it.</p>
+<p>Lens queries were among the fastest-growing query types on Search, and users submit them through cameras, uploaded photos, or content on screens. People use them to identify objects, products, places, plants, animals, or text without knowing precise terms. That volume tells builders something practical. Visual search has to handle messy real photos at high speed, mostly on phones, not just tidy test collections.</p>
+<blockquote>
+<p><strong>Start here:</strong> Name your main query type first. It decides whether you need still images only, or video timelines, audio, timestamps, and sensor data too.</p>
+</blockquote>
+<p>If you only need text-to-image search across a product catalogue, your job is far simpler than searching dashcam video by sound and motion. Pick the query type that matches a real question your users already ask. Then you'll know what data to keep and what you can safely ignore.</p>
+<p><a id="how-embeddings-connect-images-and-words"></a></p>
+<h2>How Embeddings Connect Images and Words</h2>
+<p>Here's the plain idea behind the jargon. Imagine a huge map of meaning. Every image gets coordinates on that map, and every word or phrase gets coordinates too. Things that are alike sit close together. Things that have little in common sit far apart.</p>
+<p>A photo of a dog on grass lands near the words "puppy on a lawn." It lands far from "office printer" or "snowy mountain." In technical language, those coordinates are called an <strong>embedding</strong>. You don't need to picture the numbers. Just picture the map.</p>
+<p><img alt="An infographic illustrating how machine learning embeddings map images and words together based on semantic similarity." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/0b4bf3cf-c3f7-48f7-aefa-ce29269e5378/ai-search-image-embedding-map.jpg" /></p>
+<p><a id="how-the-map-gets-built"></a></p>
+<h3>How the Map Gets Built</h3>
+<p>Models in the CLIP family learn from very large collections of images paired with captions. After seeing enough pairs, the model learns to place a picture and a matching description in the same neighborhood. That's why one system can accept either kind of query. A text query becomes a point on the map, an image query becomes a point on the same map, and the system returns whatever sits closest. That closest-items idea is what people mean by <strong>nearest-neighbor search</strong>.</p>
+<p>This is also why wording matters less than you'd expect. "Kids playing soccer," "children kicking a ball," and a photo of a youth match can all land near each other. The system isn't matching exact keywords. It's matching neighborhoods of meaning.</p>
+<p><a id="where-the-map-gets-blurry"></a></p>
+<h3>Where the Map Gets Blurry</h3>
+<p>Neighbors can still be the wrong house. Fine distinctions often blur together, such as two product variants that differ only in a small label, tiny printed text on a sign, or near-identical vehicles.</p>
+<p>Say you're searching dashcam footage for a red delivery van with a white roof. The top result shows a red van with a white roof, filmed at dusk from behind. It looks right at a glance. But it's a different van, from a different day, because the map placed all red vans close together and the small details that separate them, like a plate number or a dent, weren't clear enough to pull them apart.</p>
+<p>Results also depend on what the model learned from. If its training covered everyday consumer photos well but rarely saw industrial parts, medical scenes, or your local road signs, those areas of the map will be crowded and vague.</p>
+<blockquote>
+<p>When a result is wrong, ask three questions. Was my wording unclear? Was the image too dark, small, or blurred? Or does the model simply not know this kind of scene well?</p>
+</blockquote>
+<p>Each answer points to a different fix. Better wording costs nothing. Better capture may mean a camera change. Poor coverage means you need a model or test set that reflects your footage.</p>
+<p><a id="fusing-image-audio-and-video-signals-into-one-search"></a></p>
+<h2>Fusing Image, Audio and Video Signals Into One Search</h2>
+<p>A single frame rarely tells the whole story. Take a dashcam clip of a near miss. The frame shows a pedestrian. The audio holds a horn. The timeline shows hard braking over two seconds. The metadata says where and when it happened. Drop any one of those, and your search gets weaker.</p>
+<p><strong>Multimodal</strong> search just means combining more than one kind of signal. A query like "horn near a crosswalk at dusk" should return one moment, not three separate lists you have to cross-check by hand.</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>What it adds</th>
+<th>Example query</th>
+<th>Gap when used alone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Image frames</td>
+<td>Objects, colours and text on signs</td>
+<td>A logo on a bus</td>
+<td>Small or blurred items are missed</td>
+</tr>
+<tr>
+<td>Audio</td>
+<td>Speech, alarms and machine sounds</td>
+<td>Glass breaking near a door</td>
+<td>Noisy rooms hide the sound</td>
+</tr>
+<tr>
+<td>Video timeline</td>
+<td>Motion and sequence of events</td>
+<td>A car braking near a pedestrian</td>
+<td>Long files are slow to review</td>
+</tr>
+<tr>
+<td>Time and location metadata</td>
+<td>When and where the event happened</td>
+<td>A horn near a crosswalk at dusk</td>
+<td>Wrong device clocks shift results</td>
+</tr>
+<tr>
+<td>IMU and LiDAR data</td>
+<td>Motion spikes and 3D geometry</td>
+<td>A sudden impact spike</td>
+<td>Needs specialist sensors and processing</td>
+</tr>
+</tbody>
+</table>
+<p>This isn't a futuristic wish. In a 2026 survey of more than 700 visual and physical AI professionals, <strong>68% of teams work with at least three data modalities, while only 6% work with a single modality</strong>, according to the <a href="https://voxel51.com/whitepapers/state-of-physical-ai-2026">State of Physical AI 2026 whitepaper</a>. Teams reported using time-series sensor data, 3D point clouds or LiDAR, audio, and multispectral imagery alongside ordinary video.</p>
+<p><a id="the-physical-ai-difference"></a></p>
+<h3>The Physical AI Difference</h3>
+<p><strong>Physical AI</strong> is a useful comparison point. A vision-only robot sees. A physical AI robot combines vision, depth, touch, and audio to understand a scene and act on context. A <a href="https://www.capgemini.com/wp-content/uploads/2026/04/Final-Web-Version-Report-Physical-AI.pdf">2026 Capgemini Research Institute survey of 1,678 executives</a> found the top expected gains were <strong>productivity (76%)</strong>, <strong>cost efficiency (70%)</strong>, and <strong>product quality or precision (65%)</strong>. A search layer for that kind of system has to link a video frame to the sound, the position, and the sensor reading from the same second, because that's where the operational answer lives.</p>
+<p>Tools that support this style of retrieval, such as the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">V-Modal visual video search SDK listing</a>, reflect that shift toward combined signals rather than frames alone.</p>
+<p>Every added modality also adds work. Clocks drift between devices. Files get bigger. Reviewers need context they can trust. So match the signal set to the question. If sound never changes the answer, don't record and store it just because you can.</p>
+<p><a id="industry-use-cases-from-advertising-to-robotics-and-cctv"></a></p>
+<h2>Industry Use Cases From Advertising to Robotics and CCTV</h2>
+<p>Scale explains why searchable memory matters. A 2025 industry assessment citing International Federation of Robotics data reported <strong>542,000 industrial robots installed worldwide in 2024</strong> and <strong>approximately 4.66 million industrial robots operating globally that year</strong>, and the same <a href="https://www.fortunebusinessinsights.com/physical-ai-market-119097">physical AI market assessment</a> states robotics represented <strong>46.9% of the physical AI market in 2025</strong>. Each of those machines can generate hours of footage nobody will ever watch end to end.</p>
+<p><img alt="A digital interface demonstrating AI search capabilities across various video sources in an industrial manufacturing factory setting." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/e6982ede-2463-447f-a305-5f1e1bce9d75/ai-search-image-industrial-ai.jpg" /></p>
+<p><a id="comparing-the-main-use-cases"></a></p>
+<h3>Comparing the Main Use Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Industry</th>
+<th>Typical search</th>
+<th>Signals combined</th>
+<th>Who searches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Advertising video editing</td>
+<td>Shot with a product or a crowd reaction</td>
+<td>Frames and spoken phrases</td>
+<td>Video editors and ad producers</td>
+</tr>
+<tr>
+<td>Vision for robotics</td>
+<td>Moment a robot met an obstacle</td>
+<td>Camera frames and depth data</td>
+<td>Robotics engineers and operations teams</td>
+</tr>
+<tr>
+<td>Audio for robotics</td>
+<td>Spoken command and the robot's response</td>
+<td>Audio, video and machine state</td>
+<td>Robotics operators</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Vehicle braking near a pedestrian</td>
+<td>Video, motion and audio</td>
+<td>Fleet managers and insurers</td>
+</tr>
+<tr>
+<td>CCTV and video surveillance</td>
+<td>One visual indicator across hours of footage</td>
+<td>Video frames and timestamps</td>
+<td>Security integrators and site owners</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Where an object was last seen</td>
+<td>First-person video and audio</td>
+<td>Wearable app developers</td>
+</tr>
+<tr>
+<td>GoPro</td>
+<td>Action clip with a sound peak</td>
+<td>Video and audio</td>
+<td>Creators and action-sports teams</td>
+</tr>
+</tbody>
+</table>
+<p>In advertising, search is mostly about media content. An editor assembling a spot needs every shot where the product appears, the moment someone says the campaign line, or a genuine crowd reaction. Frames and speech carry most of the answer, and a wrong result costs editing time, not safety.</p>
+<p>Robotics is different. A warehouse team searching for a pallet misalignment, a worker entering a restricted zone, or the second a robot stopped near an obstacle needs sensor and audio evidence attached to the frame. Audio for robotics adds another layer. Matching a spoken command like "stop" to what the robot did next tells you whether it heard, understood, and obeyed. Vision alone can't answer that.</p>
+<p>DashCam and CCTV work sits between those poles. A fleet manager looking for braking near a pedestrian, a siren, or a glass break is doing incident review. A site owner scanning overnight CCTV for one visual indicator, such as a specific vehicle color at a gate, is doing the same kind of needle search across hours of mostly empty footage. In CCTV use, we built V-Modal AI to scan hours of footage for one specific visual indicator, which is exactly that needle search.</p>
+<p>Smart glasses and GoPro footage add first-person motion. The wearer asks where they last saw their keys, or a creator hunts for the clip where the crowd noise peaked. The camera moves constantly, audio is close and personal, and battery limits what gets captured.</p>
+<blockquote>
+<p><strong>A useful test:</strong> Find the row whose footage looks most like yours. If your data, devices, and questions match that row, copy its signal combination before inventing your own.</p>
+</blockquote>
+<p>Media search can lean on frames and speech. Physical AI stacks can't, because their questions involve depth, motion, and machine state. That difference in raw material, not fashion, should drive your design.</p>
+<p><a id="mobile-wearable-and-edge-stacks-for-image-and-video-search"></a></p>
+<h2>Mobile, Wearable and Edge Stacks for Image and Video Search</h2>
+<p>The same search idea behaves very differently depending on where it runs. A phone has a decent battery and regular Wi-Fi. Smart glasses have a tiny battery sitting against someone's head. A CCTV hub has wall power but strict rules about who can watch what.</p>
+<p><img alt="A comparison chart showing hardware constraints for image and video search across phones, wearable devices, and edge hardware." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/c9ede046-8554-40e7-b9de-d6a47d286d39/ai-search-image-device-comparison.jpg" /></p>
+<table>
+<thead>
+<tr>
+<th>Device</th>
+<th>Typical stack</th>
+<th>Connectivity</th>
+<th>Main constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mobile app</td>
+<td>Swift, Kotlin for Android or Flutter</td>
+<td>Intermittent or Wi-Fi</td>
+<td>Battery drain and large uploads</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Companion app with on-device memory</td>
+<td>Bluetooth or Wi-Fi to a phone</td>
+<td>Battery and heat</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Embedded Linux unit</td>
+<td>Cellular with gaps</td>
+<td>Storage and upload size</td>
+</tr>
+<tr>
+<td>GoPro</td>
+<td>Companion mobile app</td>
+<td>Wi-Fi offload</td>
+<td>Large files and slow transfers</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>Edge hub or video recorder</td>
+<td>Local network, cloud optional</td>
+<td>Retention rules and access control</td>
+</tr>
+<tr>
+<td>Robotics edge hub</td>
+<td>Embedded Linux</td>
+<td>Variable</td>
+<td>Latency and safety-critical response</td>
+</tr>
+</tbody>
+</table>
+<p><a id="the-model-size-trade-off"></a></p>
+<h3>The Model Size Trade-Off</h3>
+<p>Bigger models usually understand more, but they cost more on every query. They drain batteries faster, create more heat, and push more data over the network. Smaller models can run continuously on the device, yet they may miss fine detail such as product variants or small signage.</p>
+<p>The <a href="https://papers.neurips.cc/paper_files/paper/2025/file/449fb670956a93b3d4d95167f72093e1-Paper-Conference.pdf">MobileCLIP research presented at NeurIPS</a> evaluates exactly this balance, testing compact image-text models on retrieval benchmarks to show they can be optimized for latency and accuracy on mobile hardware rather than picking the largest model. A practical pattern follows from that work. Use a lightweight model for continuous capture on the device, avoid indexing near-duplicate frames, and bring in heavier processing only when a query is ambiguous.</p>
+<p>Local search is more realistic than many teams assume. A recent benchmark using CLIP ViT-B/32 embeddings found that FAISS inserted <strong>10,000 vectors in approximately 15 milliseconds</strong> and answered queries in <strong>under 1 millisecond</strong>, according to the <a href="https://www.frontiersin.org/journals/computer-science/articles/10.3389/fcomp.2026.1819991/abstract">Frontiers in Computer Science benchmark abstract</a>. Moderate local collections can feel instant without a cloud round trip, though production systems still need their own durable storage because the index itself doesn't provide it.</p>
+<p>Start from the constraint that hurts most on your target device. For glasses, that's heat and battery. For dashcams in rural fleets, it's patchy cellular coverage and upload size. For CCTV, it's retention and access control.</p>
+<p>Also test both directions separately. A model that's strong at text-to-image search can be weaker at image-to-text retrieval, and you won't see that gap if you only test one way. If your users search in more than one language, test that too, because language coverage affects retrieval quality, not just the interface.</p>
+<p><a id="pain-points-and-trust-checks-users-run-into"></a></p>
+<h2>Pain Points and Trust Checks Users Run Into</h2>
+<p>A night-shift reviewer can drag a playhead across hours of CCTV looking for thirty seconds that matter. Fatigue makes the miss more likely. The same hunt appears on phones, dashcams, robots, and smart glasses, wherever cameras record more than a person can watch.</p>
+<p>Those recordings rarely live in one place. A horn on a dashcam, a sidewalk phone clip, and a gate camera can capture one event, then store it in three apps. Audio and video from different devices drift, so the sound you hear does not sit on the frame you see. The stack works like two witnesses using different clocks. Until those clocks agree, a result can name the right place and the wrong instant.</p>
+<p>Large files create a separate failure. Long recordings and live streams slow mobile apps or crash them. A robotics technician or a glasses wearer who needs an answer on the spot gets nothing if the upload never finishes. Cloud-only search leaves that person waiting on a connection the device does not have.</p>
+<p><a id="a-match-is-not-proof"></a></p>
+<h3>A Match Is Not Proof</h3>
+<p>A visually similar result is not always the right result. Users are rarely told why a visual result appeared or how confident the system is.</p>
+<blockquote>
+<p>A visual match is not the same as a verified fact.</p>
+</blockquote>
+<p>Treat every result as a lead, not a conclusion. Run three checks before you act on it. First, ask why it was returned and which signals supported it: a frame, a sound, a sensor reading, or only a lookalike. Second, check the timestamp and source chronology, because an old image reused in a new context misleads fast. Third, work out whether the image is an original capture, an exact duplicate, or a derived copy that has been cropped or edited.</p>
+<p>Separating <strong>match confidence</strong> from <strong>claim confidence</strong> helps here. The system may be highly confident two images look alike while you should remain unsure what that likeness proves. Visual resemblance alone does not verify identity, and it cannot tell you whether an image is AI-generated. That takes provenance and context.</p>
+<p>Privacy raises a parallel worry. Services differ in retention policies, and uploaded images may be kept or added to indexes, a risk flagged for search users in this <a href="https://www.advancedwebranking.com/seo/images-and-visual-search-guide">guide to images and visual search</a>. Do not assume a photo containing a face, a home, a confidential document, or an unreleased product gets deleted just because you closed the tab. For people searching footage of others or sensitive sites, that uncertainty is itself a pain point, not a legal footnote.</p>
+<p><a id="confirm-your-setup-before-you-build-the-search"></a></p>
+<h2>Confirm Your Setup Before You Build the Search</h2>
+<p>A phone demo that finds a jacket from one photo can still stall on a dashcam in a tunnel, or on smart glasses with a thin battery. The matching may be fine. The device, the network, and the rules for keeping footage are what fail in the field.</p>
+<p>Setup works like packing a daypack before a hike. You choose what to carry, how you will find it in the dark, and what you drop if the pack gets heavy. On a robot, a CCTV recorder, or a wearable, that choice is about frames, sound, and who may look later.</p>
+<p><img alt="A six-step checklist titled Confirm Your Setup Before You Build the Search for setting up AI search systems." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/93b4be82-2068-4206-877d-b6097e50961e/ai-search-image-checklist.jpg" /></p>
+<p>Mark these lines before you write an integration.</p>
+<ul>
+<li>✓ <strong>Target platform:</strong> Mobile, smart glasses, dashcam, GoPro, CCTV, or robotics. Battery, storage, and connectivity differ on each.</li>
+<li>✓ <strong>Query types needed:</strong> Text-to-image, image-to-video, voice-to-audio, or another mode. The mode decides what you must capture.</li>
+<li>✓ <strong>Signals to combine:</strong> Frames only, or frames plus audio, timestamps, location, and sensor data.</li>
+<li>✓ <strong>Latency and offline needs:</strong> Does search have to work in a tunnel, a warehouse dead zone, or a moving vehicle?</li>
+<li>✓ <strong>Upload size and connectivity:</strong> How large are the files, and how often does the connection drop?</li>
+<li>✓ <strong>Retention and access:</strong> Who can view recordings of people, how long you keep them, and whether a service may retain or index uploads.</li>
+<li>✓ <strong>Trust checks:</strong> How reviewers will see why a result appeared, when it was captured, and whether it is an original or a copy.</li>
+</ul>
+<p><a id="your-first-small-test"></a></p>
+<h3>Your First Small Test</h3>
+<p>Start with one short clip from the device people carry. Add the SDK, configure a project with an API key, upload that clip, and search for the first moment. The path takes minutes. Request the API key through the contact page on v-modal.com before any upload. SDKs and examples are on the developer hub at <a href="https://v-modal.com/developers">v-modal.com/developers</a>.</p>
+<p>Score that search on the hardware you will ship. Was the moment the one you meant, and was it fast enough when the radio dropped? Does retention fit your rules for faces, homes, and unreleased products?</p>
+<p>A CCTV team can run the same short window, looking for one visual indicator, before scanning hours of footage. V-Modal AI retrieves video and images from a text query or an input image, without manual tags and without scrubbing a timeline. Widen the library only after that first search holds on footage from your roads, aisles, or shop floor.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
