@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Precision and Recall Explained with Clear Examples</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Precision and Recall Explained with Clear Examples</h1>
+    <p>A fleet safety lead types pedestrian crossing into a dashcam search box and gets 50 clips back. She has 20 minutes before a claims call, and the crossing she needs may or may not be on that list. The question in front of her isn't whether the search works in some general sense. It's whether the clips returned really show crossings, and whether the crossing that happened is among them.</p>
+<p>Those two worries have names. <strong>Precision</strong> measures how much of what came back is right. <strong>Recall</strong> measures how much of what happened was found. Most arguments about a video, audio, or sensor search product reduce to which of the two a team is willing to lose, and by how much.</p>
+<p>Neither number is a fixed property of a model the way its file format is. Both get decided by where you place the operating point, and that decision belongs to the product team, not to whoever trained the model.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#precision-and-recall-in-plain-words">Precision and Recall in Plain Words</a></li>
+<li><a href="#the-three-counts-behind-both-numbers">The three counts behind both numbers</a></li>
+<li><a href="#working-through-one-search-example">Working Through One Search Example</a></li>
+<li><a href="#why-the-two-numbers-pull-in-opposite-directions">Why the two numbers pull in opposite directions</a></li>
+<li><a href="#how-thresholds-move-precision-and-recall">How Thresholds Move Precision and Recall</a></li>
+<li><a href="#what-changes-when-you-move-the-cut-off">What changes when you move the cut-off</a></li>
+<li><a href="#the-four-factors-that-set-your-operating-point">The four factors that set your operating point</a></li>
+<li><a href="#recall-for-moments-not-just-files">Recall for Moments, Not Just Files</a></li>
+<li><a href="#what-counts-as-a-true-positive-for-a-moment">What counts as a true positive for a moment</a></li>
+<li><a href="#choosing-metrics-for-each-use-case">Choosing Metrics for Each Use Case</a></li>
+<li><a href="#where-the-processing-lives-changes-the-target">Where the processing lives changes the target</a></li>
+<li><a href="#pain-points-that-break-search-evaluation">Pain Points That Break Search Evaluation</a></li>
+<li><a href="#set-your-targets-before-you-ship-search">Set Your Targets Before You Ship Search</a></li>
+</ul>
+<p><a id="precision-and-recall-in-plain-words"></a></p>
+<h2>Precision and Recall in Plain Words</h2>
+<p>Say a delivery fleet's dashcam archive covers a week of driving, and a safety reviewer searches it after a complaint about a near-miss at a school gate. The search returns a ranked list. Before she trusts it, she needs two things: how many of these clips show a pedestrian crossing, and whether the crossing she's chasing appears at all.</p>
+<p>Picture the search as a fishing net dropped into a lake. <strong>Precision</strong> is the share of the catch that's fish rather than weed and boots. <strong>Recall</strong> is the share of the fish in the lake that ended up in the net. A fine mesh fills the boat with junk. A wide mesh keeps the deck clean and lets dinner swim away. Neither net is better in the abstract. It depends on whether you're feeding people tonight or trying to empty the lake.</p>
+<p><a id="the-three-counts-behind-both-numbers"></a></p>
+<h3>The three counts behind both numbers</h3>
+<p>Every precision and recall figure comes from three counts taken against a labelled set of examples.</p>
+<ul>
+<li><strong>True positives (TP):</strong> results the search returned that really do show the event.</li>
+<li><strong>False positives (FP):</strong> results it returned that don't.</li>
+<li><strong>False negatives (FN):</strong> real events in the archive that never appeared in the results.</li>
+</ul>
+<p>True negatives, meaning the hours of uneventful footage correctly left alone, drop out of both formulas. That's the first clue about why plain accuracy misleads on rare events.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula</th>
+<th>Question it answers</th>
+<th>Cost of a weak score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Precision</strong></td>
+<td>TP / (TP + FP)</td>
+<td>Of the results returned, how many are correct?</td>
+<td>Reviewers waste time on false matches</td>
+</tr>
+<tr>
+<td><strong>Recall</strong></td>
+<td>TP / (TP + FN)</td>
+<td>Of all true events, how many were found?</td>
+<td>Incidents, commands or objects go unseen</td>
+</tr>
+<tr>
+<td><strong>F1 score</strong></td>
+<td>2 × Precision × Recall / (Precision + Recall)</td>
+<td>How balanced are both metrics?</td>
+<td>Hides which error dominates</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>F1 score</strong> collapses both into one number using the harmonic mean, which is dominated by whichever value is smaller. That makes F1 hard to game and easy to misread. Precision of 0.90 with recall of 0.10 gives an F1 near 0.18, not 0.50, because the weak side drags the score down. It's a useful summary and a poor verdict, since it never tells you which side is failing.</p>
+<blockquote>
+<p><strong>Plain-language version:</strong> precision is trust in what came back, recall is confidence in what didn't.</p>
+</blockquote>
+<p>Precision asks what fraction of returned results are correct. Recall asks what fraction of real events were returned. Hold both sentences close, because every later decision in a search project is a choice about which one to spend.</p>
+<p><a id="working-through-one-search-example"></a></p>
+<h2>Working Through One Search Example</h2>
+<p>Round numbers make the mechanics obvious. A fleet search for pedestrian crossings returns <strong>50 segments</strong>. Forty of them show a real crossing. The archive holds <strong>60 real crossings</strong> in total, so 20 never made it into the results.</p>
+<ol>
+<li>Precision is 40 divided by 50, which is <strong>0.80</strong>.</li>
+<li>Recall is 40 divided by 60, which is about <strong>0.67</strong>.</li>
+<li>F1 is 2 × 0.80 × 0.67 divided by 1.47, which comes to about <strong>0.73</strong>.</li>
+</ol>
+<p>Now read those numbers from the reviewer's perspective. One clip in five on her list wastes her time. One real crossing in three never reaches her screen at all, and she has no way of knowing it exists unless someone counts the archive independently. That invisibility is why recall is the metric teams stop measuring.</p>
+<p><a id="why-the-two-numbers-pull-in-opposite-directions"></a></p>
+<h3>Why the two numbers pull in opposite directions</h3>
+<p>Tighten the search so only near-certain matches come back, and precision climbs while recall falls. Loosen it and the reverse happens. The two stop fighting only when the search itself improves, through a stronger model or a richer signal that separates a crossing from a parked car.</p>
+<blockquote>
+<p>A search that returns nothing is perfectly precise and completely useless. A search that returns everything is thorough and unreadable.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Count or metric</th>
+<th>Meaning in the example</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>True positives (TP)</td>
+<td>Returned segments that show a crossing</td>
+<td>40</td>
+</tr>
+<tr>
+<td>False positives (FP)</td>
+<td>Returned segments with no crossing</td>
+<td>10</td>
+</tr>
+<tr>
+<td>False negatives (FN)</td>
+<td>Real crossings the search missed</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>Share of the 50 returned clips that show a crossing</td>
+<td>0.80</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>Share of the 60 real crossings that were found</td>
+<td>0.67</td>
+</tr>
+<tr>
+<td>F1 score</td>
+<td>Harmonic mean of precision and recall</td>
+<td>0.73</td>
+</tr>
+</tbody>
+</table>
+<p>Run the arithmetic again on a better pass: 45 correct returns, 5 false positives, 15 misses. Precision becomes <strong>0.90</strong>, recall <strong>0.75</strong>, F1 about <strong>0.82</strong>. Both improved at once, which is the signature of a better search rather than a louder one.</p>
+<p><a id="how-thresholds-move-precision-and-recall"></a></p>
+<h2>How Thresholds Move Precision and Recall</h2>
+<p>Every search scores its candidates, and someone has to choose the cut-off above which a result counts as a match. That cut-off is the <strong>operating point</strong>. It shapes the precision and recall you report far more than the model architecture does, and a default of 0.5 is rarely the right place to leave it for a search product.</p>
+<p>The relationship is easier to see than to describe, because moving the cut-off changes detection behavior across the whole result set.</p>
+<p><img alt="A diagram explaining how adjusting the model score threshold affects precision and recall in computer vision detection." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/9423fc46-5126-41d3-a340-8d9dba49b32b/precision-and-recall-object-detection.jpg" /></p>
+<p><a id="what-changes-when-you-move-the-cut-off"></a></p>
+<h3>What changes when you move the cut-off</h3>
+<p>Threshold experiments on imbalanced classification show how wide the swing gets. A <a href="https://formative.jmir.org/2026/1/e86379/PDF">threshold analysis in JMIR Formative Research</a> found that lowering the cut-off to <strong>0.20</strong> raised recall to <strong>0.880</strong> and F1 to <strong>0.748</strong>, while precision fell to <strong>0.651</strong>. A separate configuration tuned for high sensitivity reached recall of <strong>0.9775</strong> with precision of only <strong>0.5907</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Decision threshold</th>
+<th>Recall</th>
+<th>Precision</th>
+<th>F1 score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lowered to 0.20</td>
+<td>0.880</td>
+<td>0.651</td>
+<td>0.748</td>
+</tr>
+<tr>
+<td>Tuned for high sensitivity</td>
+<td>0.9775</td>
+<td>0.5907</td>
+<td>0.736</td>
+</tr>
+</tbody>
+</table>
+<p>Both rows describe the same class of model. The difference is a decision about where to stop. At the high-sensitivity point, a reviewer opening matches finds that roughly four in ten are wrong. Whether that's acceptable depends entirely on what a miss costs.</p>
+<p><a id="the-four-factors-that-set-your-operating-point"></a></p>
+<h3>The four factors that set your operating point</h3>
+<ul>
+<li><strong>Cost asymmetry:</strong> a missed pedestrian near a loading bay is not the same loss as an extra clip in a queue.</li>
+<li><strong>Event rarity:</strong> when real events are a tiny share of the archive, a small precision drop produces a large pile of false matches.</li>
+<li><strong>Latency budget:</strong> an edge device answering in a fraction of a second can only afford so much compute, which limits the curve it can reach.</li>
+<li><strong>Review capacity:</strong> the honest constraint. If an analyst can inspect 40 clips an hour, a threshold that returns 400 is fiction.</li>
+</ul>
+<p>The <strong>precision-recall curve</strong> shows every operating point at once, with recall on the horizontal axis and precision on the vertical. Each point is one threshold. Pick the point that meets your recall floor, then read across to precision and multiply by the expected number of events to see the size of the review queue.</p>
+<p>Expected cost collapses that into one comparison: multiply false positives by the cost of a wasted review and false negatives by the cost of a miss, then choose the threshold where the total is lowest.</p>
+<p>One trap catches teams repeatedly. <strong>Class weighting and oversampling</strong> can lift minority recall while degrading probability calibration, so the scores stop meaning what the threshold assumes. Re-sweep the curve after any rebalancing change, and report <strong>recall at a fixed review budget</strong>, <strong>precision at the required recall</strong>, and a calibration check instead of a single aggregate.</p>
+<p><a id="recall-for-moments-not-just-files"></a></p>
+<h2>Recall for Moments, Not Just Files</h2>
+<p>A robot's camera records a pallet tipping at 14:02:11, and a worker shouts two seconds later. A search returns a clip running from 14:02:08 to 14:02:20. Did it find the event? Recall over files can't answer that question, because the unit of interest is a moment, not a file.</p>
+<p><a id="what-counts-as-a-true-positive-for-a-moment"></a></p>
+<h3>What counts as a true positive for a moment</h3>
+<p>Recent video-retrieval research measures <strong>Recall@K</strong>, the proportion of relevant items appearing in the top K results, and reports <strong>R@1</strong>, <strong>R@5</strong> and mean average precision for temporal retrieval, as described in this <a href="https://link.springer.com/article/10.1007/s00530-026-02459-8?error=cookies_not_supported&amp;code=26879d58-0f5b-4791-a621-465fcf4f34d6">Multimedia Systems paper on temporal video retrieval</a>. What those measures don't settle is the matching rule, and that rule is where most recall claims fall apart.</p>
+<p>There are three ways a strong recall figure still misleads. A system can score well at clip level and miss the decisive frame inside the clip. It can return the same event five times and count each return as a separate win. It can find the visual moment and lose the audio that made it matter, such as the alarm, the impact, or the spoken instruction.</p>
+<blockquote>
+<p>A recall number without an overlap rule, a duplicate policy and a stated K isn't a measurement. It's a slogan.</p>
+</blockquote>
+<p>Published figures show why qualifiers matter. A 2024 study on the <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11091259/table/T6/">Stanford Drone Dataset reported 99.6% recall</a> at its chosen precision setting of 9 × 9 and recall number 6, published in Frontiers in Neuroscience. That result is real, and it says nothing about whether the system finds your event, in your footage, inside the top ten results you can show a user.</p>
+<p>Four evaluation rules fix the ambiguity. Set a <strong>temporal overlap threshold</strong> that a returned segment must meet against the labelled event. Count <strong>distinct events</strong> rather than duplicate clips. Measure <strong>audio-visual joint recall</strong> when sound and vision describe the same moment. Report recall at <strong>realistic K values</strong>, top 5 or top 10, and inside your latency budget. On devices where storage and bandwidth are tight, recall at K is the only recall number that describes the product. If you want to watch a ranked result set behave against your own labels, <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">a visual video search SDK that returns ranked matches</a> with distance values is a practical way to run the check.</p>
+<p>Three questions to ask anyone who quotes a recall figure for video or audio search. What overlap counts as a hit? At what K was it measured? And does the number cover both modalities, or only frames?</p>
+<p><a id="choosing-metrics-for-each-use-case"></a></p>
+<h2>Choosing Metrics for Each Use Case</h2>
+<p>The right metric isn't a property of your industry. It's a property of what a mistake costs and how much review your team can absorb. The same 0.80 precision that's healthy on a dashcam review queue is unacceptable for a robot arm deciding whether a person stands in its path.</p>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Costly error</th>
+<th>Metric to prioritise</th>
+<th>Illustrative target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Advertisement video edition</td>
+<td>Missing reusable product shots or brand mentions</td>
+<td>Recall at a fixed review budget</td>
+<td>Example: every reuse candidate surfaced within the first 20 clips</td>
+</tr>
+<tr>
+<td>Vision for robotics</td>
+<td>Missing a person or obstacle</td>
+<td>Recall at a required safety level</td>
+<td>Example: zero missed hazards inside the stopping zone across the test set</td>
+</tr>
+<tr>
+<td>Audio for robotics</td>
+<td>Missing an alarm or spoken command</td>
+<td>Recall with accurate timestamps</td>
+<td>Event located within 2 seconds of onset</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Missing a near-miss incident</td>
+<td>Recall per incident, with precision on the review queue</td>
+<td>Few false alerts per driving hour</td>
+</tr>
+<tr>
+<td>CCTV and video surveillance</td>
+<td>Missing an intrusion, or flooding operators with false alarms</td>
+<td>Precision at a required recall</td>
+<td>Alerts reviewed per operator hour within budget</td>
+</tr>
+<tr>
+<td>Mobile apps, smart glasses and GoPro</td>
+<td>Losing the moment a user wants to recall</td>
+<td>Precision of the top results</td>
+<td>The right moment appears in the top 5 results</td>
+</tr>
+</tbody>
+</table>
+<p>The infographic below sets the priorities side by side across five workflows.</p>
+<p><img alt="A table comparing use cases to determine whether to prioritize precision or recall metrics in machine learning." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/10cd6209-15ea-4a8b-b142-346eab2c2793/precision-and-recall-metrics-table.jpg" /></p>
+<p>In advertising, the library is the problem. U.S. digital video advertising expenditure reached <strong>$54 billion in 2023</strong> and rose <strong>15%</strong>, with a projection of <strong>$63 billion in 2024</strong> after another 16% increase, according to <a href="https://www.statista.com/statistics/1602926/top-ways-ai-leveraged-video-marketing/">video advertising data reported by Statista</a>. A 2024 global survey in the same reporting found video marketers using AI to generate descriptions, titles, or tags to improve searchability. Editors working at that volume need search that finds product shots, speakers, motifs and spoken brand mentions instead of watching every asset end to end.</p>
+<p><a id="where-the-processing-lives-changes-the-target"></a></p>
+<h3>Where the processing lives changes the target</h3>
+<p>Phones and smart glasses run much of the work locally, because the user is holding the device and expects an answer before lowering an arm. Dashcams and CCTV cameras sit next to the stream, where compute and storage are capped and any search has a top-K budget. Robots keep perception on board and push heavier indexing elsewhere when connectivity allows, which is why audio and vision have to be evaluated together rather than separately.</p>
+<p>The commercial weight behind that stack is visible in the numbers. Fortune Business Insights estimated the physical AI market at <strong>$33.42 billion in 2025</strong> and <strong>$42.06 billion in 2026</strong>, forecasting <strong>$294.07 billion by 2034</strong> at a <strong>27.5% compound annual growth rate</strong>, per <a href="https://newmarketpitch.com/blogs/news/physical-ai-market-size">physical AI market sizing from New Market Pitch</a>. Robotics takes a <strong>46.9% share</strong> of the 2025 mix across industrial, collaborative, mobile and service robots. Edge-AI software was estimated at about <strong>$3.7 billion</strong> in 2025, with edge computer vision around <strong>$1.37 billion</strong>, in the same reporting.</p>
+<p>Those figures describe scale, not identical capability on every device. Mixed hardware, intermittent connectivity, tight edge compute and storage, audio-video sync, and the plain difficulty of recalling one past event from an unstructured sensor history remain the daily constraints.</p>
+<p><a id="pain-points-that-break-search-evaluation"></a></p>
+<h2>Pain Points That Break Search Evaluation</h2>
+<p>Measurement fails before the model does. A 2024 systematic review of AI-powered surveillance research, which screened roughly <strong>850 records</strong> and included <strong>88 studies</strong>, identifies video volume as a central operational problem: large footage volumes overwhelm human operators, delay incident response, and raise the chance that critical events are missed, as reported in this <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/widm.70137">Wiley review of AI surveillance research</a>. Detection itself has improved, with COCO object-detection accuracy rising from <strong>42% in 2015 to 64.5% in 2024</strong> while inference latency fell, per the same review.</p>
+<p>Better detectors don't fix evaluation. These are the failure modes teams hit, each with the fix that costs the least to apply this week.</p>
+<p><img alt="An infographic detailing five key challenges that negatively impact the accuracy of search evaluation processes." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/9c352845-f225-43f8-aff0-a549187c91b9/precision-and-recall-search-evaluation.jpg" /></p>
+<ul>
+<li><strong>No moment-level labels.</strong> Nobody can check a segment against a truth that only says "this file contains a crossing." Label every event with a start and end time.</li>
+<li><strong>Annotators disagree.</strong> The same clip gets marked differently by two reviewers. Double-label a sample, measure agreement, and write the rule down before scaling up.</li>
+<li><strong>Timestamps that don't overlap enough.</strong> An overlap rule that lives only in someone's head makes scores incomparable between runs. State the rule, such as a returned segment covering at least half the labelled event.</li>
+<li><strong>Rare events flattering accuracy.</strong> When 2% of clips contain the event, a system that returns nothing scores 98% accuracy. Report precision and recall on the rare class and never accuracy alone.</li>
+<li><strong>One F1 hiding the failure.</strong> A single balanced score tells you nothing about whether to hire reviewers or improve the model. Publish the pair plus the threshold it came from.</li>
+<li><strong>Latency and bandwidth capping results.</strong> An excellent ranker behind a slow pipeline still shows users five results. Measure recall at the K you can serve.</li>
+<li><strong>Drift across devices and conditions.</strong> Lighting, weather, camera models and street noise all move the curve. Re-test after every camera, microphone, or season change.</li>
+<li><strong>Manual review that can't keep up.</strong> Operators cannot inspect every candidate match. Set a review budget and measure precision inside it, not in an imaginary queue.</li>
+</ul>
+<p><a id="set-your-targets-before-you-ship-search"></a></p>
+<h2>Set Your Targets Before You Ship Search</h2>
+<p>Two numbers and one check decide whether a search feature is ready. Everything else is commentary, including the model card.</p>
+<ol>
+<li><strong>Name the costly error.</strong> A missed person or obstacle for robot vision, a missed alarm or spoken command for robot audio, a missed near-miss on a dashcam, a missed intrusion or an unreadable alert flood on CCTV, a missed product shot in an ad library. That error decides whether recall or precision leads.</li>
+<li><strong>Label a test set from your own footage.</strong> Give every moment a start and end time, mark both modalities when sound and vision describe the same event, and include enough rare events that accuracy can't look strong by ignoring them.</li>
+<li><strong>Sweep the threshold and keep the curve.</strong> Select the first point that meets the recall floor without breaking the review budget, then write down precision at that recall, recall within the allowed number of results, and whether the scores are calibrated.</li>
+</ol>
+<p>Repeat the check after class weighting, a new camera or microphone, or a change of season, lighting, or street noise. For a CCTV archive, the query that matters is often one specific visual indicator buried in hours of footage, which is exactly the case our search layer is built to handle.</p>
+<blockquote>
+<p><strong>Ship gate:</strong> a recall floor, a precision ceiling inside the review budget, and a calibration check. If any of the three is missing, the search isn't measured yet.</p>
+</blockquote>
+<hr />
+<p>Precision and recall stop being abstract the moment you attach them to a cost and a queue length, and that's the work V-Modal AI builds for: search across <strong>multimodal video and audio</strong> that returns specific moments rather than whole files, on hardware from phones and smart glasses to robots, dashcams and CCTV. Our Visual Memory Layer for Physical AI gives those devices an indexable memory they can query in natural language, with ranked results you can evaluate against your own labelled footage. Bring a day of your own video, set your recall floor and review budget, and see what the top ten results look like: visit <a href="https://github.com/v-modal">V-Modal AI</a> to start.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
