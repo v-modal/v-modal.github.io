@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>10 Example Data Sets for Multimodal Video and Robotics</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>10 Example Data Sets for Multimodal Video and Robotics</h1>
+    <p>A bigger dataset can make a worse benchmark. An <a href="https://www.alphaxiv.org/bg/abs/2503.13463">empirical investigation of dataset documentation</a> examined <strong>100 popular datasets across four repositories</strong> and found substantial gaps around collection context and processing procedures. If you can't establish what was recorded, how signals were synchronized, or how labels were produced, a large download won't tell you whether your search system works.</p>
+<p>For developers building <strong>Multimodal Video</strong> and <strong>Multimodal Audio</strong> applications, that uncertainty becomes practical fast. A smart-glasses app needs first-person context. A robot needs observations connected to actions. A CCTV reviewer needs the relevant moment, not merely a file containing something similar. Advertisement video editing needs useful shots without confusing research access with permission to reuse footage.</p>
+<p>The right <strong>example data sets</strong> let you test those differences before committing to expensive downloads or integration work. This shortlist spans wearable cameras, robot manipulation, autonomous driving, annotated media, and general-purpose catalogs. It compares their usefulness for retrieval and <strong>Physical AI benchmarking</strong>, rather than treating every public dataset as interchangeable.</p>
+<p>The recurring obstacles are concrete:</p>
+<ul>
+<li><strong>Access and licensing:</strong> Download permission doesn't automatically permit commercial deployment or media reuse.</li>
+<li><strong>Storage and bandwidth:</strong> Original video, working copies, and derived assets all consume space.</li>
+<li><strong>Synchronization:</strong> Audio, video, actions, and spatial signals may not cover the same intervals.</li>
+<li><strong>Deployment mismatch:</strong> A desktop demonstration doesn't establish reliability on Mobile, Smart Glasses, DashCam, GoPro, or CCTV hardware.</li>
+</ul>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#1-ego4d">1. Ego4D</a></li>
+<li><a href="#best-fit-and-practical-limits">Best Fit and Practical Limits</a></li>
+<li><a href="#2-ego-exo4d">2. Ego-Exo4D</a></li>
+<li><a href="#3-open-x-embodiment">3. Open X-Embodiment</a></li>
+<li><a href="#compare-embodiments-without-hiding-differences">Compare Embodiments Without Hiding Differences</a></li>
+<li><a href="#4-droid">4. DROID</a></li>
+<li><a href="#a-focused-robot-memory-candidate">A Focused Robot-Memory Candidate</a></li>
+<li><a href="#5-waymo-open-dataset">5. Waymo Open Dataset</a></li>
+<li><a href="#strong-benchmark-meaningful-restrictions">Strong Benchmark, Meaningful Restrictions</a></li>
+<li><a href="#6-ava">6. AVA</a></li>
+<li><a href="#test-the-moment-not-the-description">Test the Moment, Not the Description</a></li>
+<li><a href="#7-activitynet">7. ActivityNet</a></li>
+<li><a href="#where-it-beats-a-simple-clip-collection">Where It Beats a Simple Clip Collection</a></li>
+<li><a href="#8-hugging-face-datasets">8. Hugging Face Datasets</a></li>
+<li><a href="#9-kaggle-datasets">9. Kaggle Datasets</a></li>
+<li><a href="#prototype-convenience-versus-evaluation-confidence">Prototype Convenience Versus Evaluation Confidence</a></li>
+<li><a href="#10-uci-machine-learning-repository">10. UCI Machine Learning Repository</a></li>
+<li><a href="#use-it-for-the-supporting-application">Use It for the Supporting Application</a></li>
+<li><a href="#example-data-sets-at-a-glance">Example Data Sets at a Glance</a></li>
+<li><a href="#from-example-data-sets-to-a-working-search-layer">From Example Data Sets to a Working Search Layer</a></li>
+<li><a href="#measure-useful-evidence">Measure Useful Evidence</a></li>
+<li><a href="#move-beyond-the-desktop-demo">Move Beyond the Desktop Demo</a></li>
+</ul>
+<p><a id="1-ego4d"></a></p>
+<h2>1. Ego4D</h2>
+<p><img alt="Ego4D" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/53220e1c-0be2-4f98-ad42-24d2d17c7e3e/example-data-sets-world-map.jpg" /></p>
+<p><strong>Ego4D is the natural starting point for first-person video search.</strong> The <a href="https://ego4d-data.org/">Ego4D project</a> provides egocentric footage, benchmark tasks, download tools, sample notebooks, and research annotations. Selected portions also include audio, gaze, stereo, synchronized cameras, textual narration, or spatial information.</p>
+<p>For smart glasses, useful test queries describe lived events: finding where an object was placed or locating an earlier interaction. That makes Ego4D a closer conceptual match than a collection of isolated product photographs. It can also inform GoPro-style activity search, although wearable-camera footage shouldn't be treated as representative of every action-camera mounting position.</p>
+<p><a id="best-fit-and-practical-limits"></a></p>
+<h3>Best Fit and Practical Limits</h3>
+<ul>
+<li><strong>Strength:</strong> First-person context supports event and moment retrieval tests that resemble wearable-memory applications.</li>
+<li><strong>Trade-off:</strong> Additional modalities and annotations vary across portions, so don't assume every selected recording supports an audio-and-video query.</li>
+<li><strong>Access:</strong> Review the dataset terms before downloading or using footage in a commercial prototype.</li>
+</ul>
+<p>Start with recordings whose annotations match the questions your application needs to answer. Keep a clear distinction between locating an object somewhere in a recording and locating the moment when someone interacted with it.</p>
+<p><strong>Budget for more than the original download.</strong> Preview media, temporary processing files, and evaluation assets also need storage. I'd choose a tightly scoped wearable-memory experiment before requesting a broad collection because it's available.</p>
+<p><a id="2-ego-exo4d"></a></p>
+<h2>2. Ego-Exo4D</h2>
+<p><img alt="Ego-Exo4D" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/ae76e547-42e7-4bc8-bb20-d71eeca50c9d/example-data-sets-ego-exo4d-dataset.jpg" /></p>
+<p>A wearer and an observer can record the same activity and capture very different evidence. <a href="https://docs.ego-exo4d-data.org/">Ego-Exo4D</a> pairs egocentric and exocentric views of skilled human activities, with modalities including multichannel audio, IMU, gaze, camera poses, and environment point clouds.</p>
+<p>That combination makes it useful when a retrieval task depends on <strong>perspective and spatial context</strong>, not just recognizing an action. Say a training application needs to locate a hand movement that's partially hidden in the wearable view. An external view can supply a different basis for judging whether the retrieved interval contains the movement.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Evaluate each available viewpoint separately before treating a multi-view result as proof that a wearable-only application will work.</p>
+</blockquote>
+<p>Compared with Ego4D, Ego-Exo4D is a stronger candidate for studying relationships between wearer and observer views. The cost is a more involved data structure and a larger set of modality-specific assumptions to understand.</p>
+<p>Its synchronized signals are relevant to <strong>Vision for Robotics</strong> research, but human skill recordings aren't robot action trajectories. Likewise, recorded audio supports contextual experiments without automatically supplying labels for machine faults or contact events.</p>
+<p>Review the access terms and inspect modality coverage before selecting recordings. For a mobile companion app, judge the wearable-only experience independently from any richer desktop review interface that can display external cameras and spatial context.</p>
+<p><a id="3-open-x-embodiment"></a></p>
+<h2>3. Open X-Embodiment</h2>
+<p><img alt="Open X-Embodiment" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/da29abe6-662c-4592-b0da-0a41ac9a1afc/example-data-sets-github-repository.jpg" /></p>
+<p><strong>Open X-Embodiment is a collection of robot-learning datasets, not a uniform video library.</strong> Its value comes from bringing robot observations and actions into a shared episode representation. The <a href="https://github.com/google-deepmind/open_x_embodiment">Open X-Embodiment repository</a> includes the dataset list, metadata, RLDS guidance, and Colab visualization tools.</p>
+<p>For robot-demonstration search, this changes the question you can ask. Instead of searching only for a visible object, you can evaluate whether a result contains an interaction with the relevant action context. A useful scenario is finding demonstrations where a manipulator approaches an object but doesn't complete the intended task.</p>
+<ul>
+<li><strong>Strength:</strong> Shared episode conventions make it easier to inspect and compare participating robot datasets.</li>
+<li><strong>Limitation:</strong> Hardware, tasks, observation fields, and collection conditions still differ.</li>
+<li><strong>Licensing gotcha:</strong> Component datasets can have different terms. A shared repository doesn't create a blanket commercial license.</li>
+</ul>
+<p><a id="compare-embodiments-without-hiding-differences"></a></p>
+<h3>Compare Embodiments Without Hiding Differences</h3>
+<p>Don't collapse every robot into a single undifferentiated benchmark score. A result that works for a fixed tabletop manipulator may say little about a moving robot with a different camera arrangement.</p>
+<p>For <strong>Audio for Robotics</strong>, confirm that the selected component contains usable audio. Robot observations and actions don't imply microphone coverage.</p>
+<p>I'd choose Open X-Embodiment when comparing demonstration collections or exploring cross-embodiment retrieval. For a narrowly defined manipulation-memory prototype, a more focused corpus may reduce the time spent understanding incompatible fields and operating conditions.</p>
+<p><a id="4-droid"></a></p>
+<h2>4. DROID</h2>
+<p><img alt="DROID" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/af64bf3f-f97b-41a6-83c6-3fe822a909ec/example-data-sets-droid-dataset.jpg" /></p>
+<p>Start with the example release, not the full download. <a href="https://droid-dataset.github.io/droid/">DROID's documentation</a> provides a visualizer, a sample notebook, raw-data and RLDS options, and a smaller example release; its documented full RLDS download is <strong>approximately 1.7 TB</strong>.</p>
+<p>That's enough to make storage planning part of the evaluation, rather than an administrative detail. Your working footprint can include the downloaded data, extracted assets, playback copies, and experiment outputs. There's no useful universal dollar estimate because local disks, cloud storage, transfer charges, and retention choices differ.</p>
+<p><a id="a-focused-robot-memory-candidate"></a></p>
+<h3>A Focused Robot-Memory Candidate</h3>
+<p>DROID is useful for examining <strong>robot interaction episodes</strong> and testing action-context retrieval. A practical query might ask for an episode in which the robot approached a container, manipulated it, and then moved away. Judge the returned evidence against the actual episode, not a plausible description.</p>
+<p>Compared with Open X-Embodiment, DROID offers a more focused starting point. You still need to understand its observations and episode structure, but you aren't initially selecting among a broad collection of contributing datasets.</p>
+<ul>
+<li><strong>Setup challenge:</strong> Downloading involves cloud-bucket tooling, which may complicate restricted development environments.</li>
+<li><strong>Release caveat:</strong> The documentation notes missing episodes in an earlier release and work to address them. Record which release you evaluate.</li>
+<li><strong>Usage boundary:</strong> Check the current dataset terms independently of the availability of notebooks or visualization code.</li>
+</ul>
+<p>Use the visualizer to confirm suitability before allocating storage for the full corpus.</p>
+<p><a id="5-waymo-open-dataset"></a></p>
+<h2>5. Waymo Open Dataset</h2>
+<p><img alt="Waymo Open Dataset" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/8f19d45e-0a80-41d0-b37e-4a76aa8d4189/example-data-sets-waymo-dataset.jpg" /></p>
+<p><strong>Driving data isn't the same as dashcam footage.</strong> The <a href="https://waymo.com/open/">Waymo Open Dataset</a> covers perception, motion, and end-to-end driving tasks, with camera and LiDAR data, task-specific annotations, and evaluation resources. Relevant subsets also provide spatial context such as maps and trajectories.</p>
+<p>Those resources support richer experiments than ordinary road-video playback. You can evaluate retrieval around road users, motion, and scene relationships instead of relying solely on a visual resemblance between frames.</p>
+<blockquote>
+<p>Treat sensor-rich driving benchmarks as a reference for road-scene understanding, not as proof that a consumer DashCam app will behave the same way.</p>
+</blockquote>
+<p>A dashcam-adjacent prototype might retrieve footage containing a vehicle crossing the camera's path. Keep the evaluation limited to signals the eventual device records. If production hardware supplies video without LiDAR, a result dependent on LiDAR doesn't establish video-only capability.</p>
+<p><a id="strong-benchmark-meaningful-restrictions"></a></p>
+<h3>Strong Benchmark, Meaningful Restrictions</h3>
+<p>Waymo is a strong choice when your question requires autonomous-driving context and official evaluation tooling. It's less convenient for a quick mobile demo because the data and supporting tools can be demanding to process.</p>
+<p>Access requires registration and acceptance of the applicable license. <strong>The stated non-commercial terms limit some uses</strong>, so don't assume you can carry a research prototype directly into a paid product.</p>
+<p>Check the specific subset, task definition, and license before downloading. For a commercial dashcam workflow, separately evaluate footage captured under your intended camera, mounting, lighting, and audio conditions.</p>
+<p><a id="6-ava"></a></p>
+<h2>6. AVA</h2>
+<p><img alt="AVA" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/e0805dc6-7130-4d06-a8dc-f9b8fd935085/example-data-sets-ava-datasets.jpg" /></p>
+<p>AVA is useful when a search result must identify <strong>what a person is doing and when</strong>, rather than merely return a thematically related video. The <a href="https://research.google.com/ava/">AVA dataset collection</a> includes spatial-temporal human-action annotations, while related releases address active speakers and speech activity.</p>
+<p>For <strong>advertisement video editing</strong>, that supports experiments such as locating a person speaking or performing a visible action. For video surveillance review, it offers a way to test action localization. Neither application should assume that the source footage matches its eventual operating environment.</p>
+<ul>
+<li><strong>Strength:</strong> Person-level action labels provide a concrete basis for judging retrieved moments.</li>
+<li><strong>Audio opportunity:</strong> Active-speaker and speech-activity tasks support experiments connecting visible people with speech.</li>
+<li><strong>Access risk:</strong> Source-video availability can vary because releases reference video IDs.</li>
+<li><strong>Rights boundary:</strong> Annotation access doesn't automatically grant permission to reuse the underlying footage in an advertisement.</li>
+</ul>
+<p><a id="test-the-moment-not-the-description"></a></p>
+<h3>Test the Moment, Not the Description</h3>
+<p>A plausible caption isn't enough. Require the returned interval to show the labeled action, and distinguish speech activity from identifying what someone said.</p>
+<p>The <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">visual video search SDK listing</a> is an additional discovery resource for developers comparing retrieval tooling, separate from AVA's dataset and media permissions.</p>
+<p>AVA is narrower than open-ended media search, which is useful when you need a controlled action-focused test. It's not a replacement for licensed brand footage or representative CCTV recordings when validating a production application.</p>
+<p><a id="7-activitynet"></a></p>
+<h2>7. ActivityNet</h2>
+<p><img alt="ActivityNet" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/d13348ba-ebf4-4e9d-be18-c87c9e06f7b4/example-data-sets-activity-benchmark.jpg" /></p>
+<p>Finding the right video is easier than finding the right activity inside it. <a href="https://activity-net.org/">ActivityNet</a> focuses on human activity understanding through tasks including classification and temporal activity detection. Its untrimmed videos and time-segment annotations make it a useful test for <strong>moment-level retrieval</strong>.</p>
+<p>For a media-content team, the practical question is whether a search result lands on the useful action or forces an editor to keep scrubbing. A sports advertisement prototype, for example, could test whether an activity query returns the relevant segment rather than an introductory shot.</p>
+<p><a id="where-it-beats-a-simple-clip-collection"></a></p>
+<h3>Where It Beats a Simple Clip Collection</h3>
+<p>Untrimmed footage creates a more demanding evaluation than clips already centered on the target event. That makes ActivityNet useful for testing the difference between recognizing an activity and localizing it.</p>
+<p>Compared with AVA's person-level action emphasis, ActivityNet is a natural choice when the main requirement is finding an activity interval within a longer recording. Its annotations are more activity-focused than broadly multimodal, so don't assume they validate sound-dependent queries.</p>
+<p>The operational disadvantages deserve attention. Source videos may no longer be available, and obtaining files can involve an access-request process.</p>
+<p><strong>Record what you could retrieve</strong>, along with the annotations used for evaluation. Otherwise, a later experiment may test a different collection.</p>
+<p>For CCTV or GoPro applications, use ActivityNet to validate the retrieval task first, then test representative device footage. An activity benchmark doesn't establish performance under a fixed overhead camera or unstable body-mounted view.</p>
+<p><a id="8-hugging-face-datasets"></a></p>
+<h2>8. Hugging Face Datasets</h2>
+<p><img alt="Hugging Face Datasets" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/c14c8a31-7ff5-47f3-abd7-3bc3330f2e39/example-data-sets-dataset-browser.jpg" /></p>
+<p><strong>Hugging Face Datasets is a discovery and loading platform, not a single benchmark.</strong> The <a href="https://huggingface.co/datasets">dataset hub</a> hosts collections across vision, audio, video, and robotics, with dataset cards and programmatic loading tools. Formats, licenses, maintenance, and access requirements depend on the individual uploader.</p>
+<p>Its strongest practical advantage is the ability to compare candidates before committing to a large corpus. For a mobile application, start with an inspectable example that exercises your intended media type and query behavior.</p>
+<ul>
+<li><strong>Best use:</strong> Discovering specialized datasets and testing reproducible loading workflows.</li>
+<li><strong>Main risk:</strong> Treating a polished dataset page as evidence of completeness or commercial suitability.</li>
+<li><strong>Access caveat:</strong> Gated datasets and externally hosted media may require additional steps.</li>
+</ul>
+<p>A concrete long-memory example is <a href="https://huggingface.co/datasets/MM-Lifelong/MM-Lifelong/blob/main/docs/BENCHMARK.md">MM-Lifelong</a>, whose benchmark contains <strong>181.1 hours of video and 1,289 evidence-grounded questions</strong>. Its emphasis on locating evidence is relevant to wearable and Physical AI memory, where an answer should be supported by a retrievable moment.</p>
+<p>That distinction matters when comparing search with general question answering. A fluent response doesn't prove the system found the correct evidence.</p>
+<p>Before adopting any hosted collection, inspect its original source, version, license, and modality coverage. The platform can simplify access, but it doesn't remove your responsibility to establish what the dataset can legitimately test.</p>
+<p><a id="9-kaggle-datasets"></a></p>
+<h2>9. Kaggle Datasets</h2>
+<p><img alt="Kaggle Datasets" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/fba22b50-d14d-4969-9f7f-425e14381f60/example-data-sets-data-platform.jpg" /></p>
+<p>For a quick interface prototype, convenience can matter more than benchmark pedigree. <a href="https://www.kaggle.com/datasets">Kaggle Datasets</a> offers searchable community collections, file-type and size filters, stated-license filters, downloads, and notebook integration.</p>
+<p>That makes it useful for testing upload screens, media previews, dataset selection, or a basic visual-discovery interface. An e-commerce team can use a suitable listing to explore interactions before assembling a representative, properly licensed evaluation collection.</p>
+<blockquote>
+<p><strong>Rights check:</strong> A platform listing and a license label aren't substitutes for establishing who originally created the media and whether the uploader could distribute it.</p>
+</blockquote>
+<p>Kaggle's trade-off is variability. Documentation, provenance, annotation quality, and maintenance differ between contributors. A convenient download may omit the recording conditions or source information needed for a credible Physical AI benchmark.</p>
+<p><a id="prototype-convenience-versus-evaluation-confidence"></a></p>
+<h3>Prototype Convenience Versus Evaluation Confidence</h3>
+<p>Use Kaggle when you need accessible starter material and can inspect it directly. Prefer a specialist dataset when you need documented temporal annotations, robot actions, sensor calibration, or synchronized audio-video evidence.</p>
+<p>Check the actual files before building around a listing. A collection described as video-related may contain extracted images, metadata, or references rather than playable source media.</p>
+<p>For commercial applications, retain the original-source reference and license information with your evaluation notes. <strong>Don't treat public availability as commercial-use permission.</strong> If provenance remains unclear, keep looking rather than letting a convenient sample become a production dependency.</p>
+<p><a id="10-uci-machine-learning-repository"></a></p>
+<h2>10. UCI Machine Learning Repository</h2>
+<p><img alt="UCI Machine Learning Repository" src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/screenshots/d1f436ee-9f0c-4436-a00d-e65f9e05bbba/example-data-sets-uci-repository.jpg" /></p>
+<p>UCI belongs on this list because not every useful prototype needs video. The <a href="https://archive.ics.uci.edu/">UCI Machine Learning Repository</a> provides searchable datasets and descriptive records across conventional machine-learning tasks. It's better suited to structured-data experiments than to synchronized audiovisual retrieval.</p>
+<p>Its longevity is documented: <a href="https://ics.uci.edu/2019/10/25/uci-machine-learning-repository-to-receive-1-8-million-upgrade/">UC Irvine's account of the repository</a> traces its origins to <strong>1987</strong>, when researcher David Aha proposed a shared location for datasets and descriptions. That history makes UCI a familiar reference point, but not a specialist source for modern wearable or robotics media.</p>
+<p><a id="use-it-for-the-supporting-application"></a></p>
+<h3>Use It for the Supporting Application</h3>
+<p>A mobile developer can use an appropriate structured dataset to test metadata filters, result sorting, API responses, or an evaluation dashboard. Those are legitimate engineering tasks, even though they don't demonstrate Multimodal Video or Multimodal Audio capability.</p>
+<ul>
+<li><strong>Strength:</strong> Useful for small, understandable examples and conventional classification or regression experiments.</li>
+<li><strong>Mismatch:</strong> Structured records can't validate whether a system retrieves the correct audiovisual moment.</li>
+<li><strong>Preparation:</strong> Some datasets need preprocessing, and original sources and licenses still require inspection.</li>
+</ul>
+<p>Compared with Kaggle and Hugging Face, UCI is less relevant for discovering video-first corpora. Its role is more focused: remove uncertainty from the supporting application while reserving audiovisual claims for a suitable media benchmark.</p>
+<p>I'd use it to validate plumbing and filtering, not to support claims about robotics perception, CCTV incident search, or smart-glasses memory.</p>
+<p><a id="example-data-sets-at-a-glance"></a></p>
+<h2>Example Data Sets at a Glance</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Primary Modalities</th>
+<th>Domain</th>
+<th>Best For</th>
+<th>Access/Licensing Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ego4D</td>
+<td>First-person video; selected audio, gaze, and 3D data</td>
+<td>Egocentric perception and activity</td>
+<td>Wearable-camera event and moment retrieval</td>
+<td>Review dataset terms; modality coverage varies</td>
+</tr>
+<tr>
+<td>Ego-Exo4D</td>
+<td>First- and third-person video, audio, IMU, gaze, and 3D data</td>
+<td>Skilled human activities</td>
+<td>Synchronized multimodal and cross-view research</td>
+<td>Access and use subject to dataset terms</td>
+</tr>
+<tr>
+<td>Open X-Embodiment</td>
+<td>Robot observations and actions</td>
+<td>Robot learning</td>
+<td>Comparing datasets and cross-embodiment learning</td>
+<td>Component dataset terms vary</td>
+</tr>
+<tr>
+<td>DROID</td>
+<td>Robot interaction episodes; RLDS and raw data</td>
+<td>Robot manipulation</td>
+<td>Prototyping robot-memory and action-context systems</td>
+<td>Example subset available; full download is large</td>
+</tr>
+<tr>
+<td>Waymo Open Dataset</td>
+<td>Camera, LiDAR, maps, and trajectories</td>
+<td>Autonomous driving</td>
+<td>Sensor-rich perception and motion benchmarks</td>
+<td>Registration and license acceptance required; non-commercial terms apply</td>
+</tr>
+<tr>
+<td>AVA</td>
+<td>Video, spatial-temporal action labels, and speech-related annotations</td>
+<td>Human action and speaker understanding</td>
+<td>Moment-level action retrieval</td>
+<td>Video availability may vary; check access and terms</td>
+</tr>
+<tr>
+<td>ActivityNet</td>
+<td>Untrimmed video and temporal activity annotations</td>
+<td>Human activity recognition</td>
+<td>Temporal event localization and video indexing</td>
+<td>Some source videos may be unavailable; access request may be needed</td>
+</tr>
+<tr>
+<td>Hugging Face Datasets</td>
+<td>Video, audio, vision, robotics, and other data</td>
+<td>Dataset discovery and machine learning</td>
+<td>Discovering and loading datasets for experiments</td>
+<td>Licenses and access requirements vary by dataset</td>
+</tr>
+<tr>
+<td>Kaggle Datasets</td>
+<td>Varied file types and modalities</td>
+<td>General-purpose datasets</td>
+<td>Quick prototypes and teaching examples</td>
+<td>Check provenance and license for each listing</td>
+</tr>
+<tr>
+<td>UCI Machine Learning Repository</td>
+<td>Primarily structured data</td>
+<td>Conventional machine learning</td>
+<td>Small experiments and metadata or filtering demos</td>
+<td>Check dataset licenses and original sources</td>
+</tr>
+</tbody>
+</table>
+<p><a id="from-example-data-sets-to-a-working-search-layer"></a></p>
+<h2>From Example Data Sets to a Working Search Layer</h2>
+<p>Choose <strong>example data sets by the evidence your application must return</strong>, not by download size. Ego4D and Ego-Exo4D fit wearable and Smart Glasses questions. Open X-Embodiment and DROID fit robot interaction and action-context evaluation. Waymo supports sensor-rich driving experiments, while AVA and ActivityNet support annotated activity retrieval.</p>
+<p>Keep the deployment boundary explicit. DashCam footage isn't interchangeable with an autonomous-driving sensor suite, and a human-activity benchmark isn't representative CCTV footage. For advertisement video editing, separate finding a useful shot from having permission to publish it.</p>
+<p><a id="measure-useful-evidence"></a></p>
+<h3>Measure Useful Evidence</h3>
+<p>Write representative queries before expanding the corpus. For <strong>Vision for Robotics</strong>, ask for visible states or interactions; for <strong>Audio for Robotics</strong>, require recordings that contain the relevant sound and enough context to judge it. For surveillance, test whether the result supports review of an event rather than merely resembling the query.</p>
+<p>A <a href="https://arxiv.org/html/2412.17759">survey of large multimodal datasets</a> emphasizes scale and temporal alignment across audiovisual collections. For a practical evaluation, report <strong>recall@K</strong>, localization error in seconds, and results separated by query modality. Don't let success on visual queries conceal failures on sound-dependent questions.</p>
+<p>The main production challenges remain familiar:</p>
+<ul>
+<li><strong>Fragmented analysis:</strong> Separate audio and visual outputs can make it hard to establish whether they describe the same event.</li>
+<li><strong>Manual scrubbing:</strong> Returning an entire recording leaves the reviewer doing the localization work.</li>
+<li><strong>Edge constraints:</strong> Bandwidth, local storage, connectivity, and device responsiveness affect usability.</li>
+<li><strong>Unsupported conditions:</strong> Missing audio, unusual viewpoints, darkness, or unfamiliar environments need explicit tests.</li>
+</ul>
+<p><a id="move-beyond-the-desktop-demo"></a></p>
+<h3>Move Beyond the Desktop Demo</h3>
+<p>For Kotlin Android, Flutter, or Swift-facing applications, evaluate playback, permissions, interrupted connectivity, and device storage alongside retrieval quality. Keep training and evaluation material separate, preserve dataset-version records, and include representative recordings from the intended hardware before making production claims.</p>
+<p><strong>V-Modal AI's Visual Memory Layer for Physical AI</strong> is a relevant option for building multimodal search and continuous edge memory. Our platform supports natural-language and visual queries, and users can retrieve video or images with a text query or an input image. Our public repositories and example code provide a starting point for evaluating that workflow against your chosen corpus.</p>
+<p>Pick a dataset whose annotations let you judge the result, prototype retrieval on a small subset, and inspect failures before scaling. Expand only after you can explain what the benchmark proves, what it doesn't prove, and which permissions apply.</p>
+<hr />
+<p>V-Modal AI offers Multimodal Video and Audio Search and an edge-oriented memory layer for Physical AI applications. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to explore the public repositories and example code, then choose a dataset from this list and prototype text-query or input-image retrieval on a small subset before scaling.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
