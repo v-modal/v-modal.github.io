@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>AI That Can Analyze Videos Beyond Summaries</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>AI That Can Analyze Videos Beyond Summaries</h1>
+    <p>The usual advice is to upload a video, ask for a summary, and judge whether the answer sounds intelligent. That's the wrong test. A convincing summary can still overlook the event you need, confuse its order, or describe something the recording doesn't establish.</p>
+<p><strong>AI that can analyze videos should give you evidence you can replay.</strong> For an editor, that might be a product appearance paired with a spoken claim. For a robot developer, it might be the warning sound before a failed grasp. The useful question isn't whether the system understands a video, but whether you can check its answer against picture, sound, and time.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-a-useful-video-answer-contains">What a Useful Video Answer Contains</a></li>
+<li><a href="#the-evidence-checklist">The evidence checklist</a></li>
+<li><a href="#physical-ai-robotics-and-media-side-by-side">Physical AI Robotics and Media Side by Side</a></li>
+<li><a href="#what-changes-when-a-machine-uses-the-memory">What changes when a machine uses the memory</a></li>
+<li><a href="#how-picture-and-sound-stay-on-one-clock">How Picture and Sound Stay on One Clock</a></li>
+<li><a href="#correct-words-can-still-point-to-the-wrong-moment">Correct words can still point to the wrong moment</a></li>
+<li><a href="#what-to-demand-from-the-answer">What to demand from the answer</a></li>
+<li><a href="#phones-glasses-dashcams-action-cameras-and-cctv">Phones Glasses Dashcams Action Cameras and CCTV</a></li>
+<li><a href="#why-uploading-everything-isnt-the-default-answer">Why uploading everything isn't the default answer</a></li>
+<li><a href="#privacy-belongs-in-the-device-decision">Privacy belongs in the device decision</a></li>
+<li><a href="#pain-points-before-you-trust-a-result">Pain Points Before You Trust a Result</a></li>
+<li><a href="#operational-problems-a-demonstration-can-hide">Operational problems a demonstration can hide</a></li>
+<li><a href="#use-a-corpus-rather-than-a-highlight-reel">Use a corpus rather than a highlight reel</a></li>
+<li><a href="#ad-edits-robot-memory-and-surveillance-moments">Ad Edits Robot Memory and Surveillance Moments</a></li>
+<li><a href="#advertisement-video-edition">Advertisement video edition</a></li>
+<li><a href="#vision-and-audio-for-robotics">Vision and audio for robotics</a></li>
+<li><a href="#dashcam-and-video-surveillance-review">Dashcam and video surveillance review</a></li>
+<li><a href="#test-one-clip-before-you-commit">Test One Clip Before You Commit</a></li>
+</ul>
+<p><a id="what-a-useful-video-answer-contains"></a></p>
+<h2>What a Useful Video Answer Contains</h2>
+<p>A summary that sounds right isn't the same as analysis. Naming a book doesn't help much if you need a particular sentence. Video search should open the recording at the relevant passage, not merely tell you what the whole file concerns.</p>
+<p>Start with <strong>frames</strong>, the sampled pictures through a recording. A useful result identifies a visible cue, such as a door opening or a logo filling the view. A broad label like outdoor scene doesn't tell you where to look.</p>
+<p>Then consider <strong>objects</strong> and <strong>actions</strong>. Objects are the people, vehicles, products, tools, and logos that persist across pictures. Actions describe what happens over a span: a worker lifts a box, a vehicle brakes, or a presenter turns a product toward the camera.</p>
+<p><a id="the-evidence-checklist"></a></p>
+<h3>The evidence checklist</h3>
+<p><strong>Audio</strong> adds spoken words, alarms, impacts, and ambient sound. <strong>Timestamps</strong> make those observations usable by giving the result a beginning and an end. Neither helps if the sound belongs to a different moment from the picture.</p>
+<p><strong>Five layers an AI that can analyze videos should return</strong></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it captures</th>
+<th>A useful result</th>
+<th>Where it fails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frames</td>
+<td>Sampled pictures through the clip</td>
+<td>A visible cue at a known time</td>
+<td>Blur, darkness, or occlusion</td>
+</tr>
+<tr>
+<td>Objects</td>
+<td>People, vehicles, products, tools, logos</td>
+<td>The same entity followed across frames</td>
+<td>Lookalikes and partial views</td>
+</tr>
+<tr>
+<td>Actions</td>
+<td>Movement or interaction over a span</td>
+<td>Start and end of the activity</td>
+<td>Similar motions confused</td>
+</tr>
+<tr>
+<td>Audio</td>
+<td>Speech, alarms, impacts, ambient sound</td>
+<td>A sound tied to the same moment</td>
+<td>Missing, delayed, or noisy mics</td>
+</tr>
+<tr>
+<td>Timestamps</td>
+<td>Shared clock for picture and sound</td>
+<td>A jumpable start and end</td>
+<td>Right event in the wrong order</td>
+</tr>
+</tbody>
+</table>
+<p>Consider a shopping-video query: find the moment the presenter says the price while the product is on screen. A helpful answer would identify the product held toward the camera, locate the spoken price, and provide a replayable range covering their overlap. It shouldn't substitute an earlier product shot or a later price card.</p>
+<p>The answer should also preserve distinctions. A visible price label isn't proof that the presenter spoke the price. A spoken price isn't proof that the correct product was visible.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Treat every result as a claim with supporting evidence, not as a replacement for the recording.</p>
+</blockquote>
+<p>When comparing tools through a directory such as <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">this visual video search SDK listing</a>, use the table as a pass-fail test. Ask what the returned moment proves, which layers support it, and what remains uncertain.</p>
+<p><a id="physical-ai-robotics-and-media-side-by-side"></a></p>
+<h2>Physical AI Robotics and Media Side by Side</h2>
+<p>Say a camera records a robot placing a packaged product onto a conveyor while a warning tone sounds. An editor, a security operator, and a robotics engineer may all search that recording. They need different answers because they'll do different things next.</p>
+<p><strong>Media content search</strong> serves a person who wants to watch or edit. The editor needs a clear product shot, perhaps with the logo facing forward. The surrounding machinery may be irrelevant unless it affects the cut.</p>
+<p><strong>Robotics vision</strong> serves a system or engineer trying to understand a physical interaction. The important evidence could be the package's position, the gripper's approach, and the point where the package slipped. An attractive highlight isn't enough.</p>
+<p><img alt="A diagram illustrating the five layers of AI robotics and media processing from sensing to decision making." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/eece66ef-fece-4b0d-bdbb-f4a036d0058f/ai-that-can-analyze-videos-robotics-ai.jpg" /></p>
+<p><a id="what-changes-when-a-machine-uses-the-memory"></a></p>
+<h3>What changes when a machine uses the memory</h3>
+<p><strong>Audio for robotics</strong> adds another question: what instruction, alarm, or contact sound accompanied the motion? A warning tone may help an engineer distinguish an interrupted operation from an apparently normal attempt. Sound provides context, but it doesn't automatically establish why a failure occurred.</p>
+<p>The broader <strong>Physical AI technology stack</strong> connects sensing, interpretation, memory, control, and hardware validation. NIST's <a href="https://www.nist.gov/programs-projects/physical-ai-and-data-generation-robotics">physical AI and robotics program</a> includes the Manufacturing Objects and Assemblies Dataset, or MOAD, physical apparatuses at NIST and the University of Massachusetts Lowell, 3D imaging and sensing, terrestrial lidar performance standards, and the standardized .e57 point-cloud format.</p>
+<p>That work illustrates why physical memory can require more than a video clip. A robot may need the visual observation, its spatial context, and the surrounding environmental state. A human editor can judge a shot by watching it; a robot system needs information connected to its operating environment.</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Question about the shared scene</th>
+<th>What makes the result useful</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Media editing</td>
+<td>Where is the clearest logo shot?</td>
+<td>A usable clip for a human edit</td>
+</tr>
+<tr>
+<td>Video surveillance</td>
+<td>Did someone enter the robot's work area?</td>
+<td>An event span for investigation</td>
+</tr>
+<tr>
+<td>Robotics diagnosis</td>
+<td>When did the gripper miss the part after the warning tone?</td>
+<td>Position, interaction, and sound in context</td>
+</tr>
+</tbody>
+</table>
+<p>The decision rule is straightforward. If the next step is a human edit, media retrieval may be sufficient. If the next step is a machine action or an incident review, demand <strong>place, action, and sound</strong>, with enough context to avoid turning an ambiguous observation into an operational decision.</p>
+<p><a id="how-picture-and-sound-stay-on-one-clock"></a></p>
+<h2>How Picture and Sound Stay on One Clock</h2>
+<p>A subtitled conversation becomes confusing when the words appear beneath the wrong face. The transcription might be correct, yet the viewer attributes the statement to the wrong person. <strong>Multimodal video and multimodal audio</strong> have the same requirement: their evidence must belong to a shared timeline.</p>
+<p>A system might recognize a tool and detect an alarm without establishing which came first. That matters when the question is whether a person picked up the tool after the alarm, rather than merely whether both appeared somewhere in the recording.</p>
+<p><img alt="A diagram illustrating how AI synchronizes video frames with audio waveforms to maintain alignment between picture and speech." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/1231774d-a641-4c47-9448-9ac00e7328a4/ai-that-can-analyze-videos-video-synchronization.jpg" /></p>
+<p><a id="correct-words-can-still-point-to-the-wrong-moment"></a></p>
+<h3>Correct words can still point to the wrong moment</h3>
+<p>The <a href="https://arxiv.org/html/2406.19392">ReXTime benchmark</a> evaluates reasoning across events and localization within the correct span using Recall@1 at intersection-over-union thresholds of <strong>0.3 and 0.5</strong>; its strongest reported model achieved <strong>73.67% accuracy</strong>, compared with <strong>87.98%</strong> for humans, a <strong>14.31-percentage-point gap</strong>.</p>
+<p>In plain language, temporal overlap asks whether the returned segment covers the relevant event. A system shouldn't receive full credit because its answer mentions the right tool. It must point to the right interval.</p>
+<p>For a shop-floor investigation, ask when the worker picked up the tool after the alarm. The answer needs the alarm's position on the timeline, the pickup action, and their order. Even then, after doesn't necessarily mean because of. Establishing sequence is different from proving causation.</p>
+<p><a id="what-to-demand-from-the-answer"></a></p>
+<h3>What to demand from the answer</h3>
+<p>You don't need access to a vendor's internal search methods to evaluate its output. Require:</p>
+<ul>
+<li><strong>A candidate segment:</strong> A replayable interval rather than an unsupported description.</li>
+<li><strong>Supporting pictures:</strong> Frames that show the action the answer claims occurred.</li>
+<li><strong>Relevant audio:</strong> Sound timestamps when speech, alarms, or impacts matter.</li>
+<li><strong>An uncertainty note:</strong> A clear statement when the evidence is incomplete or ambiguous.</li>
+</ul>
+<p>Prefer a short list of plausible segments with confidence information over a polished paragraph that hides ambiguity. Confidence is useful for prioritizing review, not for replacing it.</p>
+<blockquote>
+<p>A correct object name at the wrong moment is still a wrong answer.</p>
+</blockquote>
+<p>This emphasis isn't new to video evaluation. NIST's <a href="https://www-nlpir.nist.gov/projects/tvpubs/tv20.slides/tv20.actev.slides.pdf">Activities in Extended Video evaluation</a> treats activities as people performing movements or interacting with objects, including driving, and asks systems to identify when those activities occur. A frame label was never the finish line.</p>
+<p><a id="phones-glasses-dashcams-action-cameras-and-cctv"></a></p>
+<h2>Phones Glasses Dashcams Action Cameras and CCTV</h2>
+<p>The device changes what a useful video tool must tolerate. A phone records deliberate clips; a dashcam records long stretches nobody intends to watch. Smart glasses capture what their wearer faces, not necessarily what an investigator later wishes they had seen.</p>
+<p>Choose the capture environment before choosing the interface. A successful desktop demonstration doesn't establish that the same workflow will suit a warm wearable, a weak mobile connection, or a fixed camera without usable audio.</p>
+<p><strong>Mobile and camera stacks for video analysis</strong></p>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Typical capture</th>
+<th>Moment to retrieve</th>
+<th>Main constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mobile phone</td>
+<td>User-shot clips in a companion app</td>
+<td>A spoken line or product appearance</td>
+<td>Upload failures and storage pressure</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>First-person continuous view</td>
+<td>A place, object, or instruction seen earlier</td>
+<td>Battery, heat, and privacy</td>
+</tr>
+<tr>
+<td>Dashcam</td>
+<td>Forward road video, sometimes cabin audio</td>
+<td>A near-collision or traffic incident</td>
+<td>Hours of mostly uneventful driving</td>
+</tr>
+<tr>
+<td>GoPro-style action camera</td>
+<td>Shaky wide field from the wearer</td>
+<td>A product, stunt, or job step</td>
+<td>Motion and unstable framing</td>
+</tr>
+<tr>
+<td>CCTV or IoT camera</td>
+<td>Fixed multi-hour surveillance</td>
+<td>A person, vehicle, alarm, or impact</td>
+<td>Low light, occlusion, noisy or absent mics</td>
+</tr>
+</tbody>
+</table>
+<p><a id="why-uploading-everything-isnt-the-default-answer"></a></p>
+<h3>Why uploading everything isn't the default answer</h3>
+<p>A <a href="https://www.scitepress.org/Papers/2025/138584/138584.pdf">2025 edge-intelligence study</a> reported <strong>180 ms average detection latency</strong> for local processing versus approximately <strong>730–900 ms</strong> for cloud-dependent configurations, while preserving <strong>91.7% detection accuracy</strong> and reducing bandwidth use by <strong>85%</strong> by sending metadata rather than raw video.</p>
+<p>Those results describe the evaluated setup, not a universal promise for every device. They nevertheless provide a concrete reason to test local processing rather than assume that sending everything to the cloud is automatically better.</p>
+<p>A mobile app developer should test interrupted uploads and recovery, not just successful transfers over office Wi-Fi. Android, iPhone, and Flutter-based companion apps also need clear progress, cancellation, and playback behavior so users know whether footage is available for review.</p>
+<p>For smart glasses, ask whether a wearer can retrieve an earlier instruction after connectivity disappears. For a dashcam, check whether incident footage remains accessible before routine recording replaces it. For a GoPro-style camera, test a moving field task rather than a stationary product demonstration.</p>
+<p><a id="privacy-belongs-in-the-device-decision"></a></p>
+<h3>Privacy belongs in the device decision</h3>
+<p>Local processing can reduce the need to transmit raw footage, but local doesn't automatically mean private. Review who can access recordings, how long they remain available, and whether deletion covers both source clips and searchable derivatives.</p>
+<p>For CCTV, distinguish a camera with reliable audio from one that only supplies pictures. The tool should make missing sound explicit, not describe silence as evidence that no warning occurred.</p>
+<p>Buy for the recording you have: a personal clip, wearable memory, road incident, moving action-camera take, or fixed-camera review.</p>
+<p><a id="pain-points-before-you-trust-a-result"></a></p>
+<h2>Pain Points Before You Trust a Result</h2>
+<p>A model can identify real events and still report them in the wrong order. That's especially dangerous when a reviewer is deciding whether a warning preceded a mistake or followed it.</p>
+<p>The <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12408113/">VIDHALLUC and TEDBench discussion</a> describes VIDHALLUC's <strong>5,002 videos</strong>, with most tested multimodal models scoring below <strong>50%</strong> on temporal-sequence hallucination tasks, and TEDBench's <strong>381 videos and 3,048 question-answer pairs</strong>, where advanced video models, including GPT-4o, frequently failed to detect missing, invented, or misordered actions.</p>
+<p><a id="operational-problems-a-demonstration-can-hide"></a></p>
+<h3>Operational problems a demonstration can hide</h3>
+<p>A pilot needs to expose failure, not just collect impressive answers. Put these problems on the acceptance checklist:</p>
+<ul>
+<li><strong>Event-order errors:</strong> Include similar-looking actions, interrupted movements, and repeated attempts. Require the system to distinguish observation from inference and abstain when evidence is insufficient.</li>
+<li><strong>False-positive cost:</strong> Record how much irrelevant footage an operator must inspect. Harmless alerts still consume attention.</li>
+<li><strong>Weak evidence:</strong> Test shadows, partial views, camera movement, and speech overwhelmed by machinery. A plausible answer shouldn't conceal an unreadable scene.</li>
+<li><strong>Continuous-recording burden:</strong> Search ordinary stretches as well as known incidents. Otherwise, the pilot only proves that the system can handle preselected highlights.</li>
+<li><strong>Edge resource limits:</strong> Watch heat, battery use, and responsiveness during sustained operation.</li>
+<li><strong>Sampling risk:</strong> Include brief actions that disappear quickly. Saving compute is a poor trade if the event you need is skipped.</li>
+</ul>
+<p>An <a href="https://ar5iv.labs.arxiv.org/html/2503.04865">edge-video-analytics evaluation</a> associated real-time <strong>30-frame-per-second</strong> processing with approximately <strong>30 ms inference latency</strong>, reported power consumption reaching <strong>8.6 W</strong> when processor frequencies were maximized, and found that adaptive early-exit inference could save energy and memory. The practical lesson is to test sustained behavior, not only a fast first response.</p>
+<p><a id="use-a-corpus-rather-than-a-highlight-reel"></a></p>
+<h3>Use a corpus rather than a highlight reel</h3>
+<p>NIST's <a href="https://www.nist.gov/publications/framework-performance-evaluation-face-text-and-vehicle-detection-and-tracking-video">2020 face, text, and vehicle evaluation framework</a> provided <strong>50 training clips and 50 test clips per task/domain</strong>, approximately <strong>2.5 minutes per clip</strong>, with I-frame-level spatial and temporal annotations and roughly <strong>450,000 annotated frames per task/domain</strong>.</p>
+<p>You don't need to copy that benchmark exactly. You do need comparable discipline: known answers, representative footage, and a consistent way to count correct detections, misses, and irrelevant results.</p>
+<blockquote>
+<p><strong>Pilot standard:</strong> Score replayable precision, missed brief events, operator workload, and behavior during a lost connection. Don't let a fluent explanation compensate for missing evidence.</p>
+</blockquote>
+<p>A short demo that can't survive representative recordings isn't deployment proof. Keep a separate record of uncertain answers so the team can tell whether the system fails safely or merely fails confidently.</p>
+<p><a id="ad-edits-robot-memory-and-surveillance-moments"></a></p>
+<h2>Ad Edits Robot Memory and Surveillance Moments</h2>
+<p>Consider an editor searching a product demonstration for a shorter advertisement. The task isn't to invent a new scene. It's to locate usable evidence already present in the source footage, then make an editorial decision.</p>
+<p>The same query-to-evidence-to-decision pattern applies to robotics and incident review, but the decision changes with the job.</p>
+<p><img alt="An infographic showing five AI use cases for video analysis including editing, robotics, and surveillance." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/98a2e3d8-4e1f-45f4-a97f-978ed06a2fdf/ai-that-can-analyze-videos-video-analysis.jpg" /></p>
+<p><a id="advertisement-video-edition"></a></p>
+<h3>Advertisement video edition</h3>
+<p>A <a href="https://www.grandviewresearch.com/industry-analysis/ai-generated-content-market-report">2025 Grand View Research summary citing the Interactive Advertising Bureau</a> reports that <strong>86% of digital-video buyers already use or plan to use generative AI</strong> for video advertisements, projects AI-generated creative to represent <strong>40% of video advertisements by 2026</strong>, and puts U.S. digital-video ad spending at <strong>$64 billion in 2024</strong>, up <strong>18%</strong>, with approximately <strong>$72 billion expected in 2025</strong>.</p>
+<p>Creation and retrieval serve different purposes. An editor might search for the presenter holding the product while explaining its main benefit. The evidence is the product shot plus the complete spoken claim, including any qualification that changes its meaning.</p>
+<p>The decision is whether that span can become a cutdown. A matching product appearance alone doesn't make the clip suitable if the edit would remove essential context.</p>
+<p><a id="vision-and-audio-for-robotics"></a></p>
+<h3>Vision and audio for robotics</h3>
+<p>For <strong>vision for robotics</strong>, consider a failed assembly attempt. The engineer searches for the moment the part became misaligned, then examines its position relative to the fixture. That evidence helps determine which part of the attempt deserves closer diagnosis.</p>
+<p>For <strong>audio for robotics</strong>, the question changes: which instruction or alarm preceded the failed grasp? The relevant result preserves the command or warning and the subsequent robot behavior. The engineer can then investigate whether the issue concerns instruction handling, timing, or the physical grasp, without assuming the sound itself proves the cause.</p>
+<p>These are complementary jobs. Neither a clean image nor an accurate transcript independently explains the entire attempt.</p>
+<p><a id="dashcam-and-video-surveillance-review"></a></p>
+<h3>Dashcam and video surveillance review</h3>
+<p>A driver searching <strong>dashcam</strong> footage needs the approach to a near-collision, not only the most dramatic frame. Keep the lead-up and immediate aftermath so a reviewer can inspect vehicle positions and motion before drawing conclusions.</p>
+<p>A <strong>video surveillance</strong> investigator might search for a person approaching a restricted door while an alarm or shout is audible. The useful handoff is the relevant span with its surrounding context, not an automated accusation about intent.</p>
+<p>A <a href="https://www.voxelai.com/industry-insights/cctv-video-analytics-safety-statistics">2026 Voxel industry compilation</a> reports injury reductions as high as <strong>77%</strong> at some computer-vision sites and selected cases with no OSHA citations within <strong>12 months</strong>; these are selected deployment outcomes, not reductions or compliance results every camera will deliver.</p>
+<p>Across these jobs, search narrows what a person must review. It doesn't erase the need for judgment, especially when footage could affect a safety decision or an investigation.</p>
+<p><strong>Creation tools make new footage. Search tools should establish what existing footage contains.</strong> Mixing those expectations makes it harder to assess either one.</p>
+<p><a id="test-one-clip-before-you-commit"></a></p>
+<h2>Test One Clip Before You Commit</h2>
+<p>Choose footage you already understand: a product advertisement, a robot attempt, a dashcam recording, or a CCTV incident. Write down what happened before asking the tool, so its wording doesn't influence your own reference answer.</p>
+<p>Use this compact acceptance test:</p>
+<ol>
+<li><strong>Ask naturally:</strong> Describe the event in ordinary language and add a still image if the tool supports it.</li>
+<li><strong>Inspect the result:</strong> Require the matching moment, supporting pictures, relevant sound, and replayable start and end.</li>
+<li><strong>Reject unsupported storytelling:</strong> Fail an answer that sounds persuasive but offers no jump point or evidence.</li>
+<li><strong>Compare manually:</strong> Check the returned span against your own review, then repeat with longer, less curated recordings.</li>
+</ol>
+<p>Teams building phones, glasses, dashcams, or robots need a <strong>Physical AI search layer</strong> when their goal is recalling recorded experience rather than generating a replacement scene.</p>
+<p>V-Modal AI is one public example: we analyze actual video frames and context so moments can be retrieved by meaning through natural language, an image, or another video, with Visual Search for Mobile, Edge devices, Smart Glasses, and Physical AI devices. Developers start by adding an SDK, configuring a project with an API key, uploading a video, and searching for a first moment.</p>
+<p>Evaluate that workflow against your footage. No product description substitutes for a representative accuracy test.</p>
+<hr />
+<p>V-Modal AI offers a visual memory and multimodal search layer for finding meaningful moments in recorded video and audio. Visit <a href="https://github.com/v-modal">V-Modal AI</a> for public developer resources and SDK examples, then test a familiar recording for picture, sound, and replayable evidence before expanding your integration.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
