@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Video Intelligence API for Physical AI Stacks</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Video Intelligence API for Physical AI Stacks</h1>
+    <p>A driver gets home, remembers a horn just before a hard brake, and opens a long dashcam recording. A warehouse technician knows a robot's motor made an unusual sound yesterday but can't remember which run. An editor needs the shot where a product turns and its logo appears. In each case, the useful answer is a moment in a video, not another full recording to watch.</p>
+<p>A <strong>video intelligence API</strong> can act as a search and memory layer for those moments. A caller provides evidence they already have, such as a phrase, an image, a voice clip, or a description of a physical situation. The API returns a time range and a way to play the matching clip. That makes it useful not just for finished media, but also for phones, smart glasses, dashcams, robots, and CCTV systems that need to recall what happened.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#capabilities-and-query-modes">Capabilities and Query Modes</a></li>
+<li><a href="#three-callers-three-kinds-of-evidence">Three callers, three kinds of evidence</a></li>
+<li><a href="#dont-confuse-a-result-with-a-transcript">Don't confuse a result with a transcript</a></li>
+<li><a href="#physical-ai-compared-with-media-and-robotics-stacks">Physical AI Compared With Media and Robotics Stacks</a></li>
+<li><a href="#one-warehouse-two-jobs">One warehouse, two jobs</a></li>
+<li><a href="#device-stacks-from-phones-to-cctv">Device Stacks From Phones to CCTV</a></li>
+<li><a href="#start-with-the-operators-first-question">Start with the operator's first question</a></li>
+<li><a href="#match-the-query-to-the-camera">Match the query to the camera</a></li>
+<li><a href="#industry-jobs-from-ads-to-surveillance">Industry Jobs From Ads to Surveillance</a></li>
+<li><a href="#caller-facing-architecture-and-endpoints">Caller Facing Architecture and Endpoints</a></li>
+<li><a href="#endpoints-in-call-order">Endpoints in call order</a></li>
+<li><a href="#media-handling-and-sdk-integration-steps">Media Handling and SDK Integration Steps</a></li>
+<li><a href="#integration-steps">Integration steps</a></li>
+<li><a href="#pain-points-teams-hit-in-deployment">Pain Points Teams Hit in Deployment</a></li>
+<li><a href="#first-integration-decision">First Integration Decision</a></li>
+</ul>
+<p><a id="capabilities-and-query-modes"></a></p>
+<h2>Capabilities and Query Modes</h2>
+<p>A video intelligence API gives an app a way to ask for a moment across video and audio. A useful result is specific: it includes a start time, an end time, and a playable clip or stream pointer. The caller can then show or play the moment without making the user scrub through the whole recording.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Caller input</th>
+<th>Result</th>
+<th>Typical device</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Natural-language moment search</td>
+<td>Spoken or typed description of a scene or sound</td>
+<td>Time range and clip for the matching moment</td>
+<td>Mobile, smart glasses, CCTV</td>
+</tr>
+<tr>
+<td>Image-to-video</td>
+<td>Still photo or product frame</td>
+<td>Video segments that visually match the image</td>
+<td>Mobile commerce, ad libraries</td>
+</tr>
+<tr>
+<td>Text-to-video</td>
+<td>Short written intent</td>
+<td>Ranked time segments inside indexed video</td>
+<td>Media catalogs, robotics logs</td>
+</tr>
+<tr>
+<td>Voice-to-audio</td>
+<td>Voice clip or spoken query</td>
+<td>Matching audio spans aligned to video time</td>
+<td>Robotics audio, surveillance</td>
+</tr>
+<tr>
+<td>Environmental-state-to-video</td>
+<td>Sensor or scene-state description</td>
+<td>Video moments tied to that physical context</td>
+<td>Robotics, dashcam, edge cameras</td>
+</tr>
+</tbody>
+</table>
+<p>Think of the input as evidence the caller already has. The three broad intents are <strong>words</strong>, <strong>a picture</strong>, or <strong>sound plus physical state</strong>. A search can combine inputs, too: a phrase plus an image or a phrase plus a sound can still return one timeline result.</p>
+<p><a id="three-callers-three-kinds-of-evidence"></a></p>
+<h3>Three callers, three kinds of evidence</h3>
+<p>In a 2026 scenario, an ad editor types “logo reveal after the product spin.” The query is a short written intent, and the result points into the brand's video library rather than returning a broad list of tags. The editor can open the selected moment, check the surrounding shot, and decide whether it belongs in the cut.</p>
+<p>A mobile commerce team can start with a sneaker photo instead. Image-to-video looks for matching product appearances in a video catalog, so a shopper or merchandiser can go from a still image to a product clip. That's different from searching for a general scene such as “someone walking on a city street”: the image gives the caller a specific visual reference.</p>
+<p>A robot technician might ask, “When was the last motor whine?” with a spoken query or a saved voice clip. The result should line up the relevant sound with its position in the video timeline. That alignment matters: a sound span without its matching visual context may not tell the technician what the machine was doing.</p>
+<p>A dashcam reviewer can provide the physical context “rain and a hard brake.” The query describes both the surrounding conditions and the event of interest. The result can narrow the review to the relevant stretch of the drive, rather than asking the reviewer to watch the whole trip.</p>
+<blockquote>
+<p><strong>Practical rule:</strong> Start with the evidence your user already has. Don't make someone translate a sound they heard into a detailed description if they can provide a voice clip instead.</p>
+</blockquote>
+<p><a id="dont-confuse-a-result-with-a-transcript"></a></p>
+<h3>Don't confuse a result with a transcript</h3>
+<p>A transcript is useful when the question is “What did the speaker say?” A video intelligence API is useful when the question is “When did that happen, and can I play the moment?” The result is a point on a timeline that the app can connect to the relevant audio and video.</p>
+<p>That distinction supports different applications without changing the basic interaction. A phone user might type a scene description. Someone wearing smart glasses might ask aloud about something they saw earlier. A CCTV operator might enter a visual indicator, while a robotics application might combine an audio cue with a description of the machine's state.</p>
+<p><a id="physical-ai-compared-with-media-and-robotics-stacks"></a></p>
+<h2>Physical AI Compared With Media and Robotics Stacks</h2>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Best job</th>
+<th>Where it runs</th>
+<th>Weak spot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Physical AI search and memory</td>
+<td>Recall a past visual or audio moment</td>
+<td>Phone, glasses, robot, edge camera</td>
+<td>Not a real-time control loop</td>
+</tr>
+<tr>
+<td>Media content and ad libraries</td>
+<td>Jump to a scene or product clip</td>
+<td>Mobile apps and asset catalogs</td>
+<td>Weak on live physical context</td>
+</tr>
+<tr>
+<td>Robotics vision</td>
+<td>See and act on the current scene</td>
+<td>On-robot compute</td>
+<td>Poor at long historical search</td>
+</tr>
+<tr>
+<td>Batch cloud video intelligence</td>
+<td>Label a finished file after upload</td>
+<td>Cloud job</td>
+<td>Latency and little offline recall</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="A diagram comparing Physical AI, video intelligence media stacks, robotics perception stacks, and cloud media pipelines." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/038e88c4-8fd6-407b-9e74-f1c96bfff33a/video-intelligence-api-physical-ai.jpg" /></p>
+<p>These stacks sit beside each other, but they answer different questions. <strong>Robotics vision</strong> helps a robot interpret the scene in front of it so it can act. A <strong>Physical AI search layer</strong> helps a person or system ask what happened earlier across recorded visual and audio input. <strong>Media content systems</strong> help an editor or viewer locate a scene in a finished asset. A <strong>batch cloud pipeline</strong> processes files after upload, which can suit archive work but isn't the same as local recall during a connection gap.</p>
+<p><a id="one-warehouse-two-jobs"></a></p>
+<h3>One warehouse, two jobs</h3>
+<p>Consider a warehouse robot moving through an aisle. Its live vision pipeline needs to recognize an obstruction in the current view and support a safe response. Separately, a technician may ask when that aisle was blocked the previous day. The first task is about present perception and control; the second is a search over history.</p>
+<p>An ad team has a different need. If an editor asks for a product shot or a logo reveal in a finished campaign, the catalog needs to jump to the right moment. A robotics control loop wouldn't help with that job, because the editor isn't asking the system to move through a live environment.</p>
+<p>Choose a search layer when the question is about <strong>history across video and audio</strong>. Choose a vision stack when the question is about <strong>the current frame and what to do next</strong>. A device may need both: a robot can act on live perception while a separate memory function helps its operator review past events.</p>
+<p><a id="device-stacks-from-phones-to-cctv"></a></p>
+<h2>Device Stacks From Phones to CCTV</h2>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th>Operator</th>
+<th>Constraint</th>
+<th>First query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mobile</td>
+<td>Person reviewing footage just captured</td>
+<td>Kotlin Android and Flutter on Android and iOS</td>
+<td>Search the clip just captured</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Wearer</td>
+<td>Battery and thermal limits on always-on visual memory</td>
+<td>Voice or short phrase about a moment seen earlier</td>
+</tr>
+<tr>
+<td>DashCam</td>
+<td>Fleet reviewer</td>
+<td>Long drives and intermittent networks</td>
+<td>Plate color plus a horn</td>
+</tr>
+<tr>
+<td>GoPro-class action camera</td>
+<td>Sports or field operator</td>
+<td>High-bitrate clips where chunked upload matters more than live control</td>
+<td>One action moment inside a long take</td>
+</tr>
+<tr>
+<td>CCTV and IoT cameras</td>
+<td>Security or operations reviewer</td>
+<td>Multi-hour retention</td>
+<td>One visual or sound indicator instead of the full reel</td>
+</tr>
+</tbody>
+</table>
+<p>A device stack needs to fit the person operating it and the connection available where it records. A phone app might search a clip immediately after capture. A vehicle may lose network access during a drive, while an action camera can create large files that are more practical to send in chunks. For a robot or camera, an edge hub can keep local memory available when the cloud is slow; it's not a replacement for the search interface.</p>
+<p><a id="start-with-the-operators-first-question"></a></p>
+<h3>Start with the operator's first question</h3>
+<p>On mobile, the operator is the person who just recorded the footage. Kotlin Android apps and Flutter apps for Android and iOS can provide a straightforward first path: search the clip just captured with text or an image. That gives the team a clear way to test whether its playback screen can open the returned moment.</p>
+<p>With smart glasses, the wearer may want to ask about something they saw earlier, without pulling out a phone. Always-on visual memory has to fit battery and thermal limits, so start with a short voice query or phrase rather than assuming the device can continuously send everything to a remote service. A robot operator can similarly use voice and a description of environmental state to investigate a past event.</p>
+<p>A dashcam integration serves a fleet reviewer, not just the driver. Long drives and intermittent networks make it sensible to support offline edge recall where available, followed by later sync. A useful first query is specific enough to combine a visible clue with a sound, such as a plate color and a horn.</p>
+<p><a id="match-the-query-to-the-camera"></a></p>
+<h3>Match the query to the camera</h3>
+<p>A GoPro-class action camera often captures long, high-bitrate footage during sports or field work. For that use, chunked upload can matter more than live control. Let the operator search for one action moment inside a long take rather than expecting them to move through the entire recording manually.</p>
+<p>CCTV and IoT cameras create a different review task: an operator may need one visual or sound indicator from hours of retained footage. A security reviewer could search for a particular item of clothing at a gate; an operations reviewer might look for an alarm sound. In either case, the system's value is in narrowing the viewing task to a useful moment.</p>
+<p>Phones and ad apps tend to start with text and image. Glasses and robots often have a natural reason to start with voice and environmental state. Those are starting points, not fixed rules: the right query is the one the operator can provide easily.</p>
+<p><a id="industry-jobs-from-ads-to-surveillance"></a></p>
+<h2>Industry Jobs From Ads to Surveillance</h2>
+<p>An editor preparing an ad can search a brand library for “the handshake after the logo sting.” A text query jumps to the scene, so the editor can review the shot rather than scrub through a rough cut looking for it.</p>
+<p><img alt="A six-panel illustration showcasing various practical applications for advanced video intelligence technology across multiple different industries." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/1278b5dd-50bc-4346-864e-00220d432f73/video-intelligence-api-applications.jpg" /></p>
+<p>Other teams can search for moments in footage they already capture. Each example begins with an operator and a specific clue, then ends at a playable point in the recording.</p>
+<ul>
+<li><strong>Advertisement video edition:</strong> An editor has a phrase describing the scene they need, such as the handshake after a logo sting. A text-to-video query takes them to that part of the brand library, cutting out manual searching through the rough cut.</li>
+<li><strong>Vision for robotics:</strong> A technician has a question about a robot's environment: when was a bin last empty? An environmental-state query finds the relevant historical segment so the technician can replay what the robot saw.</li>
+<li><strong>Audio for robotics:</strong> The robot operator remembers a grinding noise but may not know how to describe the corresponding visual moment. A voice-to-audio search can locate the sound and return the clip aligned to the video timeline.</li>
+<li><strong>Dashcam:</strong> A fleet reviewer knows the event involved a wet road and a sudden stop. A natural-language query narrows the drive to the relevant moment instead of making the reviewer examine the whole shift.</li>
+<li><strong>CCTV and video surveillance:</strong> A security operator needs to find a yellow helmet at a gate, or an operations operator needs to check for a spoken alarm. A query for that visual or auditory indicator can reduce the footage that must be reviewed.</li>
+<li><strong>E-commerce visual discovery:</strong> A merchandiser has a product photo or a short description. Image-to-video or text-to-video can surface the matching product clip in the catalog.</li>
+</ul>
+<p>These examples differ in the evidence available: a product frame, a remembered sound, a physical-state description, or a phrase. They share the same practical aim: help a person open the relevant part of a recording. The difficulty is making that work reliably across device, network, and review conditions.</p>
+<p><a id="caller-facing-architecture-and-endpoints"></a></p>
+<h2>Caller Facing Architecture and Endpoints</h2>
+<p>A caller-facing video intelligence API can be understood as three layers. The <strong>typed device SDK</strong> gives an app or device a consistent way to send requests. An <strong>optional edge memory</strong> can keep local recall available on a robot or camera hub when the cloud is slow. The <strong>project API</strong> accepts media and search requests, then returns moments the caller can play.</p>
+<p><a id="endpoints-in-call-order"></a></p>
+<h3>Endpoints in call order</h3>
+<ol>
+<li><strong>Create or select a project.</strong> Set up the project and send its API key with each request. The project gives the application a place to work with its media and search results.</li>
+<li><strong>Upload media.</strong> Use chunked multipart requests for large dashcam or GoPro-class files. Progress reporting helps the app show whether the upload is moving, and cancellation gives the user a real way to stop it.</li>
+<li><strong>Search for a moment.</strong> Send a typed or spoken description, a still image, a voice clip, or an environmental-state description. A caller can combine a phrase with an image or sound when that better describes what they're looking for.</li>
+<li><strong>Read the result.</strong> Handle a start time, an end time, and a clip or stream pointer. The point is to return a playable moment, not a transcript dump or a tag list the caller must interpret.</li>
+<li><strong>Play the moment.</strong> Open the result from a signed streaming URL so the phone doesn't need to copy the entire file before playback.</li>
+</ol>
+<p>Once a clip or stream is available in the project, live glasses and CCTV can query retained memory through the same caller-facing pattern. Where a vehicle or aisle has no stable connection, edge recall can answer locally; a later sync can bring its media into the same project.</p>
+<p>The call surface should feel familiar across Kotlin, Flutter, Swift, glasses, and robotics SDKs. That consistency lets an integrator build the phone path first and carry its basic request and result handling to another device.</p>
+<p><a id="media-handling-and-sdk-integration-steps"></a></p>
+<h2>Media Handling and SDK Integration Steps</h2>
+<p>The quickest useful prototype is the one that tests the whole path from media to playback. Pick a real short clip, make one search request, and check that the returned moment opens correctly. Don't start by wiring every camera and device into the application.</p>
+<p><a id="integration-steps"></a></p>
+<h3>Integration steps</h3>
+<ol>
+<li><strong>Pick the typed SDK that fits the app.</strong> Use Android Kotlin for a native Android companion app, Flutter for an Android and iOS app, or Swift for an iPhone app. The Smart Glasses or IoT Camera SDK and Robotics SDK serve those device paths. A web SDK isn't available yet, so don't make it the first dependency.</li>
+<li><strong>Add the package and configure credentials.</strong> Include the SDK in the application and set up a project with an API key. Keep the setup small enough that the team can test the request from the device it already ships.</li>
+<li><strong>Upload with visible progress and cancellation.</strong> For dashcam or action-camera media, chunked multipart uploads let the app send a large file in pieces. Give users progress feedback and make cancellation stop the upload, rather than leaving the interface stuck in a running state.</li>
+<li><strong>Play the result without copying the whole file.</strong> Use the signed streaming URL returned for a match. The app can open the selected clip and display its time range without first copying the complete recording onto the device.</li>
+<li><strong>Search one moment.</strong> Start with text, an image, or voice. Choose a query with a clear answer, such as a particular product shot or a remembered machine sound.</li>
+<li><strong>Extend the working path.</strong> Once the phone path returns a useful time range, carry the same interaction to glasses, a robot, or a camera. The uniform typed surface is what keeps calls alike across Flutter, Android, glasses, Swift, and robotics.</li>
+</ol>
+<p><img alt="A five-step infographic showing how to integrate video intelligence SDKs for media handling and analysis." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/5a0a0e73-0de2-4fcc-9585-6ce5a799fc18/video-intelligence-api-sdk-integration.jpg" /></p>
+<p>Use <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">the public SDK repository</a> as a place to prototype the caller-facing path. The uniform typed approach lets teams carry the same basic media, query, and result handling across supported device stacks.</p>
+<p>Upload, authentication, and playback are the caller's job. How the service finds moments stays inside the service, so the integrator can focus on sending useful inputs and presenting a clear result. Once a project key and a short clip are ready, a first successful search should be a minutes-scale task.</p>
+<p><a id="pain-points-teams-hit-in-deployment"></a></p>
+<h2>Pain Points Teams Hit in Deployment</h2>
+<p>A polished demo can still fail on a device in the field. Production checks should test the conditions that shape the user's actual task, not just whether a search request succeeds on a stable office connection.</p>
+<ul>
+<li><strong>Opaque physical data:</strong> A robot or glasses wearer may have recorded useful surroundings but no way to ask about them later. Check that an operator can retrieve a moment from a recorded clip using a plain-language question.</li>
+<li><strong>Audio and video drifting apart:</strong> If a sound and the visual event it belongs to don't line up, a technician may inspect the wrong moment. Check that a returned audio span opens the corresponding point in the video timeline.</li>
+<li><strong>Manual scrubbing:</strong> Reviewers may still spend their time moving through long operational recordings. Check that a specific visual or auditory clue takes them to a playable segment, rather than merely returning a broad description.</li>
+<li><strong>History split across device apps:</strong> A phone, camera, and robot may each keep separate recordings and interfaces. Check the retrieval path on the actual device the operator will use, including the handoff from a local recording to its later synced copy.</li>
+<li><strong>Bandwidth and latency:</strong> A vehicle or warehouse aisle may not have a reliable connection. Check whether an offline query on a recorded clip works in the intended edge setup, then test how the app behaves when it must sync later.</li>
+<li><strong>Labor-heavy surveillance and dashcam review:</strong> An operator needs to locate one visual or sound indicator, not inspect an entire reel. Check that a specific clue, such as an item at a gate or an alarm sound, produces a segment the operator can verify.</li>
+<li><strong>Cross-platform stalls:</strong> A phone demo may work while the Flutter, Swift, glasses, or robotics path remains untested. Check the same query and result handling on every device stack you intend to support.</li>
+<li><strong>Uploads that appear active after cancellation:</strong> A user cancels a large upload, but the device still shows it running or occupied. Check that cancellation stops the transfer and frees the device to continue its other work.</li>
+<li><strong>Live streams that freeze the interface:</strong> A camera stream stalls while the app's controls stop responding. Check that the interface remains usable, reports the interruption clearly, and lets the operator recover without restarting the entire application.</li>
+<li><strong>Queries that are too vague:</strong> A request such as “find something interesting” may not identify one useful moment. Check that the first production queries name a concrete scene, sound, object, or physical condition.</li>
+</ul>
+<blockquote>
+<p><strong>Before release:</strong> Test the failure state as carefully as the happy path. A cancelled upload should look cancelled, and an unavailable connection should not make the app feel frozen.</p>
+</blockquote>
+<p><a id="first-integration-decision"></a></p>
+<h2>First Integration Decision</h2>
+<p>Start on the device your team already ships. Use one real clip from a phone, glasses, dashcam, GoPro-class camera, or CCTV view, then send one query the operator can provide: a typed scene, a product photo, a voice clip, or a description such as rain plus a hard brake.</p>
+<p>Call the first test successful only when the result gives you a correct time range and a playable pointer. That confirms the part a user experiences: they can ask about a moment and open it. Add another camera or a robot only after that path works.</p>
+<p>For teams that want small, typed SDKs, V-Modal AI offers a Visual Memory Layer for Physical AI. Its Android package, <code>com.vmodal.vmodal-sdk-android</code>, is in the <code>v-modal/vmodal_sdk_android</code> repository, and its Robotics SDK targets Physical AI hardware. The Web SDK isn't yet available as a starting package.</p>
+<p>Before production, test an offline query on a recorded clip and confirm that a cancelled upload frees the device. Make those checks part of the first week's work, not a late-stage acceptance test.</p>
+<hr />
+<p>V-Modal AI provides a search and memory layer for multimodal video and audio across mobile devices, edge hardware, and Physical AI systems. Start with one device and one real clip, then visit <a href="https://github.com/v-modal">V-Modal AI</a> to explore its SDKs.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
