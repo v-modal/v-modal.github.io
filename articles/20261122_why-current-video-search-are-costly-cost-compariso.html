@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Why Current Video Search Are Costly: Cost Comparison of AWS, Google, and Edge</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Why Current Video Search Are Costly: Cost Comparison of AWS, Google, and Edge</h1>
+    <p>What 100 hours of video costs comes down to two headline numbers: about <strong>$2,150 in one-time processing plus about $105 per month</strong> on AWS, and about <strong>$2,240 in listed usage</strong> for four analysis features on Google Cloud. Both describe the same 6,000 minutes of footage, and neither is the amount an operator pays.</p>
+<p>The gap between the quote and the invoice comes from stacking. Analysis bills per feature, storage and the search index bill every month, transfer bills each time someone pulls footage back, and on cameras, glasses and robots the uplink and battery cost arrives before search even starts. A cost comparison of AWS and Google is necessary, and it's still never sufficient.</p>
+<p>This question often comes up while doing something expensive by hand: scrubbing hours of footage to find one moment. The per-minute prices below explain why that manual habit survives, and exactly where it stops being the cheaper option.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-100-hours-of-video-costs-on-aws-and-google">What 100 Hours of Video Costs on AWS and Google</a></li>
+<li><a href="#the-aws-bill-line-by-line">The AWS bill, line by line</a></li>
+<li><a href="#the-google-bill-feature-by-feature">The Google bill, feature by feature</a></li>
+<li><a href="#three-cost-layers-one-decision">Three cost layers, one decision</a></li>
+<li><a href="#why-per-feature-pricing-multiplies-on-the-same-footage">Why Per-Feature Pricing Multiplies on the Same Footage</a></li>
+<li><a href="#storage-transfer-and-retrieval-charges-that-never-stop">Storage, Transfer and Retrieval Charges That Never Stop</a></li>
+<li><a href="#the-upload-side-of-the-same-bill">The upload side of the same bill</a></li>
+<li><a href="#finding-the-line-that-grows-fastest">Finding the line that grows fastest</a></li>
+<li><a href="#bandwidth-battery-and-edge-trade-offs-for-cameras-and-robots">Bandwidth, Battery and Edge Trade-Offs for Cameras and Robots</a></li>
+<li><a href="#the-bandwidth-arithmetic-comes-first">The bandwidth arithmetic comes first</a></li>
+<li><a href="#the-battery-finding-that-changes-the-split">The battery finding that changes the split</a></li>
+<li><a href="#costs-by-use-case-from-ad-editing-to-cctv">Costs by Use Case, From Ad Editing to CCTV</a></li>
+<li><a href="#confirm-cost-per-useful-result-before-you-choose-a-stack">Confirm Cost Per Useful Result Before You Choose a Stack</a></li>
+</ul>
+<p><a id="what-100-hours-of-video-costs-on-aws-and-google"></a></p>
+<h2>What 100 Hours of Video Costs on AWS and Google</h2>
+<p>A 100-hour corpus contains 6,000 minutes of footage. AWS's <a href="https://docs.aws.amazon.com/it_it/solutions/latest/media2cloud-on-aws/cost.md">Media2Cloud reference architecture</a> estimates <strong>$2,149.95</strong> in one-time processing for 1 TB in US East, followed by <strong>$104.60 per month</strong> for Amazon S3 and OpenSearch storage and search. The recurring charge matters because processing is only the initial cost of making footage searchable.</p>
+<p><img alt="A comparison chart showing the costs of processing 100 hours of video on AWS versus Google Cloud." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/5881c26d-e126-4782-b8a5-4fb9ad032d30/why-current-video-search-are-costly-cost-comparison-of-aws-google-video-cost-comparison.jpg" /></p>
+<p><a id="the-aws-bill-line-by-line"></a></p>
+<h3>The AWS bill, line by line</h3>
+<p>Two visible AWS line items are Amazon Rekognition celebrity recognition at <strong>$0.10 per minute</strong>, or <strong>$600</strong> for 6,000 minutes, and Amazon Transcribe at <strong>$0.024 per minute</strong>, or <strong>$144</strong>. Together, they account for $744 of the $2,149.95 estimate.</p>
+<p>The remainder covers the pipeline around those features, including frame handling, orchestration and index construction. Read the AWS figure as the cost of processing a terabyte of footage into a searchable system, not as the price of one analysis feature.</p>
+<p><a id="the-google-bill-feature-by-feature"></a></p>
+<h3>The Google bill, feature by feature</h3>
+<p>Google's <a href="https://cloud.google.com/video-intelligence/pricing?authuser=3">Video Intelligence pricing page</a> lists rates of <strong>$0.10 per minute</strong> for label detection, <strong>$0.15</strong> for object tracking, <strong>$0.15</strong> for text detection and <strong>$0.048</strong> for speech transcription. The listed features include a free allowance of the first 1,000 minutes.</p>
+<p>For 100 hours, subtract the free allowance to get 5,000 billable minutes. Labels cost $500, tracking $750, text detection $750 and transcription $240. Together, the four features cost <strong>$2,240</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Line item</th>
+<th>Rate</th>
+<th>100-hour cost</th>
+<th>Billing note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS Media2Cloud reference</td>
+<td>Processing estimate for 1 TB, US East</td>
+<td>One-time</td>
+<td>$2,149.95</td>
+<td>Initial analysis only</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>Rekognition celebrity recognition</td>
+<td>$0.10 per minute</td>
+<td>$600</td>
+<td>6,000 minutes</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>Amazon Transcribe speech</td>
+<td>$0.024 per minute</td>
+<td>$144</td>
+<td>6,000 minutes</td>
+</tr>
+<tr>
+<td>AWS</td>
+<td>S3 and OpenSearch storage and search</td>
+<td>Monthly</td>
+<td>$104.60 per month</td>
+<td>Recurring after processing</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Label detection</td>
+<td>$0.10 per minute</td>
+<td>$500</td>
+<td>5,000 billable minutes</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Object tracking</td>
+<td>$0.15 per minute</td>
+<td>$750</td>
+<td>5,000 billable minutes</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Text detection</td>
+<td>$0.15 per minute</td>
+<td>$750</td>
+<td>5,000 billable minutes</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Speech transcription</td>
+<td>$0.048 per minute</td>
+<td>$240</td>
+<td>5,000 billable minutes</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Four-feature usage total</td>
+<td>Sum of the four rates</td>
+<td>$2,240</td>
+<td>Excludes storage, transfer and queries</td>
+</tr>
+</tbody>
+</table>
+<p><a id="three-cost-layers-one-decision"></a></p>
+<h3>Three cost layers, one decision</h3>
+<p>The AWS and Google figures cover different scopes. AWS's estimate includes a narrower feature set plus storage and search; Google's $2,240 total covers four analysis features but excludes storage, transfer, application servers and repeated queries. Neither total, by itself, measures the cost of returning a useful result.</p>
+<p>For a practical comparison, separate the initial processing bill from recurring costs, then account for how often footage is retrieved and how many analysis features run over it. A low per-minute rate can still produce an expensive search system if finding a moment requires repeated processing or costly retrieval.</p>
+<p>The cost of one useful search result is a better decision metric than the cost of one processed minute. Divide the full operating cost by the results that help a viewer, editor or investigator find the moment they need.</p>
+<p><a id="why-per-feature-pricing-multiplies-on-the-same-footage"></a></p>
+<h2>Why Per-Feature Pricing Multiplies on the Same Footage</h2>
+<p>Amazon Rekognition Video lists label detection at <strong>$0.00817 per processed minute</strong>. At 100,000 minutes, that single operation costs about <strong>$817</strong>, according to <a href="https://aws.amazon.com/rekognition/pricing/">AWS's Rekognition pricing page</a>. One feature alone has already exceeded the 100-hour benchmark by more than sixteen times.</p>
+<p>The bill grows when the same footage triggers separate analyses. AWS charges for stored-video analysis from Amazon S3, and multiple API calls against the same video section are billed separately. Calls for labels, faces, text, celebrities or moderation each add a charge. Re-analyzing a clip for a later query adds another pass over the footage.</p>
+<p>For a fleet of fifty dashcams recording eight hours a day, the daily total is 400 hours, or <strong>24,000 minutes</strong>. At Google's <strong>$0.10 label rate</strong>, label detection alone costs <strong>$2,400 per day</strong>, before object tracking, text detection or transcription. Repeated analysis can turn one recorded minute into several billable feature-minutes.</p>
+<p>Google's first 1,000 free minutes cover less than a day of footage from a single camera recording around the clock. That camera produces <strong>1,440 minutes</strong> a day. Free allowances can help with evaluation, but they do little to offset continuous capture.</p>
+<p>Transfer is a separate cost from analysis. S3 internet data transfer out is listed at <strong>$0.005 per GB</strong> in the North America example. A cloud-only pipeline can therefore incur charges for inference, object access and data transfer on the same footage.</p>
+<p>The useful comparison is cost per result a person can act on, not cost per minute processed. A system that runs several feature-specific calls may produce more labels, but those labels do not necessarily make a search more useful. For CCTV, robotics and mobile workloads, the key question is whether each pass helps retrieve a relevant moment. Indexing once and reusing that representation can avoid paying to analyze the same frames repeatedly.</p>
+<p><a id="storage-transfer-and-retrieval-charges-that-never-stop"></a></p>
+<h2>Storage, Transfer and Retrieval Charges That Never Stop</h2>
+<p>Recurring costs are where video budgets fail slowly. An independent 2026 cloud-cost comparison put <strong>AWS S3 Standard at $0.023 per GB-month</strong> against <strong>Google Cloud Storage Standard at $0.020 per GB-month</strong>, roughly <strong>13%</strong> apart in Google's favour, as reported by <a href="https://www.coststorage.com/compare/aws-google">CostStorage's AWS versus Google comparison</a>. For 1 TB, that is about $23 a month on S3 Standard and about $20 on Google Cloud Storage.</p>
+<p>Storage alone is the smallest recurring line in a real deployment. AWS's own benchmark lands at $104.60 per month once the OpenSearch search layer sits on top of the archive. The index that makes retrieval fast is a second managed service with its own bill, and it grows with the archive rather than with query volume.</p>
+<p>Then retrieval starts charging. Downloads for manual review, evidence exports and video served to mobile users each trigger per-GB transfer rates on top of storage. Those rates sit below the per-minute analysis prices teams compare, but they accrue on every playback, every export and every viewer session. A <a href="https://www.vdocipher.com/blog/video-hosting-servers/">video hosting cost benchmark</a> lists AWS Elemental MediaConvert from <strong>$0.0075 per output minute</strong> and notes CloudFront's permanent <strong>1 TB monthly free allowance</strong>, which covers light delivery and runs out quickly once a large archive is re-downloaded for review.</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Rate</th>
+<th>What triggers the charge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS S3 Standard</td>
+<td>$0.023 per GB-month</td>
+<td>Keeping the archive stored</td>
+</tr>
+<tr>
+<td>Google Cloud Storage Standard</td>
+<td>$0.020 per GB-month</td>
+<td>Keeping the archive stored</td>
+</tr>
+<tr>
+<td>AWS S3 internet data transfer out</td>
+<td>Charged per GB downloaded</td>
+<td>Manual review, exports and evidence pulls</td>
+</tr>
+<tr>
+<td>AWS Kinesis Video Streams HLS consumption</td>
+<td>Charged per GB consumed</td>
+<td>Playback and review</td>
+</tr>
+<tr>
+<td>Google video egress</td>
+<td>Charged per GB exported</td>
+<td>Moving processed video out</td>
+</tr>
+<tr>
+<td>AWS Elemental MediaConvert</td>
+<td>From $0.0075 per output minute</td>
+<td>Transcoding output</td>
+</tr>
+<tr>
+<td>AWS CloudFront</td>
+<td>1 TB per month free, then billed per GB</td>
+<td>Delivering video to viewers</td>
+</tr>
+</tbody>
+</table>
+<p><a id="the-upload-side-of-the-same-bill"></a></p>
+<h3>The upload side of the same bill</h3>
+<p>Mobile and edge uploads carry their own mechanics, and getting them wrong costs money twice: once in wasted transfer and once in repeated processing. Signed streaming URLs, chunked multipart uploads, progress reporting and real cancellation of uploads are the four pieces that keep a flaky connection from turning a dashcam clip into a half-finished object you pay to store and analyze anyway. A cancelled upload need not be finished, which matters on a cellular link in a parking garage.</p>
+<p><a id="finding-the-line-that-grows-fastest"></a></p>
+<h3>Finding the line that grows fastest</h3>
+<p>Every archive has one recurring line that outpaces the rest, and it is rarely the line finance watches. A media company re-cutting the same masters holds storage steady while analysis repeats on identical footage. A retailer running continuous in-store cameras grows storage every hour, and almost none of that footage is ever queried, so the cost per useful result climbs even while the per-GB rate looks cheap.</p>
+<blockquote>
+<p><strong>Recurring line to watch:</strong> archive growth, not query volume, drives the bill that never stops.</p>
+</blockquote>
+<p>Work out which of the two shapes your project matches before choosing a provider. The difference between $0.023 and $0.020 per GB-month buys very little if you store ten times more footage than anyone will search.</p>
+<p><a id="bandwidth-battery-and-edge-trade-offs-for-cameras-and-robots"></a></p>
+<h2>Bandwidth, Battery and Edge Trade-Offs for Cameras and Robots</h2>
+<p>Video search rarely starts with video search. It starts with a network link and a battery, and both are already spending before a single query runs.</p>
+<p>Modality count is the first thing to size. A <a href="https://voxel51.com/whitepapers/state-of-physical-ai-2026">2026 survey of visual and physical-AI teams</a> reports that <strong>68%</strong> work with at least three data modalities while only <strong>6%</strong> use a single one. Active inputs include inertial and other time-series data at <strong>42%</strong>, 3D point clouds and LiDAR at <strong>38%</strong>, audio at <strong>25%</strong> and multispectral imagery at <strong>18%</strong>. Each added modality adds synchronization and storage cost on both the cloud and edge sides, and a camera fleet with microphones and IMUs is a three-modality problem on day one.</p>
+<p><a id="the-bandwidth-arithmetic-comes-first"></a></p>
+<h3>The bandwidth arithmetic comes first</h3>
+<p>The math is short. A 2 Mbps camera stream works out to roughly <strong>21.6 GB of upstream data per day</strong> per camera: 2 megabits a second, 86,400 seconds, divided by eight. Ten of those cameras produce about <strong>216 GB per day</strong>, or roughly <strong>6.5 TB per month</strong>, of uplink before any analysis is invoked. That traffic bills at transfer and egress rates rather than the per-minute analysis rates teams compare, so the cheapest-looking per-minute provider can lose on the uplink alone.</p>
+<p><img alt="A diagram illustrating the trade-offs between bandwidth, battery usage, and edge processing for cameras and robots." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/2c2babcb-b641-40bc-9159-765f495b1684/why-current-video-search-are-costly-cost-comparison-of-aws-google-video-architecture.jpg" /></p>
+<p><a id="the-battery-finding-that-changes-the-split"></a></p>
+<h3>The battery finding that changes the split</h3>
+<p>Device energy is the dimension almost no comparison models address. Lowering the frame rate a device analyzes, or analyzing only on motion, cuts its power draw meaningfully while detection accuracy slips only slightly. The segments a filtered device keeps are also the ones worth paying to store.</p>
+<p>That trade-off dismantles two assumptions at once: that cloud processing is automatically cheaper, and that edge processing must analyze every frame. Neither follows. The device should filter and keep a local record, the cloud should archive selected material, and retrieval should pull only the segments a specific latency, privacy and battery target needs.</p>
+<p>How that split lands by device:</p>
+<ul>
+<li><strong>Smart glasses:</strong> on-device visual memory the wearer can query later beats streaming everything to a server that drains the frame.</li>
+<li><strong>Dashcams and action cameras:</strong> upload on an event flag rather than continuously, so the transfer bill tracks incidents instead of engine hours.</li>
+<li><strong>CCTV:</strong> keep footage local for offline checks, and send only alarm-adjacent segments upstream.</li>
+<li><strong>Robots:</strong> react to nearby streams without a round trip, because a latency budget spent on upload is a latency budget not spent on action.</li>
+</ul>
+<p>V-Modal AI runs visual search on mobile, edge devices, smart glasses and physical AI hardware, which is where this filtering decision lands in practice.</p>
+<p>The caveats are real. Edge hardware carries upfront cost and maintenance, and offline availability helps a remote site while it complicates central audit. None of that changes the metric set: compare configurations on bandwidth avoided, battery consumed, offline availability and data residency, then divide the total by queries that found something.</p>
+<blockquote>
+<p><strong>Decision rule:</strong> treat every frame you send to the cloud as a purchase, and ask what anyone will ever search for in it.</p>
+</blockquote>
+<p><a id="costs-by-use-case-from-ad-editing-to-cctv"></a></p>
+<h2>Costs by Use Case, From Ad Editing to CCTV</h2>
+<p>Physical-AI search is moving past static computer vision toward systems that connect perception to action. McKinsey's analysis of physical AI projects that physical-AI applications could generate more than <strong>US$1 trillion in economic value by 2035</strong> across mobility, robotics, devices, production environments, buildings and infrastructure. The same analysis traces general-purpose robotics investment rising from about <strong>US$1 billion in 2020</strong> to around <strong>US$9 billion in 2025</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Main cost driver</th>
+<th>Pain point</th>
+<th>Cost-saving pattern</th>
+<th>Recent example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Advertisement video editing</td>
+<td>Repeated analysis of masters and cutdowns</td>
+<td>Manual scrubbing for the right shot</td>
+<td>Search by image or text and reuse one analysis</td>
+<td>One master analyzed once, then cutdowns located by query</td>
+</tr>
+<tr>
+<td>Robotics vision</td>
+<td>Continuous camera and sensor streams</td>
+<td>Syncing video with IMU and LiDAR data</td>
+<td>Filter on device and retrieve only event segments</td>
+<td>Vision-language-action models act on live video feeds</td>
+</tr>
+<tr>
+<td>Audio for robotics</td>
+<td>Per-minute transcription plus timing sync</td>
+<td>Audio and video in separate tools</td>
+<td>Transcribe only flagged segments</td>
+<td>Finding audio cues relevant to robot operation</td>
+</tr>
+<tr>
+<td>Dashcam</td>
+<td>Vehicle uploads and mobile bandwidth</td>
+<td>Reviewing hours of footage for one incident</td>
+<td>Upload flagged clips and search by visual cue</td>
+<td>Locating a traffic incident in dashcam footage</td>
+</tr>
+<tr>
+<td>CCTV and video surveillance</td>
+<td>Continuous ingestion and retention of every hour</td>
+<td>Scanning hours for one visual indicator</td>
+<td>Keep footage local and retrieve only alarm segments</td>
+<td>Retrieving the CCTV segment tied to an alarm</td>
+</tr>
+<tr>
+<td>Smart glasses and GoPro</td>
+<td>Upload volume and battery drain</td>
+<td>Limited battery and unstable connectivity</td>
+<td>On-device memory and selective upload</td>
+<td>Smart glasses queried for a visual memory anytime</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Advertisement video editing.</strong> An editor working on a 40-hour master and eight cutdowns pays for analysis of the same source repeatedly. Search by image or text against one indexed master, and the cutdown work stops generating new processing charges.</p>
+<p><strong>Robotics vision.</strong> A warehouse robot with cameras, an IMU and LiDAR generates three synchronized streams. Vision-language-action models now interpret video feeds and translate natural-language instructions into actions such as moving a robot arm, which means the search layer has to answer before the action, not after it.</p>
+<p><strong>Audio for robotics.</strong> Transcription bills per minute and then needs timing alignment against the visual track. Transcribe flagged segments only, and the sync problem shrinks along with the bill.</p>
+<p><strong>Dashcam.</strong> Upload bandwidth is the constraint, not analysis cost. Flag the event on the device and upload the clip, then search by visual cue for the vehicle or the incident.</p>
+<p><strong>CCTV and video surveillance.</strong> Retention is the driver: every hour is stored whether or not it's queried. V-Modal AI can scan hours of footage for one specific visual indicator in CCTV use, which is the difference between reviewing alarms and reviewing everything.</p>
+<p>The recurring pain points are consistent across all six: scrubbing long footage by hand, audio and visual tools that don't share a timeline, data volume outrunning available bandwidth, cloud dependence on weak connections, and staff hours spent on footage that never matters.</p>
+<blockquote>
+<p><strong>Pay for what gets retrieved.</strong> Analysis the retrieval layer never touches is a donation to your provider.</p>
+</blockquote>
+<p><a id="confirm-cost-per-useful-result-before-you-choose-a-stack"></a></p>
+<h2>Confirm Cost Per Useful Result Before You Choose a Stack</h2>
+<p>Cost per useful search result is total monthly cost divided by the retrievals your team acts on. That denominator is the honest one, because a system that indexes 6,000 minutes and answers 40 questions has only ever been useful 40 times.</p>
+<p>Run the worked example. AWS's first month is <strong>$2,149.95</strong> plus <strong>$104.60</strong>, or <strong>$2,254.55</strong>. Across 40 useful retrievals, that's about <strong>$56.36</strong> each. From month two, the recurring $104.60 across the same 40 retrievals is about <strong>$2.62</strong> each, because the analysis is sunk and you're paying for storage, index and access.</p>
+<p>Now apply the same test to Google's <strong>$2,240</strong> four-feature usage total. Add storage and transfer before comparing, since that total excludes them, and recompute the per-result figure on the same 40 retrievals. If the number still surprises you, the denominator is probably wrong.</p>
+<p><img alt="A team of professionals collaborating in an office while reviewing a video search cost comparison chart." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/82524129-46dd-4749-bffb-ad2027385b7a/why-current-video-search-are-costly-cost-comparison-of-aws-google-video-search.jpg" /></p>
+<p>Here's the sequence that produces a defensible number:</p>
+<ol>
+<li><strong>Count footage properly.</strong> Hours per camera or device per month, multiplied by device count.</li>
+<li><strong>List the features each query needs.</strong> Labels alone and labels plus transcription are different products.</li>
+<li><strong>Flag the footage nobody will query.</strong> Most of it, in CCTV and robotics.</li>
+<li><strong>Price storage and retrieval for the expected downloads.</strong> Not for the archive size alone.</li>
+<li><strong>Count useful retrievals per month.</strong> The ones someone acted on, not the ones the system logged.</li>
+<li><strong>Compare providers on identical cost layers.</strong> Analysis against analysis, storage against storage.</li>
+<li><strong>Pilot on one site before scaling.</strong> One camera wall, one robot, one ad campaign.</li>
+</ol>
+<p>A pilot doesn't need a procurement cycle. A developer adds an SDK to the app, configures a project with an API key, uploads a video and searches for the first moment, which takes minutes according to V-Modal AI's onboarding path, documented through the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">V-Modal visual video search SDK listing</a>. The developer hub at V-Modal AI is where the API keys and SDK setup live.</p>
+<p>One caveat before you commit a number to a slide: rates change. Verify the live pricing pages for Rekognition, Video Intelligence, S3, Cloud Storage, Kinesis and CloudFront on the day you sign, because published per-minute prices and transfer tiers shift between quarters.</p>
+<hr />
+<p>If per-minute processing is what's inflating your video search budget, the cheaper lever is analyzing less and retrieving more precisely. V-Modal AI builds a visual memory layer for physical AI that indexes video, audio and sensor streams so you can search for a moment in natural language or with an image, on mobile, edge devices, smart glasses and robots, and it ships SDKs for Android, Flutter and embedded hardware. Start with the repositories and example code at <a href="https://github.com/v-modal">V-Modal AI</a> and price your own corpus against the retrievals you need.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
