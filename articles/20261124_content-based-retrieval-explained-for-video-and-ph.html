@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Content Based Retrieval Explained for Video and Physical AI</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Content Based Retrieval Explained for Video and Physical AI</h1>
+    <p>You know the recording exists. What you don't have is the minute inside it. A maintenance ticket says a machine alarmed before it stopped, an editor wants the take where the label faces the camera, and an investigator needs the second a gate opened. The file sits on a drive, fully intact and practically useless until somebody finds the moment.</p>
+<p>That gap between having footage and being able to use it is what <strong>content based retrieval</strong> closes. The idea is easier to grasp than the machinery behind it, and the costs land in places teams don't expect: battery life, storage tiers, audio sync, and retention rules that delete the evidence you wanted to search.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-content-based-retrieval-means">What Content Based Retrieval Means</a></li>
+<li><a href="#the-card-catalog-and-the-page-inside">The card catalog and the page inside</a></li>
+<li><a href="#three-parts-in-plain-terms">Three parts, in plain terms</a></li>
+<li><a href="#content-based-versus-tag-based-search-at-a-glance">Content Based Versus Tag Based Search at a Glance</a></li>
+<li><a href="#one-drive-two-very-different-answers">One drive, two very different answers</a></li>
+<li><a href="#where-tags-still-earn-their-keep">Where tags still earn their keep</a></li>
+<li><a href="#how-natural-language-and-visual-queries-find-moments">How Natural Language and Visual Queries Find Moments</a></li>
+<li><a href="#four-ways-to-ask-the-same-archive">Four ways to ask the same archive</a></li>
+<li><a href="#constraints-change-the-answer">Constraints change the answer</a></li>
+<li><a href="#phrasing-that-gets-you-a-usable-segment">Phrasing that gets you a usable segment</a></li>
+<li><a href="#finding-moments-in-ad-cctv-and-dashcam-footage">Finding Moments in Ad, CCTV and Dashcam Footage</a></li>
+<li><a href="#the-editor-with-too-many-clips">The editor with too many clips</a></li>
+<li><a href="#the-operator-watching-a-wall-of-feeds">The operator watching a wall of feeds</a></li>
+<li><a href="#the-fleet-manager-chasing-an-impact">The fleet manager chasing an impact</a></li>
+<li><a href="#why-sound-has-to-be-indexed-not-transcribed-and-forgotten">Why sound has to be indexed, not transcribed and forgotten</a></li>
+<li><a href="#seeing-hearing-and-touching-events-in-robotics">Seeing, Hearing and Touching Events in Robotics</a></li>
+<li><a href="#media-search-asks-what-appeared-robotics-asks-what-happened">Media search asks what appeared, robotics asks what happened</a></li>
+<li><a href="#what-a-contact-microphone-knows-that-a-camera-doesnt">What a contact microphone knows that a camera doesn't</a></li>
+<li><a href="#memory-has-to-be-governed-not-just-accumulated">Memory has to be governed, not just accumulated</a></li>
+<li><a href="#pain-points-and-how-to-measure-retrieval-quality">Pain Points and How to Measure Retrieval Quality</a></li>
+<li><a href="#one-accuracy-number-hides-the-trade-offs">One accuracy number hides the trade-offs</a></li>
+<li><a href="#build-a-test-matrix-not-a-single-score">Build a test matrix, not a single score</a></li>
+<li><a href="#choose-a-retrieval-setup-to-test-this-week">Choose a Retrieval Setup to Test This Week</a></li>
+</ul>
+<p><a id="what-content-based-retrieval-means"></a></p>
+<h2>What Content Based Retrieval Means</h2>
+<p>Say a security team holds <strong>400 hours of footage</strong> from last week and has one question: find the moment a person climbs the loading-dock fence. Nobody labeled that climb. Nobody wrote a description of it. Reviewing every timeline at normal speed would outlast the investigation.</p>
+<p><a id="the-card-catalog-and-the-page-inside"></a></p>
+<h3>The card catalog and the page inside</h3>
+<p>A library card catalog finds a book by the label on its spine. You need to know the title, the author, or the subject heading someone assigned. That's a tag, and it works beautifully right up to the moment your question isn't the question the cataloger had in mind.</p>
+<p>Content based retrieval reads inside the book instead. You ask for the page where a particular thing happens, and the system goes looking for that event rather than for a label describing it. <strong>Content based retrieval</strong> means finding digital media, including images, video, audio and sensor streams, by what they contain rather than by filenames, tags or hand-written captions.</p>
+<p>The diagram below maps that difference against the fence-climb problem.</p>
+<p><img alt="An infographic illustrating content-based retrieval compared to traditional cataloging for analyzing hours of security footage." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/d17caaaf-656a-414f-abaa-d32aefc637f1/content-based-retrieval-security-analysis.jpg" /></p>
+<p><a id="three-parts-in-plain-terms"></a></p>
+<h3>Three parts, in plain terms</h3>
+<ul>
+<li><strong>What the system perceives:</strong> visual scenes, sounds, and environmental signals. A doorway, a shouted word, a motor changing pitch, a contact sensor tripping.</li>
+<li><strong>How you express the query:</strong> a sentence, a photo, a sound, or a device state. You don't have to translate your question into somebody else's vocabulary first.</li>
+<li><strong>What comes back:</strong> a whole file if that's all you need, or, far more usefully, a <strong>time segment</strong> with a start and an end you can jump straight to.</li>
+</ul>
+<p>The reason this matters now is volume. Phones record constantly, dashcams and CCTV run for days, and robots keep continuous sensor history that no person can scrub through. A <a href="https://arxiv.org/html/2502.15336v1">2025 analysis of embodied multimodal large models</a> reviewed <strong>300 research papers</strong> and describes agents combining vision, language and audio to perceive and act in physical environments, which is the same combination sitting in a phone, a dashcam, a GoPro-class camera, a CCTV device or a pair of smart glasses.</p>
+<blockquote>
+<p><strong>Quick test:</strong> if the answer depends on what happens inside the file, content based retrieval is the right kind of search. If the answer is written on the outside of the file, you don't need it.</p>
+</blockquote>
+<p><a id="content-based-versus-tag-based-search-at-a-glance"></a></p>
+<h2>Content Based Versus Tag Based Search at a Glance</h2>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Tag based search</th>
+<th>Content based retrieval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it searches</td>
+<td>Filenames, tags and captions</td>
+<td>Visual scenes, sounds and sensor signals</td>
+</tr>
+<tr>
+<td>Manual labeling needed</td>
+<td>Yes, for every file</td>
+<td>Not for core queries</td>
+</tr>
+<tr>
+<td>Finds a moment inside a long file</td>
+<td>Only if someone tagged that moment</td>
+<td>Yes, returns a time segment</td>
+</tr>
+<tr>
+<td>Query types</td>
+<td>Keywords</td>
+<td>Text, image, sound and device-state queries</td>
+</tr>
+<tr>
+<td>Works on untagged footage</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Typical failure</td>
+<td>Missing or wrong tags</td>
+<td>Look-alike scenes and background noise</td>
+</tr>
+</tbody>
+</table>
+<p><a id="one-drive-two-very-different-answers"></a></p>
+<h3>One drive, two very different answers</h3>
+<p>Take a <strong>12-hour dashcam drive</strong> with no tags on it. Somebody in the office asks whether a driver braked hard near a school zone.</p>
+<p>Tag search returns the entire file, because nobody typed "hard braking near school zone" into a metadata field at 4:12 in the afternoon. The label doesn't exist, so the search has nothing to hold onto. That's the first three rows of the table in one example: what gets searched, who has to do the labeling, and whether a moment inside a long recording is reachable at all.</p>
+<p>Content based retrieval returns the <strong>40-second segment</strong> where the braking and the horn happen. The query is a sentence, not a keyword pulled from a controlled vocabulary, and the footage never needed a human pass before it became searchable.</p>
+<p><a id="where-tags-still-earn-their-keep"></a></p>
+<h3>Where tags still earn their keep</h3>
+<p>Tags aren't the enemy. They're the wrong tool for one job and the right tool for several others.</p>
+<ul>
+<li><strong>Access control:</strong> who's allowed to open this camera's archive, and under which role.</li>
+<li><strong>Folder structure and provenance:</strong> which site, which vehicle, which shift, which firmware build.</li>
+<li><strong>Licensing and billing:</strong> music rights on an ad clip, retention class on a surveillance archive, chargeback codes on a client project.</li>
+</ul>
+<p>Keep tags for administration and use content for finding events. A tag tells you what a file <em>is</em>; content tells you what a file <em>contains</em>.</p>
+<p>The failure modes differ too, and that matters when you plan a rollout. Tag systems fail when a label is missing or wrong, and you'll never know how much you didn't find. Content systems return look-alike scenes and get fooled by background noise, which is annoying but visible: a human reviews the shortlist and sees the wrong result immediately.</p>
+<blockquote>
+<p>Is the thing I need named anywhere in this library, or is it only visible or audible inside it?</p>
+</blockquote>
+<p><a id="how-natural-language-and-visual-queries-find-moments"></a></p>
+<h2>How Natural Language and Visual Queries Find Moments</h2>
+<table>
+<thead>
+<tr>
+<th>Query mode</th>
+<th>Example question</th>
+<th>What comes back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text-to-video</td>
+<td>Show the moment the delivery van stops at the gate</td>
+<td>Time segment in the matching clip</td>
+</tr>
+<tr>
+<td>Image-to-video</td>
+<td>Find clips where this product appears</td>
+<td>Video segments with the same object</td>
+</tr>
+<tr>
+<td>Voice-to-audio</td>
+<td>Find where someone says stop the robot</td>
+<td>Audio interval with timestamp</td>
+</tr>
+<tr>
+<td>Environment-state-to-video</td>
+<td>Show footage from when the door sensor opened</td>
+<td>Segment recorded at that device state</td>
+</tr>
+</tbody>
+</table>
+<p><a id="four-ways-to-ask-the-same-archive"></a></p>
+<h3>Four ways to ask the same archive</h3>
+<p>Each mode fits a different starting point. You have words when you're reconstructing an incident from a report. You have a photo when a merchandising team sends you the exact packaging they want found on shelf. You have a sound when the only clue is an alarm tone or a spoken instruction. And you have a device state when the log tells you a door opened at a specific time and you want the picture that goes with it.</p>
+<p>A reviewer working a wall of feeds is usually mixing all four in a single session.</p>
+<p><img alt="A digital artist uses advanced software to analyze surveillance video feeds displayed on a large screen wall." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/92cd0325-705a-4920-991b-f21c7766e77b/content-based-retrieval-video-analysis.jpg" /></p>
+<p><a id="constraints-change-the-answer"></a></p>
+<h3>Constraints change the answer</h3>
+<p>Compare two phrasings. "The moment the forklift enters aisle 4" asks for an event. "The forklift in aisle 4 without a person nearby" asks for an event plus an <strong>absence check</strong>, and a keyword search can't express that at all, because a tag saying "forklift" tells you nothing about who wasn't there.</p>
+<p>Timing detail is just as demanding. The <a href="https://papers.nips.cc/paper_files/paper/2025/file/c192d0aefb044150948577bf6e7b3f62-Paper-Datasets_and_Benchmarks_Track.pdf">TF-CoVR benchmark for temporally fine-grained composed video retrieval</a> reports that its strongest baseline improves zero-shot mAP@50 from <strong>5.92 to 7.51</strong>, while fine-tuning raises the reported state of the art from <strong>19.83 to 27.22</strong>. Two lessons follow for anyone buying or building a search layer. A clip containing the right objects in the wrong sequence is a false match, so order and duration have to be respected. And adapting a system to your own footage, whether that's surveillance, robotics, dashcam or smart-glasses video, moves results enough that you should measure out-of-the-box performance separately from performance after adaptation.</p>
+<p><a id="phrasing-that-gets-you-a-usable-segment"></a></p>
+<h3>Phrasing that gets you a usable segment</h3>
+<p>Write queries with three parts: <strong>name the subject, name the action, state the order or duration</strong>. "A person climbs the fence after the truck leaves" beats "fence person truck", because the second version describes a scene while the first describes an event.</p>
+<p>Then check every returned segment against three questions:</p>
+<ol>
+<li>Does it start near the event, or does it include ten seconds of nothing before it?</li>
+<li>Does it end before the next unrelated event begins?</li>
+<li>Is the order right, with the cause before the effect?</li>
+</ol>
+<p>A segment that fails the third check isn't a near miss. It's the wrong moment wearing the right clothes.</p>
+<p><a id="finding-moments-in-ad-cctv-and-dashcam-footage"></a></p>
+<h2>Finding Moments in Ad, CCTV and Dashcam Footage</h2>
+<p>Three teams, three versions of the same problem.</p>
+<p><a id="the-editor-with-too-many-clips"></a></p>
+<h3>The editor with too many clips</h3>
+<p>An advertising editor has thousands of clips from a two-day shoot and needs a close-up of hands holding the product, outdoors, late afternoon. Scrubbing timelines means opening a clip, dragging the playhead, guessing, and repeating. Searching by description returns matching segments the editor can jump into directly, which removes the hours of manual review that eat a cutting day before any creative decision gets made.</p>
+<p>The pain point here isn't storage. It's attention. Editors make worse choices at hour six of logging footage than at hour one.</p>
+<p><a id="the-operator-watching-a-wall-of-feeds"></a></p>
+<h3>The operator watching a wall of feeds</h3>
+<p>A CCTV operator needs one visual indicator across a long archive: a red delivery jacket, or a specific vehicle type. Instead of watching, the operator gets a shortlist of time segments to review, each with a start and end. Human judgment stays in the loop, but it's applied to candidates rather than to everything.</p>
+<p><strong>V-Modal AI</strong> fits an operational workflow by scanning hours of footage for one specific visual indicator, so the reviewer's job becomes confirming a handful of moments rather than watching a shift.</p>
+<p><a id="the-fleet-manager-chasing-an-impact"></a></p>
+<h3>The fleet manager chasing an impact</h3>
+<p>A fleet manager wants the hard-braking event that coincided with a horn or a sudden impact sound. Picture alone is ambiguous. Plenty of clips show a vehicle slowing; far fewer show slowing plus the acoustic signature of a near collision. The sound is what separates a real incident from a look-alike, and it's also what protects reviewers from missing events once fatigue sets in.</p>
+<p><a id="why-sound-has-to-be-indexed-not-transcribed-and-forgotten"></a></p>
+<h3>Why sound has to be indexed, not transcribed and forgotten</h3>
+<p>The <a href="https://arxiv.org/html/2605.10228">FLARE audiovisual retrieval work</a> reports that user-simulated queries can produce substantially different model behavior from caption-based evaluation, and that audio to language alignment remains a major bottleneck. Its hardest cases need both channels: retrieval fails when either modality is used alone but succeeds when the modalities are combined.</p>
+<p>Think of glass breaking while a person enters a room, or a machine alarm sounding as a component changes state. Neither the picture nor the sound settles the question by itself. The same work notes that few benchmarks historically evaluated audio-to-image or audio-to-video retrieval because heterogeneous modalities are difficult to process, which is exactly why a strong text-to-video score doesn't prove an operational system works on your footage.</p>
+<blockquote>
+<p><strong>Before you commit:</strong> run sound and picture on the same recordings, with queries phrased the way your team actually talks, including constraints like "the moment when" and "without". Background noise, overlapping speakers and environmental sound will decide more of your results than any leaderboard will.</p>
+</blockquote>
+<p><a id="seeing-hearing-and-touching-events-in-robotics"></a></p>
+<h2>Seeing, Hearing and Touching Events in Robotics</h2>
+<p>A <a href="https://link.springer.com/article/10.1007/s44379-025-00050-y">2025 review of Physical AI</a> describes the technology as an integrated stack spanning robotics, neural graphics, control theory, simulation engines, robotic-learning systems and world models, and notes that modern Physical AI models are trained on multimodal inputs including <strong>images, video, motion trajectories, audio and sensor feeds</strong>, rather than vision alone.</p>
+<p><img alt="A diagram illustrating the components of a physical AI stack in robotics, including simulation, control, and learning." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/31da4bdb-35b8-4a6e-983a-f05a852a8998/content-based-retrieval-robotic-ai-stack.jpg" /></p>
+<p><a id="media-search-asks-what-appeared-robotics-asks-what-happened"></a></p>
+<h3>Media search asks what appeared, robotics asks what happened</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Media search</th>
+<th>Physical AI and robotics search</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core question</td>
+<td>What appeared on screen</td>
+<td>What happened in the physical world</td>
+</tr>
+<tr>
+<td>Modalities</td>
+<td>Mostly video, images and captions</td>
+<td>Vision, audio, touch, motion trajectories and sensor feeds</td>
+</tr>
+<tr>
+<td>Typical event</td>
+<td>A person, product or vehicle in frame</td>
+<td>An object falling, a pour finishing, an alarm before a stop</td>
+</tr>
+<tr>
+<td>Ground truth</td>
+<td>Human-labeled start and end time</td>
+<td>Time-aligned camera, sound and contact readings</td>
+</tr>
+<tr>
+<td>Common failure</td>
+<td>Look-alike scenes</td>
+<td>Occluded views and silent contact events</td>
+</tr>
+</tbody>
+</table>
+<p>An editor wants a shot. A robotics engineer wants a cause. "The action performed after a spoken instruction" is a question about sequence across modalities, and no image label answers it.</p>
+<p><a id="what-a-contact-microphone-knows-that-a-camera-doesnt"></a></p>
+<h3>What a contact microphone knows that a camera doesn't</h3>
+<p>A <a href="https://proceedings.mlr.press/v205/li23c/li23c.pdf">peer-reviewed manipulation study</a> used a camera for vision, a contact microphone for acoustic feedback, and a vision-based tactile sensor, fusing the modalities through a self-attention model on two challenging tasks, dense packing and pouring. Each modality supplied different information: vision provided global status but could be obstructed, audio exposed immediate events that were sometimes invisible, and touch delivered precise local geometric information.</p>
+<p>That's the whole argument for multimodal recall in one result. A reviewer looking at robot recordings by image alone can miss the acoustic evidence needed to diagnose a failure, because the gripper blocked the view at the exact instant the interesting thing happened.</p>
+<p><a id="memory-has-to-be-governed-not-just-accumulated"></a></p>
+<h3>Memory has to be governed, not just accumulated</h3>
+<p>Continuous recording creates a second problem that better matching doesn't solve. Work on <a href="https://arxiv.org/html/2609.24271v1">embodied long-term memory</a> identifies the deployment tension directly: memory continuously records environmental observations, user behavior and task histories, yet systems must operate under local compute and storage limits and privacy requirements. The same work highlights on-device processing to reduce sensitive data transmission and hierarchical storage with on-demand access across temporal scales.</p>
+<p>Practically, that means writing down hot, warm and cold memory tiers, event-triggered retention, confidence-aware summaries and auditable deletion, then testing how recall degrades once old data is compressed. Cloud-only retrieval maximizes capability and can be unacceptable in a continuously observed space; edge-only retrieval improves locality and privacy while forcing explicit trade-offs among battery, storage, latency and recall.</p>
+<p>For each robot event worth recalling, record four things: the camera view, the sound, the contact or force reading, and the timestamp that ties them together.</p>
+<p><a id="pain-points-and-how-to-measure-retrieval-quality"></a></p>
+<h2>Pain Points and How to Measure Retrieval Quality</h2>
+<p>The complaints repeat across every deployment, whether the device is a phone, a camera or a robot cell.</p>
+<ul>
+<li><strong>Manual scrubbing:</strong> long operational footage reviewed by hand, at human speed, by people who get tired.</li>
+<li><strong>Sync drift:</strong> audio and video that don't line up, so the sound arrives a beat away from the event it belongs to.</li>
+<li><strong>Look-alike matches:</strong> visually similar scenes returned as hits, repeated objects, background speech mistaken for the query.</li>
+<li><strong>Missed short events:</strong> brief actions skipped because the system samples footage aggressively to save storage and compute.</li>
+<li><strong>Retention conflicts:</strong> policies that delete or summarize old data while investigators still need to search it.</li>
+<li><strong>Bandwidth limits:</strong> sites where cloud search isn't an option, so retrieval has to work offline.</li>
+<li><strong>Integration effort:</strong> one search experience across phone, camera and robot platforms, each with its own constraints.</li>
+</ul>
+<p><a id="one-accuracy-number-hides-the-trade-offs"></a></p>
+<h3>One accuracy number hides the trade-offs</h3>
+<p>Ranking scores are the right family of measures, but they aren't self-explanatory. A <a href="https://arxiv.org/pdf/1706.06064v2">survey of retrieval evaluation methods</a> notes limitations in mAP and ANMRR because their assumptions may not match human judgments, and that alternative measures can correlate more closely with human evaluations. Mean Average Precision earns its place by rewarding systems that put multiple relevant results near the top, averaged across queries, not by describing whether your operator found the right second of video.</p>
+<p>Report at least these, separately:</p>
+<ol>
+<li>A ranking measure at a fixed cutoff, <strong>mAP@K or recall@K</strong>.</li>
+<li><strong>Temporal localization accuracy</strong>, meaning whether the returned segment matches the actual start and end.</li>
+<li>Query latency, plus storage and indexing cost.</li>
+<li>The share of relevant segments found within a fixed latency budget, under offline operation, for edge and robotics deployments.</li>
+</ol>
+<p><a id="build-a-test-matrix-not-a-single-score"></a></p>
+<h3>Build a test matrix, not a single score</h3>
+<p>Separate text-to-video, image-to-video, and audio-to-audio or audio-to-video queries. Then load each column with hard negatives: scenes that look similar, repeated objects, background speech, and events occurring in the wrong temporal order. A system that scores well on clean queries and collapses on hard negatives isn't ready for a loading dock.</p>
+<p>Cutoffs matter more than people expect. A <a href="https://www.nature.com/articles/s41598-024-54954-5?error=cookies_not_supported&amp;code=7ea1c1ff-72d2-4afb-a6e5-4e37454c441f">2024 Scientific Reports study of content-based retrieval for chest CT images</a> reported that the system retrieved the same cases in <strong>60.0% of top-three results</strong> and <strong>68.0% of top-five results</strong>. Same system, same data, two different numbers, because the question changed.</p>
+<blockquote>
+<p>A test set is only useful if every query has a human-labeled start and end time. Without those labels you're grading guesses against guesses.</p>
+</blockquote>
+<p><a id="choose-a-retrieval-setup-to-test-this-week"></a></p>
+<h2>Choose a Retrieval Setup to Test This Week</h2>
+<p>You can settle most vendor arguments in five working days with footage you already own.</p>
+<ol>
+<li><strong>Pick one channel.</strong> One dashcam fleet, one CCTV site, or one robot cell. Narrow beats representative here, because you need labeled truth more than you need coverage.</li>
+<li><strong>Write 20 real questions</strong> your team asks today, in natural language, mixing text, image and sound queries. Copy them from tickets and chat logs rather than inventing tidy ones.</li>
+<li><strong>Label the true start and end time</strong> of each matching moment in the test footage. This is the slow step and the one that makes everything after it meaningful.</li>
+<li><strong>Run the set and record the metrics</strong> defined above, per query mode, with hard negatives included.</li>
+<li><strong>Decide what runs on the device</strong> and what can go to the cloud, using the retention and privacy rules you wrote down before you started.</li>
+</ol>
+<p>If you're comparing providers, run the same set through each. <strong>V-Modal AI</strong> analyzes the actual frames and context of videos so any moment can be retrieved by meaning, through natural language, an image, or another video, and provides Visual Search capabilities for Mobile, Edge devices, Smart Glasses and Physical AI devices. Teams evaluating that fit can start from the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">V-Modal visual and video search SDK listing</a> and point the same 20 questions at it, so the comparison rests on your footage rather than on anyone's demo reel.</p>
+<p>Keep the test set. It becomes the basis for every later decision, including the ones about retention tiers and offline budgets that nobody wants to reopen from scratch.</p>
+<hr />
+<p>We built V-Modal AI as a visual memory layer for Physical AI, so mobile apps, smart glasses, dashcams, CCTV systems and robots can retrieve a specific moment from continuous video, audio and sensor history using a sentence, an image or another clip. If your team is still scrubbing timelines to answer questions your footage already contains, bring your 20 labeled queries and try them against our multimodal search. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to explore the SDKs and example code, and start with the one channel that costs you the most review hours today.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
