@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>AI Search APIs Compared: Video, Audio and Physical AI</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>AI Search APIs Compared: Video, Audio and Physical AI</h1>
+    <p>The most repeated advice about AI search APIs is to run a latency test, compare price per thousand calls, and pick the winner. That advice comes from the web-search world, where the result is a URL and a wrong answer costs you one extra model call. It breaks the moment your data is a nine-hour dashcam file, a microphone array on a warehouse robot, or a week of CCTV from twelve cameras. There, a fast endpoint that returns the wrong second of footage costs you a human reviewer, a re-run, and a user who stops trusting the feature.</p>
+<p>The spending behind these APIs is real and growing. Menlo Ventures estimated that enterprises spent <strong>$37 billion on generative AI in 2025</strong>, up from <strong>$11.5 billion in 2024</strong>, with <strong>$12.5 billion of that going to foundation-model APIs</strong>, according to <a href="https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/">Menlo Ventures' 2025 state of generative AI in the enterprise analysis</a>. OpenAI's <a href="https://openai.com/business/guides-and-resources/the-state-of-enterprise-ai-2025-report/">state of enterprise AI 2025 report</a> counted <strong>more than 1 million business customers</strong> and found that <strong>API use by non-technology companies grew fivefold year over year</strong>. Search is being embedded inside products, not just visited on a website. That shift is exactly why the evaluation method has to change with the data type.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#choosing-an-ai-search-api-by-data-type">Choosing an AI Search API by Data Type</a></li>
+<li><a href="#the-first-question-for-each-family">The first question for each family</a></li>
+<li><a href="#how-text-image-video-audio-and-sensor-search-differ">How Text, Image, Video, Audio and Sensor Search Differ</a></li>
+<li><a href="#text-and-image">Text and image</a></li>
+<li><a href="#video-and-audio">Video and audio</a></li>
+<li><a href="#environmental-sensor-search">Environmental sensor search</a></li>
+<li><a href="#the-physical-ai-stack-where-search-sits">The Physical AI Stack Where Search Sits</a></li>
+<li><a href="#five-layers-one-missing-middle">Five layers, one missing middle</a></li>
+<li><a href="#three-queries-that-expose-the-gap">Three queries that expose the gap</a></li>
+<li><a href="#video-search-use-cases-from-ads-to-surveillance">Video Search Use Cases from Ads to Surveillance</a></li>
+<li><a href="#editing-and-commerce">Editing and commerce</a></li>
+<li><a href="#dashcam-cctv-and-action-footage">Dashcam, CCTV and action footage</a></li>
+<li><a href="#evaluation-criteria-that-predict-production-reliability">Evaluation Criteria That Predict Production Reliability</a></li>
+<li><a href="#reading-the-metrics-honestly">Reading the metrics honestly</a></li>
+<li><a href="#ask-for-profiles-not-defaults">Ask for profiles, not defaults</a></li>
+<li><a href="#cloud-edge-and-hybrid-deployment-trade-offs">Cloud, Edge and Hybrid Deployment Trade-offs</a></li>
+<li><a href="#thresholds-not-preferences">Thresholds, not preferences</a></li>
+<li><a href="#what-stays-local-and-what-syncs">What stays local and what syncs</a></li>
+<li><a href="#pain-points-teams-hit-when-adding-ai-search">Pain Points Teams Hit When Adding AI Search</a></li>
+<li><a href="#shortlist-your-ai-search-api-before-you-build">Shortlist Your AI Search API Before You Build</a></li>
+<li><a href="#seven-steps-to-a-defensible-choice">Seven steps to a defensible choice</a></li>
+</ul>
+<p><a id="choosing-an-ai-search-api-by-data-type"></a></p>
+<h2>Choosing an AI Search API by Data Type</h2>
+<p>Most buying mistakes happen before the first API call, when a team picks the wrong family of search for the data it holds.</p>
+<table>
+<thead>
+<tr>
+<th>API family</th>
+<th>Typical data</th>
+<th>Best-fit job</th>
+<th>Example providers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web search APIs</td>
+<td>Public web pages and documents</td>
+<td>Grounded answers for agents</td>
+<td>Cloudflare Web Search API, Amazon Bedrock AgentCore Web Search API</td>
+</tr>
+<tr>
+<td>Vector search engines</td>
+<td>Embeddings you generate yourself</td>
+<td>Custom text and image retrieval</td>
+<td>FAISS, Qdrant, Milvus, Weaviate</td>
+</tr>
+<tr>
+<td>Multimodal video and audio search</td>
+<td>Video frames, audio and timestamps</td>
+<td>Finding the moment inside footage</td>
+<td>V-Modal AI</td>
+</tr>
+<tr>
+<td>Edge memory layers</td>
+<td>Continuous on-device streams</td>
+<td>Offline recall on phones, glasses and robots</td>
+<td>V-Modal AI robotics and edge memory layer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Match the family to the unit of result you need.</strong> A web page, a document chunk and a timestamp inside a video are three different products, and no amount of prompt engineering converts one into another.</p>
+<p><a id="the-first-question-for-each-family"></a></p>
+<h3>The first question for each family</h3>
+<ul>
+<li><strong>Web search APIs:</strong> which sources must the answer cite, and can you accept an index you don't control? If your agent answers questions about regulations or product releases, provenance is the feature, not speed.</li>
+<li><strong>Vector search engines:</strong> do you already produce embeddings, and who maintains that pipeline? FAISS, Qdrant, Milvus and Weaviate give you control over the index, but they assume you've solved chunking, embedding and refresh yourself.</li>
+<li><strong>Multimodal video and audio search:</strong> does the answer need to be a moment rather than a file? If a reviewer has to scrub to find the event, you've bought a filing system, not search.</li>
+<li><strong>Edge memory layers:</strong> must the moment be findable with the radio off? A robot in a basement or a pair of glasses on a trail can't wait for a round trip.</li>
+</ul>
+<blockquote>
+<p><strong>Practical rule:</strong> write down the result unit first (URL, passage, frame, timestamp, sensor window), then shortlist only the families that can return it.</p>
+</blockquote>
+<p>Two families often belong in the same product. An industrial inspection app might use a web search API for manufacturer documentation and a video search layer for the inspection footage itself. Treating those as one procurement decision is how teams end up with a general-purpose endpoint that does neither job well.</p>
+<p><a id="how-text-image-video-audio-and-sensor-search-differ"></a></p>
+<h2>How Text, Image, Video, Audio and Sensor Search Differ</h2>
+<p>Each modality has its own query shape, its own result unit and its own proof of correctness. Lumping them under one relevance score is the root of most disappointing deployments.</p>
+<p><a id="text-and-image"></a></p>
+<h3>Text and image</h3>
+<p>Text search takes a question or keywords and returns a passage or a URL. You judge it on citation accuracy: does the returned passage support the sentence the model wrote? This is the modality most public benchmarks measure, and it's now the default interface for a large share of queries. In a study of <strong>24,000 queries across 243 countries</strong>, researchers found that <strong>67% of queries in the United States received an AI-generated answer in 2025</strong>, as reported in their <a href="https://arxiv.org/html/2602.13415">arXiv paper on AI-generated answers in search</a>.</p>
+<p>Image search takes a photo or a product shot and returns a matching image or frame, judged on Recall@K over visual matches. Scale changes the answer quality here in ways a demo won't show. A <a href="https://www.frontiersin.org/articles/10.3389/fcomp.2026.1819991/full">scalable image-retrieval benchmark published in Frontiers in Computer Science</a> measured Milvus at roughly <strong>47 to 56 ms query latency with perfect Recall@5 at 100 to 10,000 vectors</strong>, while at <strong>50,000 vectors recall fell to about 0.98 to 0.99</strong> in the tested IVF configuration. Test at the corpus size you'll run in production, not the size of your sample folder.</p>
+<p><a id="video-and-audio"></a></p>
+<h3>Video and audio</h3>
+<p>Video search accepts text, an image or another clip and returns a timestamped segment. Two metrics decide whether it works: <strong>timestamp error</strong> (how far the returned start point sits from the true moment) and <strong>segment recall</strong> (whether the right moment appears at all). A system can rank the correct file first and still hand the reviewer a point four minutes away from the event.</p>
+<p>Audio search takes a spoken phrase or a sound sample, such as a glass-break or an alarm tone in CCTV audio, and is measured on recall of that event at the right second. Audio punished by noise, overlap and distance behaves nothing like clean podcast speech, so build your test set from the microphones you'll deploy.</p>
+<p><a id="environmental-sensor-search"></a></p>
+<h3>Environmental sensor search</h3>
+<p>Sensor search starts from a state, a door opening or a vibration spike, and returns the video or audio window around it. The measure that matters is <strong>cross-modal retrieval accuracy</strong>: given the sensor event, did the system return the correct camera window? This is the query type that generic relevance scores can't express at all, because the input and the output live in different modalities.</p>
+<p>One text-style score can't rank these results because correctness isn't shared. A caption that reads perfectly can point at the wrong second, and a visually correct frame can be attached to the wrong microphone event.</p>
+<blockquote>
+<p>Decide which result unit your product returns, then choose the metric that protects that unit. Everything else is a vanity number.</p>
+</blockquote>
+<p><a id="the-physical-ai-stack-where-search-sits"></a></p>
+<h2>The Physical AI Stack Where Search Sits</h2>
+<p>Physical AI isn't a camera with a model bolted on. Deloitte's <a href="https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/about/2025/robotics-and-physical-ai-tech-futures-report.pdf">robotics and physical AI tech futures report</a> describes these systems as ingesting <strong>visual, auditory and tactile data</strong> through cameras, microphones, LiDAR, thermal sensors and tactile sensors, and identifies sensor networks, drones and robotic platforms as tools for anomaly detection, surveillance and real-time intelligence. Vision alone is not the stack.</p>
+<p><img alt="A diagram illustrating the five layers of the physical AI stack, focusing on memory and search." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/e6b096a2-cc1b-43fd-bd84-7229ca5bae1e/ai-search-apis-ai-stack.jpg" /></p>
+<p><a id="five-layers-one-missing-middle"></a></p>
+<h3>Five layers, one missing middle</h3>
+<p>Build it from the bottom. <strong>Sensing</strong> captures the physical world. <strong>Perception</strong> turns raw signals into objects, events and scenes. <strong>Memory and search</strong> stores those observations and retrieves them on demand. <strong>Reasoning</strong> combines what's happening now with what happened before. <strong>Action</strong> sends the decision to a gripper, a vehicle or an alert channel.</p>
+<p>Teams often build sensing, perception and action, then wire perception straight into reasoning. The system is competent in the current frame and amnesiac about everything before it. The World Economic Forum's <a href="https://reports.weforum.org/docs/WEF_Physical_AI_Powering_the_New_Age_of_Industrial_Operations_2025.pdf">Physical AI report on industrial operations</a> identifies multimodal foundation models, reinforcement learning, imitation learning, soft grippers and tactile sensors as the capabilities letting robots handle variability and adapt in real time, with affordable high-resolution cameras and LiDAR supplying richer raw inputs. Richer inputs make the memory gap worse, not better, because there's more history the system can't reach.</p>
+<p><a id="three-queries-that-expose-the-gap"></a></p>
+<h3>Three queries that expose the gap</h3>
+<ul>
+<li><strong>Vision for robotics:</strong> which gripper pose preceded the failed grasp? The answer is a short clip, not a label.</li>
+<li><strong>Audio for robotics:</strong> was there a motor whine or an alarm in the seconds before the stop? That's an audio event tied to a motion log.</li>
+<li><strong>Environmental context:</strong> what temperature or vibration reading accompanied the camera clip of the defect?</li>
+</ul>
+<p>Sort out what you own and what you buy. Sensor drivers, the capture pipeline and the control loop stay yours, because they're tied to your hardware and your safety case. The search layer is buyable, and it should give context to decisions rather than sit inside the control loop. A retrieval call has variable latency; a control loop can't tolerate that.</p>
+<p>If your robot can't answer what happened in the last thirty seconds across its cameras and microphones, the stack is missing its memory layer, and no amount of reasoning quality will compensate.</p>
+<p><a id="video-search-use-cases-from-ads-to-surveillance"></a></p>
+<h2>Video Search Use Cases from Ads to Surveillance</h2>
+<p>Advertisement editing is the cleanest published example of retrieval doing real work. An <a href="https://dl.acm.org/doi/abs/10.1145/3474085.3479205">ACM paper on automatic advertising clip generation</a> describes a system that segments source footage chronologically and assembles selected segments through a weighted directed graph. A newer multimodal approach, Text-to-Edit, outputs a structured editing draft containing clip arrangement, voice-over scripting and decorative tags. Both depend on the same primitive: find the precise scene or spoken line in long footage, then hand it to the assembler. Natural-language retrieval removes the scrubbing pass that sits before every edit.</p>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>Typical query</th>
+<th>Segment returned</th>
+<th>Success measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Advertisement editing</td>
+<td>Scene or spoken line from source footage</td>
+<td>Scene or line segment for clip assembly</td>
+<td>Manual scrubbing hours saved per edit</td>
+</tr>
+<tr>
+<td>E-commerce product clips</td>
+<td>Shopper image or product description</td>
+<td>Video moment showing the product</td>
+<td>Recall of the correct product moment</td>
+</tr>
+<tr>
+<td>Dashcam review</td>
+<td>Hard braking near a crosswalk</td>
+<td>Incident segment with timestamp</td>
+<td>Timestamp error and incident recall</td>
+</tr>
+<tr>
+<td>CCTV surveillance</td>
+<td>One visual indicator across hours of footage</td>
+<td>Timestamped clip per match</td>
+<td>Recall@K per query and review hours saved</td>
+</tr>
+<tr>
+<td>GoPro and action footage</td>
+<td>Event described by what happened</td>
+<td>Highlight segment</td>
+<td>Time from query to found moment</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>Personal recall question</td>
+<td>Recent clip or moment on-device</td>
+<td>Recall at target latency on device</td>
+</tr>
+</tbody>
+</table>
+<p><a id="editing-and-commerce"></a></p>
+<h3>Editing and commerce</h3>
+<p>Say a small agency cuts three versions of a product ad from six hours of raw footage. The editor needs the take where the presenter says the price, the close-up of the label, and the reaction shot. Searching by spoken line and scene description turns a timeline hunt into a query, and the saved hours are the metric that justifies the API bill. For teams building this into a product, the <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">V-Modal visual video search SDK listing on DevHunt</a> is a useful reference point for what a video-first search integration exposes.</p>
+<p>E-commerce product clips work the same way with a different input. A shopper uploads a photo of a jacket, and the app returns the moment in a review or livestream where that jacket appears. Recall of the correct product moment matters more than latency here, because a wrong product frame breaks the purchase path.</p>
+<p><a id="dashcam-cctv-and-action-footage"></a></p>
+<h3>Dashcam, CCTV and action footage</h3>
+<p>Dashcam review is a needle problem. An insurance analyst looking at a hard-braking event near a crosswalk doesn't want nine hours of driving; they want the incident segment with a timestamp they can quote. Measure timestamp error in seconds and check whether the incident is returned at all, since a missed incident is a different failure class from a late one.</p>
+<p>CCTV and video surveillance scale that problem across cameras and days. An operator searching for one visual indicator, a specific vehicle, a bag left in a corridor, needs a timestamped clip per match and a recall figure per query type. The economics are review hours saved, so count them before and after.</p>
+<p>GoPro and action footage is a consumer version of the same job. The user remembers what happened, not where it sits on the timeline, so time from query to found moment is the number that decides whether the feature gets used twice.</p>
+<p>Smart glasses invert the constraint. Recall is personal and recent, the device is battery-limited, and the query has to succeed on-device at a latency the wearer won't notice.</p>
+<p>Start with the use case where manual review costs the most hours each week. That's where retrieval pays for itself fastest, and where a mediocre result is most visible to the people funding the project.</p>
+<p><a id="evaluation-criteria-that-predict-production-reliability"></a></p>
+<h2>Evaluation Criteria That Predict Production Reliability</h2>
+<p>Judging an AI search API on latency alone is how teams buy a fast system that returns the wrong evidence.</p>
+<p>An <a href="https://arxiv.org/html/2608.12812">empirical comparison of seven vector-search systems on arXiv</a> measured Recall@K, Precision@K, MRR, NDCG@K, hit rate, latency percentiles, QPS, cold-start latency, index-build time, memory and storage. On SIFT1M, <strong>FAISS reached 866 queries per second on a single node</strong>, <strong>Qdrant reported the lowest median latency among full database systems at 4.55 ms</strong>, and <strong>Weaviate exceeded 99% recall in its evaluated configuration</strong>. Those are not interchangeable API SLAs. They shift with dataset, vector dimension, index type, hardware, concurrency, filtering and recall target, which is why your own frame and audio embeddings are the only benchmark that predicts your production behaviour.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What it reveals</th>
+<th>How to report it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recall@K for relevant segments</td>
+<td>Whether the right moments come back</td>
+<td>Per query type and per search profile</td>
+</tr>
+<tr>
+<td>Timestamp error</td>
+<td>Distance between returned and true moment</td>
+<td>Median and P95 in seconds</td>
+</tr>
+<tr>
+<td>P50, P95 and P99 latency</td>
+<td>Tail performance under load</td>
+<td>At your expected peak concurrency</td>
+</tr>
+<tr>
+<td>Sustained queries per second</td>
+<td>Throughput the service holds over time</td>
+<td>Measured at target recall, not at peak</td>
+</tr>
+<tr>
+<td>Ingestion lag</td>
+<td>Time from capture to searchable</td>
+<td>Per hour of new footage</td>
+</tr>
+<tr>
+<td>Memory per indexed hour</td>
+<td>Storage and device fit</td>
+<td>Against your device or server limit</td>
+</tr>
+<tr>
+<td>Cold-start latency</td>
+<td>Speed after reload or reboot</td>
+<td>Measured on the target hardware</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reading-the-metrics-honestly"></a></p>
+<h3>Reading the metrics honestly</h3>
+<p><strong>Recall@K</strong> is the only metric that answers the buyer's real question, and it must be split by query type. Spoken-phrase queries and visual-scene queries fail differently, and an average hides both. <strong>Timestamp error</strong> needs a P95, not just a median, because the tail is what your reviewers complain about.</p>
+<p><strong>Latency percentiles</strong> at your peak concurrency tell you whether the service degrades gracefully. <strong>Sustained QPS</strong> must be measured at your target recall, since approximate-nearest-neighbor systems lose throughput as recall requirements rise. <strong>Ingestion lag</strong> is the metric teams forget entirely: footage that isn't searchable yet is indistinguishable from footage that doesn't exist.</p>
+<p><a id="ask-for-profiles-not-defaults"></a></p>
+<h3>Ask for profiles, not defaults</h3>
+<p>A single speed setting hides the trade-off you're paying for. Ask for configurable search profiles, a high-recall archival profile and a low-latency edge profile, and measure quality at each one. Tuning parameters such as HNSW search breadth or IVF probes should be observable and adjustable rather than buried behind one default.</p>
+<p>Every result should carry timestamps, modality labels, a similarity score and an explicit index version, so a result can be reproduced after re-indexing. Without an index version, your regression tests change meaning every time the corpus is rebuilt.</p>
+<blockquote>
+<p>A metric matters only when it's tied to the use case it protects. Recall@K on web pages protects nothing in a dashcam product.</p>
+</blockquote>
+<p><a id="cloud-edge-and-hybrid-deployment-trade-offs"></a></p>
+<h2>Cloud, Edge and Hybrid Deployment Trade-offs</h2>
+<p>Independent work on real-time multimodal edge intelligence found that cloud-edge processing <strong>reduced end-to-end latency by more than 80% and data transmission by more than 98%</strong> versus naive cloud offloading, while maintaining competitive question-answering performance, in research published in the <a href="https://dl.acm.org/doi/10.1186/s13677-025-00801-5">Journal of Cloud Computing</a>.</p>
+<p><img alt="A chart comparing Cloud-only, Edge-only, and Hybrid AI deployment strategies across mobile, surveillance, IoT, and robotics applications." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/50ae926b-4f40-4101-97a5-08b3c829d0f1/ai-search-apis-deployment-trade-offs.jpg" /></p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Latency</th>
+<th>Bandwidth use</th>
+<th>Data location</th>
+<th>Best fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cloud-only</td>
+<td>Depends on network round trip</td>
+<td>Full media upload</td>
+<td>Data leaves the device</td>
+<td>Large archives searched across sites</td>
+</tr>
+<tr>
+<td>Edge-only</td>
+<td>Lowest, works offline</td>
+<td>Minimal, metadata only</td>
+<td>Data stays on the device</td>
+<td>Smart glasses and robots in offline settings</td>
+</tr>
+<tr>
+<td>Hybrid</td>
+<td>Local for recent clips, cloud for history</td>
+<td>Clips and metadata only</td>
+<td>Raw media local, summaries in cloud</td>
+<td>Dashcam and CCTV fleets</td>
+</tr>
+</tbody>
+</table>
+<p><a id="thresholds-not-preferences"></a></p>
+<h3>Thresholds, not preferences</h3>
+<p>Edge isn't automatically better. Set the decision with five measurable thresholds: the latency budget for each action, bandwidth available per device per day, how long raw media must be retained, battery draw, and where the data must legally stay. Deloitte's <a href="https://www.deloitte.com/content/dam/assets-zone1/nz/en/docs/services/consulting/2026/nz-physical-ai-report.pdf">New Zealand physical AI report</a> notes that <strong>multimodal sensor precision has improved by 60 percent</strong> as sensor costs declined, and points to edge processing at network entry points as a way to cut latency for Android and iOS companion apps, smart glasses, GoPro and dashcam workflows, IoT cameras and CCTV systems.</p>
+<p>More precision on more devices means more data per device, which makes the bandwidth threshold bite sooner than expected.</p>
+<p><a id="what-stays-local-and-what-syncs"></a></p>
+<h3>What stays local and what syncs</h3>
+<p>Recent raw frames and short-term audio usually stay local, because they're needed fast and they're expensive to move. Metadata, detected events and clip references sync upward, because they're small and they make the archive searchable across sites.</p>
+<p>A hybrid design handles intermittent connectivity by queuing uploads and syncing when a link returns, rather than dropping data or blocking capture. Schedule model and index updates in a maintenance window instead of pushing them at random times, since an update that lands mid-shift can change retrieval behaviour while an operator is relying on it.</p>
+<p>For a dashcam fleet, keep the last day of footage searchable on the device and sync incident clips to the cloud archive. For a CCTV installation, keep recent history local per site and search across sites in the cloud. For smart glasses, assume the radio is off and design for edge-only recall, with optional sync when the phone is nearby.</p>
+<p>Local processing still needs access control and encryption. Data that never leaves the device is not automatically safe if any app on that device can read the index.</p>
+<blockquote>
+<p><strong>Deployment rule:</strong> edge for the data that must be fast or private, cloud for the archive that must be searched across sites.</p>
+</blockquote>
+<p><a id="pain-points-teams-hit-when-adding-ai-search"></a></p>
+<h2>Pain Points Teams Hit When Adding AI Search</h2>
+<p>Teams meet these in a predictable order, and each one starts as a reasonable belief.</p>
+<ol>
+<li><strong>"Their web benchmark score is strong, so video will work."</strong> Search APIs tested on BrowseComp produced agent scores ranging from <strong>32% to 74% depending on provider and price tier</strong>, according to Parallel's comparison of AI search for agents, and none of those scores establish frame-level or timestamp-level accuracy. Test on your own footage.</li>
+<li><strong>"We'll run audio and visual analysis separately."</strong> Two pipelines drift out of sync, and the sound arrives a beat away from the picture. Run one query across both streams.</li>
+<li><strong>"Reviewers can scrub to the exact point."</strong> Manual scrubbing of long operational footage eats the hours you were trying to save. Measure retrieval on your own footage before you commit.</li>
+<li><strong>"Uploaded means searchable."</strong> Ingestion lag is often long enough that a live incident isn't findable yet. Measure capture-to-search time per hour of new footage.</li>
+<li><strong>"The upload will finish eventually."</strong> Large mobile uploads stall or crash on real networks. Use chunked uploads with progress reporting and real cancellation.</li>
+<li><strong>"It was fast in the demo."</strong> Edge devices slow down after a reboot or an index reload. Measure cold-start time on the target hardware, not on a warm server.</li>
+<li><strong>"The cheapest API is the cheapest option."</strong> Wrong results trigger extra model calls, human review and failed workflows. Count retrieval errors in your total cost.</li>
+<li><strong>"We'll port it later."</strong> Integration across Swift, Flutter and Kotlin is where schedules slip. Check SDK coverage before signing anything.</li>
+<li><strong>"Legal can review it after launch."</strong> Data residency and access control are architecture decisions, not paperwork. Settle them during vendor selection.</li>
+</ol>
+<blockquote>
+<p>The cheapest endpoint is rarely the cheapest system once you count the review hours it creates.</p>
+</blockquote>
+<p><a id="shortlist-your-ai-search-api-before-you-build"></a></p>
+<h2>Shortlist Your AI Search API Before You Build</h2>
+<p>Developers are already committed to this category: in <a href="https://survey.stackoverflow.co/2024/ai?abtest=true">Stack Overflow's 2024 developer survey</a>, <strong>76% of developers were using or planning to use AI tools in their development process, up from 70% in 2023</strong>. The question isn't whether to add search, it's how to avoid choosing badly.</p>
+<p><img alt="A team discussing AI search APIs and video analysis tools around a meeting table with laptops." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/b24763cb-b9c3-407a-bccc-a64306b38ae8/ai-search-apis-video-analysis.jpg" /></p>
+<p><a id="seven-steps-to-a-defensible-choice"></a></p>
+<h3>Seven steps to a defensible choice</h3>
+<ol>
+<li><strong>Pick your family and use case.</strong> Choose the row from the family table that matches your data, then the video use case row that matches your product. If neither fits, you're building something the market hasn't packaged yet.</li>
+<li><strong>Assemble your own test set.</strong> Gather representative footage and the queries your users would type, with the moments you expect to find marked by hand. Twenty well-chosen queries beat a thousand generic ones.</li>
+<li><strong>Score every candidate on the same metrics.</strong> Recall per query type, timestamp error, ingestion lag and P95 latency at your peak load, all on your data.</li>
+<li><strong>Test the finalist on the target device.</strong> Reboot it, reload the index, and record cold-start time. A phone, a Jetson-class hub and a pair of glasses will give you three different answers.</li>
+<li><strong>Request access.</strong> Ask for an API key through our contact page, or start from our public repositories and example code.</li>
+<li><strong>Build the first working search.</strong> Add the SDK to your app, configure a project with your API key, upload a video and search the first moment. That path takes minutes, and our Android SDK ships as <code>com.vmodal.vmodal-sdk-android</code> under Apache-2.0 for teams that need to read the licence before they integrate.</li>
+<li><strong>Keep the integration notes in your team repository.</strong> Write down the search profile you chose, the recall you measured and the device limits you hit, so the next engineer doesn't repeat the evaluation. Our developer hub carries the SDK references you'll link from those notes.</li>
+</ol>
+<p>Keep the candidate that meets your recall and latency targets on your own footage, even if another option posts a better public score. A leaderboard win on someone else's dataset is not evidence about your cameras, your microphones or your users.</p>
+<hr />
+<p>We build V-Modal AI as a visual memory layer for Physical AI, with multimodal video and audio search that returns the exact moment inside footage from a text query, an image or another clip, plus an edge-optimized memory layer for robots, smart glasses and mobile devices that need recall without a network. If you're evaluating AI search APIs for video, audio or sensor data, bring your own footage and run the metrics that protect your result unit. Visit <a href="https://github.com/v-modal">V-Modal AI</a> to read the SDKs and example code, then request an API key and search your first moment.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
