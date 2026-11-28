@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+  <title>Android Kotlin REST API Example: Retrofit Step by Step</title>
+  <link rel='stylesheet' href='../style.css'/>
+</head>
+<body>
+  <header>
+    <a href='../index.html'>V-Modal AI Blog: Search, MultiModality, Physical AI</a>
+  </header>
+  <main>
+    <a href='../index.html' class='back-link'>&#8592; Back to articles</a>
+    <h1>Android Kotlin REST API Example: Retrofit Step by Step</h1>
+    <p>More than <strong>60% of professional Android developers</strong> use Kotlin, and <strong>95% of the top 1,000 Android applications</strong> contain Kotlin code, according to <a href="https://developer.android.com/kotlin/build-better-apps">Android Developers</a>. On the server side, REST was used by <strong>93% of API developer teams</strong> as an API architectural style in 2025, according to an <a href="https://stats.conversationalgeek.com/analysis/postman-2025-developer-tooling">analysis citing Postman's State of the API Report</a>. That combination makes a solid <strong>Android Kotlin REST API example</strong> the baseline skill for almost every mobile team.</p>
+<p>Most tutorials stop the moment one <code>GET</code> request prints a JSON object to Logcat. Production networking falls apart right after that point. Rotating a phone mid-request, losing cellular signal during a 300 MB dashcam upload, or letting ten parallel requests trigger ten token refreshes at once will break a naive client on day one.</p>
+<p>Building a dependable client means owning screen state, canceling stale coroutines, enforcing strict retry rules, and streaming large <strong>Multimodal Video</strong> and <strong>Multimodal Audio</strong> captures from phones, smart glasses, GoPros, dashcams, CCTV hubs, and robots without crashing the heap.</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#what-you-will-build-and-why-kotlin-fits">What You Will Build and Why Kotlin Fits</a></li>
+<li><a href="#four-layers-that-keep-networking-maintainable">Four Layers That Keep Networking Maintainable</a></li>
+<li><a href="#project-setup-and-a-working-retrofit-client">Project Setup and a Working Retrofit Client</a></li>
+<li><a href="#core-dependencies-and-when-to-include-them">Core Dependencies and When to Include Them</a></li>
+<li><a href="#six-steps-to-a-compiling-retrofit-client">Six Steps to a Compiling Retrofit Client</a></li>
+<li><a href="#verifying-your-first-staging-call">Verifying Your First Staging Call</a></li>
+<li><a href="#wiring-the-repository-to-viewmodel-and-ui-state">Wiring the Repository to ViewModel and UI State</a></li>
+<li><a href="#separating-transport-models-from-screen-state">Separating Transport Models from Screen State</a></li>
+<li><a href="#preventing-search-race-conditions">Preventing Search Race Conditions</a></li>
+<li><a href="#handling-http-errors-timeouts-and-expired-tokens">Handling HTTP Errors, Timeouts and Expired Tokens</a></li>
+<li><a href="#retry-rules-and-single-flight-token-refresh">Retry Rules and Single-Flight Token Refresh</a></li>
+<li><a href="#production-traps-that-break-naive-parsers">Production Traps That Break Naive Parsers</a></li>
+<li><a href="#uploading-video-and-audio-from-devices-and-cameras">Uploading Video and Audio from Devices and Cameras</a></li>
+<li><a href="#streaming-large-media-without-out-of-memory-crashes">Streaming Large Media Without Out-of-Memory Crashes</a></li>
+<li><a href="#where-searchable-video-and-audio-meet-real-hardware">Where Searchable Video and Audio Meet Real Hardware</a></li>
+<li><a href="#device-pain-points-you-will-hit-in-production">Device Pain Points You Will Hit in Production</a></li>
+<li><a href="#run-your-first-request-before-you-scale">Run Your First Request Before You Scale</a></li>
+<li><a href="#custom-retrofit-client-versus-a-published-kotlin-sdk">Custom Retrofit Client Versus a Published Kotlin SDK</a></li>
+<li><a href="#four-steps-to-validate-your-integration">Four Steps to Validate Your Integration</a></li>
+</ul>
+<p><a id="what-you-will-build-and-why-kotlin-fits"></a></p>
+<h2>What You Will Build and Why Kotlin Fits</h2>
+<p>In 2025, <strong>8.1 million developers worldwide</strong> had Kotlin experience, according to <a href="https://kotlinlang.org/state-of-kotlin-2026/">JetBrains' State of Kotlin report</a>. Writing your networking layer in Kotlin aligns directly with how modern Android teams structure asynchronous code, immutable data models, and UI state.</p>
+<p><img alt="An Android developer writing Kotlin code for a REST API connection on a laptop at a desk." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/5c2ca1d6-d15d-41f0-8008-2575f0967a49/android-kotlin-rest-api-example-developer-coding.jpg" /></p>
+<p>Consider a concrete scenario: you're building an Android companion app that searches a REST backend for timestamped video and audio moments, uploads fresh recordings from a connected camera, and polls an asynchronous processing job while the user walks across a spotty LTE connection. Firing a single HTTP call takes ten lines of code. Keeping that screen responsive and predictable when the network drops takes careful architecture.</p>
+<p><a id="four-layers-that-keep-networking-maintainable"></a></p>
+<h3>Four Layers That Keep Networking Maintainable</h3>
+<p>Rather than dumping HTTP code into an Activity or composable, split the client into four focused responsibilities:</p>
+<ul>
+<li><strong>Retrofit</strong> turns REST endpoints into typed Kotlin interfaces with <code>@GET</code>, <code>@POST</code>, and <code>@Multipart</code> annotations.</li>
+<li><strong>OkHttp</strong> handles the actual sockets, TLS handshakes, connection pooling, timeouts, and request interceptors.</li>
+<li><strong>Kotlin Coroutines</strong> push blocking I/O off the main thread and tie request lifecycles to structured cancellation.</li>
+<li><strong>Lifecycle ViewModel</strong> holds a sealed UI state across screen rotations so your composables only render what's ready.</li>
+</ul>
+<p>By the end of this walkthrough, you'll have a compiling Kotlin architecture with a repository boundary, a sealed <code>SearchUiState</code>, mapped HTTP error handling, a single-flight token interceptor, and chunked media upload support. If you already have Retrofit wired up, jump straight to the state pipeline, error matrix, or camera upload patterns below.</p>
+<p><a id="project-setup-and-a-working-retrofit-client"></a></p>
+<h2>Project Setup and a Working Retrofit Client</h2>
+<p>A clean <strong>Android Kotlin REST API example</strong> starts by keeping your dependency list tight. Every library in the request path needs a clear job, and anything that prints request headers or payloads must stay out of release builds.</p>
+<p><a id="core-dependencies-and-when-to-include-them"></a></p>
+<h3>Core Dependencies and When to Include Them</h3>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Role in the example</th>
+<th>Add when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Retrofit</td>
+<td>Declares endpoints as typed Kotlin interfaces</td>
+<td>Always</td>
+</tr>
+<tr>
+<td>OkHttp</td>
+<td>HTTP engine for timeouts, interceptors and connection reuse</td>
+<td>Always, Retrofit uses it</td>
+</tr>
+<tr>
+<td>JSON converter (kotlinx.serialization or Moshi)</td>
+<td>Turns JSON into data classes and back</td>
+<td>Always</td>
+</tr>
+<tr>
+<td>kotlinx-coroutines</td>
+<td>Suspend calls that stay off the main thread</td>
+<td>Always</td>
+</tr>
+<tr>
+<td>Logging interceptor</td>
+<td>Prints request and response details</td>
+<td>Debug builds only</td>
+</tr>
+<tr>
+<td>Lifecycle ViewModel</td>
+<td>Keeps request state across rotation</td>
+<td>Any screen that shows network data</td>
+</tr>
+</tbody>
+</table>
+<p>I recommend picking <strong>kotlinx.serialization</strong> or <strong>Moshi</strong> over older reflection-heavy converters on new Kotlin projects. Both respect Kotlin nullability rules cleanly, so a missing required JSON field fails fast at the network boundary instead of throwing a surprise <code>NullPointerException</code> three screens later.</p>
+<p><a id="six-steps-to-a-compiling-retrofit-client"></a></p>
+<h3>Six Steps to a Compiling Retrofit Client</h3>
+<ol>
+<li><strong>Declare internet permission in <code>AndroidManifest.xml</code>.</strong> Add <code>&lt;uses-permission android:name="android.permission.INTERNET" /&gt;</code> above the <code>&lt;application&gt;</code> tag. Android grants this at install time without a runtime dialog, and omitting it causes every socket call to fail immediately before leaving the device.</li>
+<li><strong>Add dependencies to your Gradle version catalog.</strong> Pin the latest stable releases of Retrofit, OkHttp, your chosen JSON converter, <code>kotlinx-coroutines-android</code>, and <code>lifecycle-viewmodel-ktx</code> inside <code>libs.versions.toml</code>, then wire them into your app module's <code>build.gradle.kts</code>.</li>
+<li><strong>Define explicit serializable data models.</strong> Create <code>SearchResponse</code> wrapping a <code>List&lt;SearchItem&gt;</code>, where each <code>SearchItem</code> exposes <code>id: String</code>, <code>title: String</code>, <code>startSeconds: Double</code>, and <code>endSeconds: Double</code>. Add <code>UploadResponse(val jobId: String, val status: String)</code> and <code>JobStatusResponse(val jobId: String, val state: String)</code> so every backend key maps to a typed property. Use nullable types only when the backend omits a field.</li>
+<li><strong>Declare your endpoints in one Retrofit interface.</strong> Mark every function <code>suspend</code> so Retrofit dispatches calls asynchronously without blocking the caller. A single service interface can hold both text queries and media transfers: <code>@GET("search") suspend fun search(@Query("q") query: String): SearchResponse</code>, <code>@Multipart @POST("uploads") suspend fun upload(@Part file: MultipartBody.Part): UploadResponse</code>, and <code>@GET("jobs/{id}") suspend fun getJobStatus(@Path("id") jobId: String): JobStatusResponse</code>.</li>
+<li><strong>Configure a single shared <code>OkHttpClient</code>.</strong> Build one client instance and inject it everywhere so connections stay pooled. Set separate timeouts: keep <code>connectTimeout</code> and <code>readTimeout</code> tight (for example, 15 seconds and 30 seconds) so dead sockets fail quickly, but set <code>writeTimeout</code> longer (for example, 120 seconds) to give large camera uploads room on slow uplinks. Attach an auth <code>Interceptor</code> that reads the bearer token from encrypted storage (<code>EncryptedSharedPreferences</code> or Keystore-backed DataStore) and adds <code>Authorization: Bearer $token</code>. Attach <code>HttpLoggingInterceptor</code> only inside an <code>if (BuildConfig.DEBUG)</code> guard.</li>
+<li><strong>Build one <code>Retrofit</code> singleton from <code>BuildConfig</code>.</strong> Pass your <code>OkHttpClient</code>, attach the JSON converter factory, and call <code>.baseUrl(BuildConfig.API_BASE_URL)</code> with a guaranteed trailing slash. Keeping the base URL in build flavor configuration lets you switch between staging and production without touching feature code.</li>
+</ol>
+<blockquote>
+<p><strong>Security rule:</strong> Never attach <code>HttpLoggingInterceptor</code> at <code>Level.BODY</code> or <code>Level.HEADERS</code> in a release build. Any log aggregator or user bug report will capture bearer tokens, signed media URLs, and private query text straight from Logcat.</p>
+</blockquote>
+<p><a id="verifying-your-first-staging-call"></a></p>
+<h3>Verifying Your First Staging Call</h3>
+<p>Before building any screens, verify the transport layer in isolation. Point <code>BuildConfig.API_BASE_URL</code> at your staging server, invoke <code>apiService.search("loading dock")</code> from a temporary coroutine or instrumentation test, and inspect the debug output.</p>
+<p>Your checkpoint is simple: the project compiles with zero warnings, the staging server returns a <code>200 OK</code>, and Logcat displays a parsed list of <code>SearchItem</code> objects with intact <code>startSeconds</code> and <code>endSeconds</code> values.</p>
+<p><a id="wiring-the-repository-to-viewmodel-and-ui-state"></a></p>
+<h2>Wiring the Repository to ViewModel and UI State</h2>
+<p>Getting JSON back from staging is the straightforward part. <a href="https://developer.android.com/develop/connectivity/network-ops/connecting">Android's network connectivity documentation</a> describes Retrofit as a type-safe HTTP client built on OkHttp, recommends placing calls behind a repository to avoid duplication, and requires keeping network work off the main thread via <code>withContext(Dispatchers.IO)</code> or an injected dispatcher. It also stresses transmitting traffic over SSL and minimizing sensitive data over the wire, making HTTPS and redacted logs essential for mobile media and robotics telemetry.</p>
+<p>That layering matches <a href="https://developer.android.com/topic/architecture/data-layer">Android's data layer architecture guide</a>, which recommends main-safe data sources, <code>suspend</code> functions for one-shot operations, and <code>Flow</code> for observable state. Follow a strict build pipeline from the bottom up: serializable DTO models, the Retrofit interface, the configured <code>OkHttpClient</code> and <code>Retrofit</code> instance, a repository, a <code>ViewModel</code>, and finally your Compose UI.</p>
+<p><a id="separating-transport-models-from-screen-state"></a></p>
+<h3>Separating Transport Models from Screen State</h3>
+<p>The repository should be the only class in your codebase that imports Retrofit. Expose a clean contract such as <code>suspend fun search(query: String): Result&lt;List&lt;SearchItem&gt;&gt;</code> and wrap the network execution inside <code>withContext(ioDispatcher)</code> (defaulting to <code>Dispatchers.IO</code>) so any caller can invoke it safely from the main thread. Inside that block, convert raw transport DTOs into domain models and catch HTTP or serialization failures before returning.</p>
+<p>In the <code>ViewModel</code>, model every screen state explicitly with a sealed hierarchy called <code>SearchUiState</code>:</p>
+<ul>
+<li><strong><code>Idle</code>:</strong> The initial screen before the user enters a query.</li>
+<li><strong><code>Loading</code>:</strong> An active search request is in flight.</li>
+<li><strong><code>Empty</code>:</strong> The backend returned <code>200 OK</code>, but zero timestamped clips matched.</li>
+<li><strong><code>Content(val items: List&lt;SearchItem&gt;)</code>:</strong> Validated results ready to render.</li>
+<li><strong><code>Error(val message: String, val canRetry: Boolean)</code>:</strong> A mapped failure telling the UI whether a Retry button makes sense.</li>
+</ul>
+<p><a id="preventing-search-race-conditions"></a></p>
+<h3>Preventing Search Race Conditions</h3>
+<p>Typing into a search bar exposes a subtle bug that breaks many first implementations. If a user types "red" and then quickly finishes typing "red truck", the first request can stall on a slow cell tower and arrive after the second response, overwriting the newer "red truck" results with stale data.</p>
+<p>Lock down the search flow with four concrete steps:</p>
+<ol>
+<li><strong>Debounce user input by roughly 300 ms</strong> using <code>Flow.debounce(300)</code> or a delayed coroutine so rapid keystrokes don't hammer the backend.</li>
+<li><strong>Cancel the previous search <code>Job</code> before starting a new one</strong> (or switch via <code>flatMapLatest</code>), guaranteeing that only the latest query can write to <code>SearchUiState</code>.</li>
+<li><strong>Transition to <code>Loading</code>, call <code>repository.search(query)</code>, and map the <code>Result</code></strong> cleanly into <code>Content</code>, <code>Empty</code>, or <code>Error</code>.</li>
+<li><strong>Expose state as <code>StateFlow&lt;SearchUiState&gt;</code></strong> and collect it in Jetpack Compose with <code>collectAsStateWithLifecycle()</code>, which automatically pauses collection when the screen drops into the background.</li>
+</ol>
+<p>Keep these production guardrails in place as your app grows:</p>
+<ul>
+<li><strong>Never leak DTOs into composables:</strong> When the backend renames a JSON property, only your mapper should change, not five UI files.</li>
+<li><strong>Keep <code>CancellationException</code> out of <code>Error</code> state:</strong> If you write <code>catch (e: Exception)</code> inside a repository, rethrow <code>CancellationException</code> immediately so canceled searches don't flash false error banners.</li>
+<li><strong>Don't restart calls on configuration changes:</strong> Let the <code>ViewModel</code> own the coroutine in <code>viewModelScope</code> rather than launching requests from a composable <code>LaunchedEffect</code> keyed on ephemeral UI state.</li>
+<li><strong>Instrument transport metrics at the repository layer:</strong> Track request latency, retry counts, bytes transferred, cancellation rates, and HTTP status distributions so you spot regressions before users complain.</li>
+</ul>
+<blockquote>
+<p>Most Android networking bugs aren't HTTP bugs at all. They're lifecycle bugs where an abandoned coroutine updates a screen the user already left.</p>
+</blockquote>
+<p>Run a quick checkpoint on a physical device or emulator: trigger a search on a throttled connection, rotate the phone while <code>Loading</code> is visible, and confirm that exactly one network call fires and its response renders cleanly after rotation.</p>
+<p><a id="handling-http-errors-timeouts-and-expired-tokens"></a></p>
+<h2>Handling HTTP Errors, Timeouts and Expired Tokens</h2>
+<p>Reliable error handling starts with HTTP semantics rather than ad-hoc <code>if/else</code> blocks. <a href="https://www.rfc-editor.org/rfc/rfc9110.html">RFC 9110</a> defines HTTP status codes as three-digit integers from 100 through 599, assigns the 2xx class to successful requests (including <code>200 OK</code> and <code>201 Created</code>), separates methods such as <code>GET</code>, <code>POST</code>, <code>PUT</code>, and <code>DELETE</code>, and draws a clean boundary between 4xx client errors (like <code>400 Bad Request</code> and <code>404 Not Found</code>) and 5xx server failures.</p>
+<p>Map every status code and transport failure to a deterministic client action before writing retry logic.</p>
+<table>
+<thead>
+<tr>
+<th>Status code</th>
+<th>Meaning</th>
+<th>Client action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200 OK</td>
+<td>Request succeeded</td>
+<td>Parse the body and show Content or Empty</td>
+</tr>
+<tr>
+<td>201 Created</td>
+<td>A new resource was created</td>
+<td>Store the returned ID and confirm to the user</td>
+</tr>
+<tr>
+<td>202 Accepted</td>
+<td>Accepted but still processing</td>
+<td>Poll the job status endpoint and show progress</td>
+</tr>
+<tr>
+<td>400 Bad Request</td>
+<td>Malformed query or body</td>
+<td>Show an input error and do not retry</td>
+</tr>
+<tr>
+<td>401 Unauthorized</td>
+<td>Missing or expired token</td>
+<td>Refresh the token once, then retry or sign out</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>Requested resource does not exist</td>
+<td>Show the Empty state and do not retry</td>
+</tr>
+<tr>
+<td>5xx Server error</td>
+<td>Backend failure</td>
+<td>Retry GET with backoff, capped at three attempts</td>
+</tr>
+<tr>
+<td>No response (timeout or no connection)</td>
+<td>Request never completed</td>
+<td>Retry GET with backoff, then show Network error</td>
+</tr>
+</tbody>
+</table>
+<p><a id="retry-rules-and-single-flight-token-refresh"></a></p>
+<h3>Retry Rules and Single-Flight Token Refresh</h3>
+<p>Blindly retrying every failed call creates duplicate uploads and hammers struggling servers. Apply strict method-aware rules instead:</p>
+<ul>
+<li><strong>Retry only safe <code>GET</code> requests</strong> on timeouts, dropped sockets, and 5xx errors. Use exponential backoff with random jitter (for example, 1 s, 2 s, and 4 s delays) capped at three attempts so thousands of reconnecting phones don't synchronize into a thundering herd.</li>
+<li><strong>Never auto-retry a media upload <code>POST</code></strong> unless your backend enforces an idempotency key header. If the server saved the video clip right before the phone lost Wi-Fi on the acknowledgment, retrying blindly creates duplicate files and wasted processing jobs.</li>
+<li><strong>Serialize <code>401 Unauthorized</code> refreshes behind a <code>Mutex</code>.</strong> When a screen fires five parallel requests with an expired JWT, only the first coroutine should hit the refresh endpoint while the others wait on the lock. Once the fresh token lands, retry the original request once; if the refresh fails, clear stored credentials and route the user to sign in.</li>
+<li><strong>Respect <code>429 Too Many Requests</code> headers.</strong> Read the <code>Retry-After</code> response header and suspend for that duration instead of guessing a delay.</li>
+</ul>
+<p>Exception mapping needs the same precision. Convert <code>SocketTimeoutException</code> and <code>UnknownHostException</code> into a domain <code>Network</code> failure with <code>canRetry = true</code>. Convert JSON converter exceptions (<code>SerializationException</code> or <code>JsonDataException</code>) into <code>Unknown</code> with <code>canRetry = false</code>, and log only the HTTP status code and response byte length, never the raw response body.</p>
+<p><a id="production-traps-that-break-naive-parsers"></a></p>
+<h3>Production Traps That Break Naive Parsers</h3>
+<p>Even experienced teams get blindsided by three HTTP edge cases in the wild:</p>
+<ul>
+<li><strong>Error payloads wrapped inside <code>200 OK</code>:</strong> Some gateways return status 200 with a JSON body containing <code>"error": { ... }</code> instead of a 4xx code. Validate required fields in your repository before returning <code>Success</code>.</li>
+<li><strong>Captive Wi-Fi portals returning HTML with <code>200 OK</code>:</strong> Hotel and airport networks hijack HTTP traffic and serve a login webpage. Checking <code>Content-Type: application/json</code> before parsing catches this cleanly and maps it to a <code>Network</code> error instead of an unexplained crash.</li>
+<li><strong>Asynchronous <code>202 Accepted</code> on uploads:</strong> Indexing long video and audio files doesn't finish inside a single HTTP round trip. Treat <code>202 Accepted</code> as a signal to store the returned <code>jobId</code> and start polling <code>getJobStatus(jobId)</code> with backoff rather than telling the user the file is searchable right away.</li>
+</ul>
+<blockquote>
+<p><strong>Debugging note:</strong> Force a <code>401 Unauthorized</code> in staging while firing three concurrent requests from your ViewModel. If your server logs show more than one token refresh call, your <code>Mutex</code> lock isn't guarding the refresh path properly.</p>
+</blockquote>
+<p>Before moving on, verify two things against your staging server: every error category in the table above renders the exact user message and retry button state you expect, and a forced expired token refreshes exactly once.</p>
+<p><a id="uploading-video-and-audio-from-devices-and-cameras"></a></p>
+<h2>Uploading Video and Audio from Devices and Cameras</h2>
+<p>JSON search requests move a few kilobytes. Moving video, audio, and telemetry from real hardware changes the engineering problem completely. According to a 2025 <a href="https://www.amecoresearch.com/market-report/physical-ai-market-277157">Ameco Research physical-AI market analysis</a>, computer vision accounted for an estimated <strong>42.4%</strong> of the technology share, more than <strong>80% of industrial robots</strong> use vision systems for navigation, inspection, or object recognition, and those vision deployments are linked to an estimated <strong>35% reduction in defect rates</strong> (directional market estimates).</p>
+<p>Vision alone isn't the whole picture, though. A 2026 <a href="https://voxel51.com/whitepapers/state-of-physical-ai-2026">Voxel51 survey</a> found that <strong>68% of physical-AI practitioners</strong> work across at least three modalities while only <strong>6%</strong> rely on a single modality, spanning time-series IMU and sensor data at <strong>42%</strong>, 3D point clouds or meshes and LiDAR at <strong>38%</strong>, audio at <strong>25%</strong>, and multispectral imagery at <strong>18%</strong>. Hardware costs are also pushing more capture devices into the field: <a href="https://www.deloitte.com/content/dam/assets-zone3/us/en/docs/about/2025/robotics-and-physical-ai-tech-futures-report.pdf">Deloitte's 2025 Robotics and Physical AI report</a> notes humanoid-robot manufacturing costs fell <strong>40%</strong> between 2023 and 2024, projecting the combined global market for industrial and service robots to exceed <strong>$392 billion by 2033</strong> and the humanoid addressable market to reach <strong>$38 billion by 2035</strong>.</p>
+<p>Every capture device creates a distinct upload profile for your Android client.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Typical capture</th>
+<th>Upload pattern</th>
+<th>Main challenge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phone app</td>
+<td>Photos and short clips</td>
+<td>One upload, usually on Wi-Fi</td>
+<td>Flaky connections and large files</td>
+</tr>
+<tr>
+<td>Smart glasses</td>
+<td>First-person video and audio</td>
+<td>Continuous chunks over time</td>
+<td>Battery, heat and microphone noise</td>
+</tr>
+<tr>
+<td>GoPro or action camera</td>
+<td>High-bitrate video</td>
+<td>Large batches after a session</td>
+<td>File size and upload time</td>
+</tr>
+<tr>
+<td>Dashcam</td>
+<td>Road video with GPS and sensor data</td>
+<td>Event clips after an impact or alert</td>
+<td>Finding the near-miss moment</td>
+</tr>
+<tr>
+<td>CCTV</td>
+<td>Multi-camera continuous feeds</td>
+<td>Scheduled or event-triggered clips</td>
+<td>Volume, bandwidth and privacy rules</td>
+</tr>
+<tr>
+<td>Robotics</td>
+<td>Video, audio and sensor streams</td>
+<td>Edge-first, synced when online</td>
+<td>Clock sync and intermittent connectivity</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="An infographic showing how Android devices collect, upload, and edit video data from various cameras like CCTV and GoPro." src="https://cdnimg.co/b1bdec76-698e-4e94-9be0-270a29bb8024/4f7fc516-738a-47f4-a03c-ddeadfe7a795/android-kotlin-rest-api-example-video-processing.jpg" /></p>
+<p><a id="streaming-large-media-without-out-of-memory-crashes"></a></p>
+<h3>Streaming Large Media Without Out-of-Memory Crashes</h3>
+<p>The single fastest way to crash an Android app is treating a 400 MB dashcam or CCTV clip like a JSON string by calling <code>file.readBytes()</code>. Loading a video into heap memory triggers an <code>OutOfMemoryError</code> on mid-range phones almost instantly. Instead, subclass OkHttp's <code>RequestBody</code> and stream bytes directly from <code>ContentResolver.openInputStream(uri)</code> or a <code>FileChannel</code> into the <code>BufferedSink</code> in small buffers (such as 8 KB or 64 KB).</p>
+<p>Structure resilient uploads in four steps:</p>
+<ol>
+<li><strong>Chunk large recordings</strong> into fixed-size segments and send each segment as a <code>@Multipart</code> part tagged with its byte offset and upload session ID.</li>
+<li><strong>Persist the last confirmed byte offset locally</strong> (in Room or DataStore) after each <code>200 OK</code> or <code>201 Created</code> chunk response so a dropped tunnel connection resumes cleanly instead of restarting from byte zero.</li>
+<li><strong>Hand background transfers to <code>WorkManager</code></strong> with <code>NetworkType.UNMETERED</code> constraints as soon as the user leaves the screen, letting Android finish the sync reliably on Wi-Fi.</li>
+<li><strong>Emit upload progress from bytes written to the sink</strong>, and wire the UI's Cancel button directly to <code>call.cancel()</code> on the active OkHttp call so the radio stops transmitting immediately.</li>
+</ol>
+<p><a id="where-searchable-video-and-audio-meet-real-hardware"></a></p>
+<h3>Where Searchable Video and Audio Meet Real Hardware</h3>
+<p>Comparing <strong>Physical AI</strong> and <strong>Robotics</strong> against conventional <strong>Media Content</strong> apps (phones, smart glasses, GoPros, dashcams, and CCTV) highlights a sharp architectural divide. Mobile media apps primarily capture footage for human playback and review. By contrast, a <a href="https://cset.georgetown.edu/wp-content/uploads/CSET-Physical-AI.pdf">Georgetown Center for Security and Emerging Technology overview</a> explains that <strong>Physical AI</strong> systems combine stereo or depth cameras, microphones, force/torque sensors, inertial measurement units, and tactile hand sensors with onboard GPUs or TPUs and low-level microcontrollers, tying multimodal perception directly to navigation, manipulation, and safety decisions.</p>
+<p>Across both worlds, teams rely on timestamped <strong>Multimodal Video</strong> and <strong>Multimodal Audio</strong> retrieval rather than manual scrubbing:</p>
+<ul>
+<li><strong>Advertisement video edition:</strong> Editors locate specific product shots or on-camera actions across hours of raw studio footage in seconds.</li>
+<li><strong>DashCam:</strong> Fleet and consumer apps surface near-collisions, sudden braking, or road hazards without forcing drivers to replay full commutes.</li>
+<li><strong>CCTV and Video Surveillance:</strong> Operators narrow multi-camera recordings to a specific person, vehicle, siren, or time window.</li>
+<li><strong>Vision for Robotics and Audio for Robotics:</strong> Engineers pull the exact camera frames and acoustic signatures (such as alarms, impacts, or motor anomalies) surrounding a failed grasp or obstacle event.</li>
+</ul>
+<p><a id="device-pain-points-you-will-hit-in-production"></a></p>
+<h3>Device Pain Points You Will Hit in Production</h3>
+<p>Real deployments rarely look like clean studio clips. Plan your client and upload pipeline around five recurring failure modes:</p>
+<ul>
+<li><strong>Wind and traffic noise on smart glasses:</strong> Open-air microphones saturate easily, so avoid compressing audio tracks too aggressively before upload.</li>
+<li><strong>GoPro files overwhelming cellular uplinks:</strong> High-bitrate action footage stalls over LTE; enforce Wi-Fi-only <code>WorkManager</code> queues by default with an explicit user override.</li>
+<li><strong>Audio and video timestamp drift:</strong> Long continuous clips from dashcams or edge cameras can drift out of sync across streams; preserve container timestamps and device clock offsets in your upload metadata.</li>
+<li><strong>Privacy and retention gates on CCTV:</strong> Raw site footage often requires consent checks, masking, or local retention windows before a single frame leaves the premises.</li>
+<li><strong>Intermittent factory and roadside connectivity:</strong> Robotics and vehicle systems cannot rely on constant cloud reachability, which drives edge-first recording with deferred REST synchronization.</li>
+</ul>
+<p>Teams building camera-heavy apps often pair their custom UI with specialized <a href="https://devhunt.org/tool/vmodal-visual-video-search-sdk?banner=true">visual video search tooling for mobile developers</a> so they don't have to reinvent chunked streaming and progress tracking from scratch. Even if you keep everything in-house, notice what stays constant: your repository contract, sealed <code>SearchUiState</code>, and HTTP error mapper carry over unchanged. Only the streaming <code>RequestBody</code> and the <code>WorkManager</code> upload worker change.</p>
+<p><a id="run-your-first-request-before-you-scale"></a></p>
+<h2>Run Your First Request Before You Scale</h2>
+<p>Once you understand the moving parts of a production Android REST client, you face a practical engineering trade-off: maintain your own Retrofit and OkHttp stack from scratch, or start from a published native Kotlin SDK.</p>
+<p><a id="custom-retrofit-client-versus-a-published-kotlin-sdk"></a></p>
+<h3>Custom Retrofit Client Versus a Published Kotlin SDK</h3>
+<p>Rolling your own Retrofit client makes sense when you own both the mobile app and a bespoke backend with custom authentication flows, unusual response envelopes, or strict zero-third-party-SDK rules. You control every interceptor, timeout, and retry branch, but you also own every future bug fix around multipart chunking, signed URLs, and cancellation.</p>
+<p>Starting from a native SDK cuts integration time dramatically when you're connecting to an existing multimodal backend. Our native Android SDK, <code>com.vmodal.vmodal-sdk-android</code>, is published in the <code>v-modal/vmodal_sdk_android</code> repository under the <strong>Apache-2.0</strong> license. Because the source is open, you don't have to treat it as a black box: you can read its typed client, chunked multipart uploads, progress reporting, and real cancellation paths side by side against the Retrofit layer you just built. Its uniform typed surface also spans Android, Flutter, Smart Glasses, Swift iPhone Duo, and Robotics if your team ships across multiple form factors.</p>
+<p><a id="four-steps-to-validate-your-integration"></a></p>
+<h3>Four Steps to Validate Your Integration</h3>
+<ol>
+<li><strong>Request an API key</strong> through the contact page on v-modal.com so you have scoped credentials for staging tests.</li>
+<li><strong>Open the developer hub</strong> at v-modal.com/developers to inspect the endpoint references, request headers, and response shapes.</li>
+<li><strong>Clone <code>v-modal/vmodal_sdk_android</code></strong> and compare its retry rules, coroutine cancellation handling, and multipart upload code against your own Retrofit setup.</li>
+<li><strong>Wire one search request into your Android project</strong> and confirm a <code>200 OK</code> response with parsed timestamped items in Logcat.</li>
+</ol>
+<p>Success before scaling looks concrete: a first parsed search result within minutes, a Compose screen that handles <code>Loading</code>, <code>Empty</code>, and <code>Error</code> cleanly across rotations, and a media upload that finishes after the user sends the app to the background.</p>
+<p>Before you ship to production or expand to fleets of cameras and robots, lock down one architectural decision across your engineering team: document exactly which REST endpoints are idempotent and safe to retry. That single contract determines every timeout handler, <code>401</code> refresh replay, and chunked upload recovery path in your app.</p>
+<hr />
+<p>V-Modal AI builds a Visual Memory Layer for Physical AI, combining <strong>Multimodal Video</strong> and <strong>Multimodal Audio</strong> search with native Kotlin, Flutter, Swift, and edge tooling for phones, smart glasses, cameras, and robotics. If you want to test real chunked media uploads, signed streaming URLs, and natural-language moment retrieval alongside the Retrofit patterns above, inspect our open-source SDKs and starter code on <a href="https://github.com/v-modal">V-Modal AI</a>.</p>
+  </main>
+  <footer>&copy; 2026 V-Modal AI Blog</footer>
+</body>
+</html>
